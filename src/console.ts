@@ -268,7 +268,7 @@ function getLogs() {
                     method: 'GET', headers: { 'x-forwarded-for': workstation },
                     https: ssl
                 }).then(response => {
-                    vt.outln(vt.reverse, vt.bright, ` ${server} `)
+                    vt.outln(vt.green, vt.bright, ` ${server} `)
                     if (response.body) {
                         const result = JSON.parse(response.body)
                         vt.outln(vt.bright, result.host, vt.normal, ' apache logs: ', result.logs.toString())
@@ -277,7 +277,7 @@ function getLogs() {
                     if (err.statusCode)
                         console.error(err.statusCode, err.statusMessage)
                     else {
-                        vt.out(vt.red, vt.faint, `*${server}`, vt.reset)
+                        vt.out(vt.red, vt.faint, `*${server}*`, vt.reset)
                         if (err.code !== 'ECONNREFUSED') vt.out(' - ', err.code)
                         vt.outln()
                     }
@@ -351,7 +351,7 @@ function monitor() {
     vt.out(vt.red, '6-second reporting interval set')
 
     timer = setInterval(() => {
-        vt.out(vt.reverse, ` ${messages} `, vt.faint, 'messages  |  ', vt.normal, `${payload} `, vt.faint, 'bytes  |  ', vt.normal, `${new Date().toLocaleString()} `, vt.noreverse, vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- \r', vt.reset)
+        vt.out(vt.reverse, vt.faint, '| ', vt.normal, ` ${messages} `, vt.faint, ' messages | ', vt.normal, ` ${payload} `, vt.faint, ' bytes | ', vt.normal, ` ${new Date().toLocaleString()} `, vt.faint, ' |', vt.noreverse, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- \r', vt.reset)
 
         if (messages) {
             vt.outln()
@@ -400,7 +400,7 @@ function monitor() {
 
             wss[i].onclose = (ev) => {
                 //vt.outln(vt.faint, server, ' closed WebSocket')
-                vt.out(vt.faint, 'peek-gw socket closed: ', vt.reset, `${--count} `, vt.faint, `remaining\r`, vt.reset, -150)
+                vt.out(vt.faint, 'peek-gw socket closed: ', vt.reset, `${--count} `, vt.faint, `remaining\r`, vt.reset, -250)
                 if (!count) resolve(1)
             }
 
@@ -439,18 +439,18 @@ function monitor() {
 
     function report() {
         const report = Object.keys(peek).sort()
-        const tab = 12
+        const tab = 13
         let last = { remoteHost: '', request: '', ts: '' }
         let repeat = 0
 
         report.forEach((ts) => {
-            vt.out(vt.bright, ts, vt.normal, '  ')
+            vt.out(vt.bright, sprintf('%-11.11s', ts), vt.normal, '  ')
 
             peek[ts].forEach((entry, i) => {
                 if (repeat && (entry.remoteHost !== last.remoteHost || entry.request !== last.request)) {
-                    vt.out('\r', vt.bright, last.ts, vt.normal)
-                    vt.outln(repeat > 1 ? ` ...${repeat} repeats: ` : '')
-                    vt.out(vt.bright, ts, vt.normal, '  ')
+                    vt.out('\r', vt.bright, sprintf('%-11.11s', last.ts), vt.normal)
+                    vt.outln(repeat > 1 ? ` [${repeat} repeats] ` : '')
+                    vt.out(vt.bright, sprintf('%-11.11s', ts), vt.normal, '  ')
                 }
                 else
                     if (i) vt.out(' '.repeat(tab))
