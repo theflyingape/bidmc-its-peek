@@ -20,18 +20,14 @@ process.chdir(__dirname)
 const URL = url.URL
 const USER = process.env.USER || 'cacheusr'
 const vt = new xvt()
-const workstation = process.env.SSH_CLIENT.split(' ')[0]
-    || process.env.IP_ADDR || os.hostname()
+const workstation = (process.env.SSH_CLIENT || process.env.IP_ADDR || os.hostname()).split(' ')[0]
 
 vt.outln(vt.magenta, vt.bright, 'Peek log insight console', vt.reset, vt.faint, '  ::  ', vt.normal, USER, vt.faint, '  ::  ', vt.normal, vt.cyan, workstation)
 
 interface config {
     name?: string,
     port?: number,
-    ssl?: {
-        key: string, cert: string,
-        requestCert: boolean, rejectUnauthorized: boolean
-    }
+    ssl?: { key: string, cert: string, requestCert: boolean, rejectUnauthorized: boolean }
 }
 
 interface vip {
@@ -39,14 +35,19 @@ interface vip {
     caché?: []
 }
 
-let config: config = require('./console.json')
+let config: config = require('./assets/console.json')
+const ssl = {
+    key: fs.readFileSync(config.ssl.key),
+    cert: fs.readFileSync(config.ssl.cert),
+    requestCert: config.ssl.requestCert,
+    rejectUnauthorized: config.ssl.rejectUnauthorized
+}
 let peek = {}
 let servers: vip = {}
 let timer: NodeJS.Timer
 
 const port: number = config.port || 443
-const ssl = config.ssl || null
-Object.assign(ssl, { requestCert: false, rejectUnauthorized: false })
+Object.assign(config.ssl, {})
 
 let session = {
     name: config.name || '',
@@ -260,11 +261,11 @@ function getLogs() {
     return new Promise<number>((resolve, reject) => {
         let count = servers.apache.length
         servers.apache.forEach(server => {
-            const reqUrl = `https://${server}:${port}/peek`
+            const reqUrl = `https://${server}:${port}/peek/`
             const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
             try {
                 got(`${reqUrl}?${params}`, {
-                    method: 'GET', headers: { 'x-forwarded-for': process.env.REMOTEHOST || process.env.HOSTNAME },
+                    method: 'GET', headers: { 'x-forwarded-for': workstation },
                     https: ssl
                 }).then(response => {
                     vt.outln(vt.reverse, vt.bright, ` ${server} `)
@@ -299,6 +300,7 @@ function serverList() {
     vt.outln()
     vt.outln(vt.reverse, vt.bright, ' Server list ')
 
+    servers = {}
     const vip = JSON.parse(fs.readFileSync('assets/vip.json').toString())
     Object.keys(vip).forEach(service => {
         servers[service] = []
@@ -349,7 +351,7 @@ function monitor() {
     vt.out(vt.red, '6-second reporting interval set')
 
     timer = setInterval(() => {
-        vt.out(`${messages} `, vt.faint, 'messages', '  |  ', vt.reset, `${payload} `, vt.faint, `bytes\r`)
+        vt.out(vt.reverse, ` ${messages} `, vt.faint, 'messages  |  ', vt.normal, `${payload} `, vt.faint, 'bytes  |  ', vt.normal, `${new Date().toLocaleString()} `, vt.noreverse, vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- \r', vt.reset)
 
         if (messages) {
             vt.outln()
@@ -359,7 +361,6 @@ function monitor() {
             report()
 
             messages = Math.abs(messages + 1)
-            vt.outln(vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop --')
         }
 
     }, 6000)
@@ -477,7 +478,7 @@ function monitor() {
                 }
             })
         })
-
+        vt.outln()
         peek = {}
     }
 }

@@ -1,0 +1,10 @@
+{
+    "name": "local",
+    "port": 2018,
+    "ssl": {
+        "key": "keys/localhost.key",
+        "cert": "keys/localhost.cer",
+        "requestCert": false,
+        "rejectUnauthorized": false
+    }
+}

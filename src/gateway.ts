@@ -50,7 +50,7 @@ console.log(`on ${os.hostname()} (${process.platform}) at ` + new Date())
 process.chdir(__dirname)
 console.log(`cwd:\t\t${__dirname}`)
 
-let config: config = require('./gateway.json')
+let config: config = require('./assets/gateway.json')
 
 config.loglevel = config.loglevel || 'LOG_NOTICE'
 if (isNaN(+config.loglevel)) config.loglevel = syslog.level[config.loglevel]
