@@ -1,0 +1,14 @@
+[Unit]
+Description=Peek gateway service into Apache logs
+After=local-fs.target network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=cachedev
+ExecStart=/bin/node gateway.js
+KillMode=process
+WorkingDirectory=/opt/peek
+
+[Install]
+WantedBy=multi-user.target
