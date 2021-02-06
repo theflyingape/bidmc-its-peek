@@ -20,27 +20,36 @@ process.chdir(__dirname)
 const URL = url.URL
 const USER = process.env.USER || 'cacheusr'
 const vt = new xvt()
-const workstation = process.env.SSH_CLIENT || process.env.IP_ADDR || os.hostname()
+const workstation = process.env.SSH_CLIENT.split(' ')[0]
+    || process.env.IP_ADDR || os.hostname()
 
 vt.outln(vt.magenta, vt.bright, 'Peek log insight console', vt.reset, vt.faint, '  ::  ', vt.normal, USER, vt.faint, '  ::  ', vt.normal, vt.cyan, workstation)
+
+interface config {
+    name?: string,
+    port?: number,
+    ssl?: {
+        key: string, cert: string,
+        requestCert: boolean, rejectUnauthorized: boolean
+    }
+}
 
 interface vip {
     apache?: []
     caché?: []
 }
 
+let config: config = require('./console.json')
 let peek = {}
 let servers: vip = {}
 let timer: NodeJS.Timer
 
-const ssl = {
-    cert: fs.readFileSync('keys/localhost.cer'),
-    key: fs.readFileSync('keys/localhost.key'),
-    requestCert: false, rejectUnauthorized: false
-}
+const port: number = config.port || 443
+const ssl = config.ssl || null
+Object.assign(ssl, { requestCert: false, rejectUnauthorized: false })
 
 let session = {
-    name: '',
+    name: config.name || '',
     host: '',
     request: '',
     status: '',
@@ -251,7 +260,7 @@ function getLogs() {
     return new Promise<number>((resolve, reject) => {
         let count = servers.apache.length
         servers.apache.forEach(server => {
-            const reqUrl = `https://${server}:2018/peek`
+            const reqUrl = `https://${server}:${port}/peek`
             const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
             try {
                 got(`${reqUrl}?${params}`, {
@@ -375,7 +384,7 @@ function monitor() {
 
         let count = servers.apache.length
         servers.apache.forEach(server => {
-            const reqUrl = `https://${server}:2018/peek/`
+            const reqUrl = `https://${server}:${port}/peek/`
             const params = new URLSearchParams({
                 VIP: session.name, USER: USER,
                 host: session.host, request: session.request, status: session.status,
