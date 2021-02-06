@@ -423,7 +423,7 @@ function monitor() {
 
                     let date = new Date(alpine.time).toLocaleDateString()
                     if (date == today) {
-                        let time = new Date(alpine.time).toLocaleTimeString()
+                        let time = new Date(alpine.time).toLocaleTimeString('en-US', { hour12: false })
                         if (!peek[time]) peek[time] = []
                         peek[time].push(alpine)
                     }
@@ -439,18 +439,18 @@ function monitor() {
 
     function report() {
         const report = Object.keys(peek).sort()
-        const tab = 13
+        const tab = 10
         let last = { remoteHost: '', request: '', ts: '' }
         let repeat = 0
 
         report.forEach((ts) => {
-            vt.out(vt.bright, sprintf('%-11.11s', ts), vt.normal, '  ')
+            vt.out(vt.bright, sprintf('%-8.8s', ts), vt.normal, '  ')
 
             peek[ts].forEach((entry, i) => {
                 if (repeat && (entry.remoteHost !== last.remoteHost || entry.request !== last.request)) {
-                    vt.out('\r', vt.bright, sprintf('%-11.11s', last.ts), vt.normal)
+                    vt.out('\r', vt.bright, sprintf('%-8.8s', last.ts), vt.normal)
                     vt.outln(repeat > 1 ? ` [${repeat} repeats] ` : '')
-                    vt.out(vt.bright, sprintf('%-11.11s', ts), vt.normal, '  ')
+                    vt.out(vt.bright, sprintf('%-8.8s', ts), vt.normal, '  ')
                 }
                 else
                     if (i) vt.out(' '.repeat(tab))
