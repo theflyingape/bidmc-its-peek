@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "target": "ES2018",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": false,
+    "outDir": "..",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "pretty": true,
+    "sourceMap": false
+  },
+  "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}

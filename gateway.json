@@ -1,0 +1,7 @@
+{
+    "host": "localhost",
+    "port": 2018,
+    "loglevel": "LOG_NOTICE",
+    "apache": { "dir": "/var/log/httpd", "files": "*_log" },
+    "ssl": { "key": "keys/localhost.key", "cert": "keys/localhost.cer" }
+}
