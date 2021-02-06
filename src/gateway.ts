@@ -193,7 +193,8 @@ dns.lookup(host, (err, addr, family) => {
                         //  convert Apache timestamp to Date TypeScript
                         let a = result.time.split(' ')
                         let d = new Date(a[0].replace(':', ' ')) + ' GMT' + a[1]
-                        result.time = (new Date(d).toLocaleDateString()) + ' ' + (new Date(d).toLocaleTimeString())
+                        result.time = (new Date(d).toLocaleDateString())
+                            + ' ' + (new Date(d).toLocaleTimeString('en-US', { hour12: false }))
                         client.send(JSON.stringify(result))
                     }
                 }
