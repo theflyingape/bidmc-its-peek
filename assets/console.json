@@ -1,6 +1,5 @@
 {
-    "report": 6000,
-    "request": "^((?!(dyna|lan|trigger)).)*$",
+    "report": 6,
     "ssl": {
         "key": "keys/localhost.key",
         "cert": "keys/localhost.cer",

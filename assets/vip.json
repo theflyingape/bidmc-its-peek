@@ -17,11 +17,18 @@
       "ccctestweb04.bidmc.org"
     ],
     "holmes.caregroup.org": [
+      "mycroft.bidmc.harvard.edu",
+      "cccliveweb1.bidmc.harvard.edu",
+      "cccliveweb2.bidmc.harvard.edu",
+      "cccliveweb3.bidmc.harvard.edu",
+      "cccliveweb4.bidmc.harvard.edu"
+    ],
+    "webomr.bidmc.org": [
       "mycroft.bidmc.org",
       "cccprodweb01.bidmc.org",
       "cccprodweb02.bidmc.org",
-      "cccprdweb03.bidmc.org",
-      "cccprdweb04.bidmc.org"
+      "cccprodweb03.bidmc.org",
+      "cccprodweb04.bidmc.org"
     ]
   },
   "caché": {
@@ -31,18 +38,23 @@
     ],
     "watson.bidmc.org": [
       "holmes-dev.caregroup.org",
-      "watsonapp1.bidmc.harvard.edu",
-      "watsonapp2.bidmc.harvard.edu"
+      "cccdevapp01.bidmc.org",
+      "cccdevapp02.bidmc.org"
     ],
     "toby.bidmc.org": [
       "holmes-test.caregroup.org",
-      "tobyapp1.bidmc.harvard.edu",
-      "tobyapp2.bidmc.harvard.edu"
+      "ccctestapp01.bidmc.org",
+      "ccctestapp02.bidmc.org"
     ],
-    "mycroft.bidmc.org": [
+    "mycroft.bidmc.harvard.edu": [
       "holmes.caregroup.org",
       "mycroftapp1.bidmc.harvard.edu",
       "mycroftapp2.bidmc.harvard.edu"
+    ],
+    "mycroft.bidmc.org": [
+      "webomr.bidmc.org",
+      "cccprodapp01.bidmc.org",
+      "cccprodapp02.bidmc.org"
     ]
   }
 }

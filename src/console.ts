@@ -2,6 +2,7 @@
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
+import { SSL_OP_TLS_BLOCK_PADDING_BUG } from 'constants'
 import dns = require('dns')
 const got = require('got')
 import fs = require('fs')
@@ -26,8 +27,13 @@ vt.outln(vt.magenta, vt.bright, 'Peek log insight console', vt.reset, vt.faint, 
 
 interface config {
     report: number
-    request: string
     ssl?: { key: string, cert: string, requestCert: boolean, rejectUnauthorized: boolean }
+}
+
+interface skip {
+    error?: string
+    verbose: number
+    webt: number
 }
 
 interface vip {
@@ -43,18 +49,19 @@ const ssl = {
     rejectUnauthorized: config.ssl.rejectUnauthorized
 }
 
-let peek = {}
 let port: number
 let servers: vip = {}
 let timer: NodeJS.Timer
 
 let session = {
     name: '',
-    host: '',
-    request: config.request || '',
-    status: '',
+    host: '.*',
+    request: '.*',
+    status: '.*',
     user: '',
-    webt: 0
+    webt: 0,
+    verbose: false,
+    xtra: false
 }
 
 let unknown = process.argv.forEach((arg, i) => {
@@ -167,17 +174,32 @@ vt.form = {
                     vt.outln('uit')
                     process.exit()
 
+                case 'V':
+                    session.verbose = !session.verbose
+                    vt.out(`erbosity = ${session.verbose}`)
+                    break
+
                 case 'W':
-                    vt.outln('WEBT number')
+                    vt.outln('ebt clinical session token ')
                     vt.focus = 'webt'
+                    return
+
+                case 'X':
+                    session.xtra = !session.xtra
+                    vt.out(`tra log info = ${session.xtra}`)
+                    break
+
+                case '#':
+                    vt.focus = 'report'
                     return
 
                 default:
                     vt.beep()
                     vt.outln(' -- invalid')
-                    vt.outln('apache: ', [bracket('Name'), bracket('Status'), bracket('Host'), bracket('Request')])
-                    vt.outln('caché: ', [bracket('User'), bracket('Webt')])
-                    vt.out([bracket('Get (default)'), bracket('Monitor'), bracket('Quit')].toString())
+                    vt.outln('action: ', bracket('Get (default)'), ', ', bracket('Monitor'), ', ', bracket('Name (switch VIP)'), ', or ', bracket('Quit'))
+                    vt.outln('apache: ', bracket('Status'), ', ', bracket('Host'), ', ', bracket('Request'))
+                    vt.outln('caché:  ', bracket('User'), ', ', bracket('Webt'))
+                    vt.out('output: ', bracket('Verbose'), ', e', bracket('Xtra'))
             }
             vt.refocus()
         }, prompt: vt.attr(vt.off, '\n', vt.cyan, 'Peek: '), cancel: 'Q', enter: 'G', max: 1, eol: false
@@ -189,7 +211,9 @@ vt.form = {
             else
                 vt.outln(session.name)
             serverList()
-            getLogs().finally(() => { vt.focus = 'menu' })
+            getLogs().finally(() => {
+                vt.focus = servers.apache.length ? 'menu' : 'name'
+            })
         }, prompt: vt.attr(vt.red, 'Name: '), max: 32
     },
     host: {
@@ -199,20 +223,18 @@ vt.form = {
                 session.host = vt.entry
                 vt.out(` (set) `)
             }
-            dns.reverse(vt.entry, (err, hostnames) => {
-                if (err) dns.lookup(vt.entry, (err, addr, family) => {
-                    if (addr) {
-                        session.host = addr
-                        vt.outln('ip = ', addr)
-                    }
-                    vt.focus = 'menu'
-                })
-                else {
-                    vt.outln('hostname(s): ', hostnames.toString())
-                    vt.focus = 'menu'
-                }
-            })
+            //  likely a single IP or name, let's see
+            checkHost(session.host).finally(() => { vt.focus = 'menu' })
         }, prompt: 'Filter on remote host: ', max: 72
+    },
+    report: {
+        cb: () => {
+            let n = parseInt(vt.entry)
+            if (n >= 2 && n <= 20) {
+                config.report = n
+                vt.out(` (set) `)
+            }
+        }, prompt: 'Interval (2-20): ', max: 2
     },
     request: {
         cb: () => {
@@ -269,6 +291,31 @@ function bracket(item: string, nl = false): string {
         nl ? ' ' : '', vt.reset, item.substr(1))
 }
 
+function checkHost(name = 'localhost') {
+    return new Promise<number>((resolve, reject) => {
+        if (name) {
+            try {
+                dns.reverse(name, (err, hostnames) => {
+                    if (hostnames.length)
+                        vt.out('hostname(s): ', hostnames.toString())
+                    resolve(1)
+                })
+            }
+            catch (err) {
+                dns.lookup(name, (err, addr, family) => {
+                    if (addr) {
+                        session.host = addr
+                        vt.out('host = ', addr)
+                    }
+                    resolve(1)
+                })
+            }
+        }
+        else
+            reject(0)
+    })
+}
+
 function serverList() {
 
     vt.outln()
@@ -285,11 +332,11 @@ function serverList() {
         for (let service in vip) {
             vt.out(vt.bright, service, vt.normal, ': ')
             for (let name in vip[service]) {
-                if (name.startsWith(session.name)) {
+                if (session.name == name.split('.')[0]) {
                     session.name = name
                     servers[service] = servers[service].concat(vip[service][name].splice(1))
                 }
-                if (vip[service][name][0].startsWith(session.name)) {
+                if (session.name == vip[service][name][0].split('.')[0]) {
                     session.name = name
                     servers[service] = servers[service].concat(vip[service][name].splice(1))
                 }
@@ -351,44 +398,50 @@ function getLogs() {
 function monitor() {
 
     if (session.host)
-        vt.outln('Remote host filter: ', vt.bright, `/${session.host}/`)
+        vt.outln('Remote host filter: ', vt.red, vt.bright, `/${session.host}/`)
     if (session.request)
-        vt.outln('Request filter: ', vt.bright, `/${session.request}/`)
+        vt.outln('Request filter: ', vt.red, vt.bright, `/${session.request}/`)
     if (session.status)
-        vt.outln('Status code filter: ', vt.cyan, `/${session.status}/`)
+        vt.outln('Status code filter: ', vt.yellow, `/${session.status}/`)
     if (session.webt)
         vt.outln('For Caché webt filter: ', vt.magenta, vt.bright, `'${session.webt}'`)
     if (session.user)
         vt.outln('For the user logged: ', vt.magenta, vt.bright, `'${session.user}'`)
+    if (session.verbose)
+        vt.outln(vt.red, vt.bright, 'Verbosity is ON')
+    if (session.xtra)
+        vt.outln(vt.cyan, vt.bright, 'Extra info is ON')
 
-    vt.out(vt.red, '6-second reporting interval set')
+    vt.out(vt.red, `${config.report}`, vt.reset, '-second reporting interval ')
 
     timer = setInterval(() => {
-        vt.out(vt.reverse, vt.faint, '| ', vt.normal, ` ${messages} `, vt.faint, ' messages | ', vt.normal, ` ${payload} `, vt.faint, ' bytes | ', vt.normal, ` ${new Date().toLocaleString()} `, vt.faint, ' |', vt.noreverse, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- \r', vt.reset)
-
         if (messages) {
-            vt.outln()
+            statusLine(true)
             messages = -1
             payload = 0
+            skip = { verbose: 0, webt: 0 }
 
-            report()
+            const copy = Object.assign({}, peek)
+            peek = {}
+            report(copy)
 
             messages = Math.abs(messages + 1)
         }
+        else
+            statusLine()
+    }, config.report * 1000)
 
-    }, 6000)
+    vt.outln(vt.reset, 'set ... ')
 
-    vt.outln(vt.reset, ' ... ')
-
+    //  init collection(s)
     let messages = 0
     let payload = 0
-    peek = {}
+    let peek = {}
+    let skip: skip = { verbose: 0, webt: 0 }
 
     return new Promise<number>((resolve, reject) => {
 
-        const today = new Date().toLocaleDateString()
-        let wss = []
-
+        //  allow user trap for Ctrl/C
         vt.hangup = () => {
             vt.carrier = true
             wss.forEach((s) => {
@@ -396,13 +449,17 @@ function monitor() {
             })
         }
 
+        const today = new Date().toLocaleDateString()
         let count = servers.apache.length
+        let wss = []
+
         servers.apache.forEach(server => {
-            const reqUrl = `https://${server}:${port}/peek/api/`
+            const reqUrl = `https://${server}:${port}/peek/`
             const params = new URLSearchParams({
                 VIP: session.name, USER: USER,
                 host: session.host, request: session.request, status: session.status,
-                webt: session.webt.toString()
+                webt: session.webt.toString(),
+                verbose: String(+session.verbose), xtra: String(+session.xtra)
             }).toString()
 
             let i = wss.push(new ws(`${reqUrl}?${params}`, ssl)) - 1
@@ -412,7 +469,8 @@ function monitor() {
             }
 
             wss[i].onclose = (ev) => {
-                //vt.outln(vt.faint, server, ' closed WebSocket')
+                if (servers.apache.length == count)
+                    vt.outln()
                 vt.out(vt.faint, 'peek-gw socket closed: ', vt.reset, `${--count} `, vt.faint, `remaining\r`, vt.reset, -250)
                 if (!count) resolve(1)
             }
@@ -429,16 +487,33 @@ function monitor() {
                         messages++
                     payload += ev.data.length
 
-                    if (messages > 0 && !(messages % 100))
-                        vt.out(`${messages} `, vt.faint, 'messages', '  |  ', vt.reset, `${payload}`, vt.faint, ` bytes\r`, vt.reset)
+                    if (messages > 0 && !(messages % 100)) statusLine()
 
                     let alpine = JSON.parse(ev.data)
+
+                    if (alpine.skip) {
+                        switch (alpine.reason) {
+                            case 'verbose':
+                                skip.verbose++
+                                break
+
+                            case 'webt':
+                                skip.webt++
+                                break
+
+                            default:
+                                skip.error = alpine.reason
+                                break
+                        }
+                    }
+
 
                     let date = new Date(alpine.time).toLocaleDateString()
                     if (date == today) {
                         let time = new Date(alpine.time).toLocaleTimeString('en-US', { hour12: false })
-                        if (!peek[time]) peek[time] = []
-                        peek[time].push(alpine)
+                        if (!peek[time]) peek[time] = {}
+                        if (!peek[time][alpine.host]) peek[time][alpine.host] = []
+                        peek[time][alpine.host].push(alpine)
                     }
                 }
                 catch (err) {
@@ -450,48 +525,71 @@ function monitor() {
         if (count == 0) resolve(1)
     })
 
-    function report() {
-        const report = Object.keys(peek).sort()
+    //  make it a HUMAN-readable report :)
+    function report(copy) {
+
         const tab = 10
         let last = { remoteHost: '', request: '', ts: '' }
         let repeat = 0
 
-        report.forEach((ts) => {
+        //  sort by timestamp
+        Object.keys(copy).sort().forEach((ts) => {
             vt.out(vt.bright, sprintf('%-8.8s', ts), vt.normal, '  ')
 
-            peek[ts].forEach((entry, i) => {
-                if (repeat && (entry.remoteHost !== last.remoteHost || entry.request !== last.request)) {
-                    vt.out('\r', vt.bright, sprintf('%-8.8s', last.ts), vt.normal)
-                    vt.outln(repeat > 1 ? ` [${repeat} repeats] ` : '')
-                    vt.out(vt.bright, sprintf('%-8.8s', ts), vt.normal, '  ')
-                }
-                else
-                    if (i) vt.out(' '.repeat(tab))
+            //  sort by host
+            Object.keys(copy[ts]).sort().forEach((host) => {
 
-                vt.out(entry.host || '?', ' ', vt.normal)
-                vt.out(' ', entry.status == '200' ? vt.cyan : vt.yellow, entry.status, ' ', vt.white)
-                vt.out(sprintf(' %-14.14s ', entry.remoteHost || '?'))
-                if (/(_WEBT=)/.test(entry.request)) {
-                    let out = entry.request.split('_WEBT=')
-                    let webt = parseInt(out[1]).toString()
-                    vt.out(out[0], vt.bright, '_WEBT=', vt.magenta, webt, vt.reset, out[1].substr(webt.length))
-                }
-                else
-                    vt.out(entry.request || '?')
+                copy[ts][host].forEach((entry, i) => {
+                    if (repeat && (entry.remoteHost !== last.remoteHost || entry.request !== last.request)) {
+                        vt.out('\r', vt.bright, sprintf('%-8.8s', last.ts), vt.normal)
+                        vt.outln(repeat > 1 ? ` [${repeat} repeats] ` : '')
+                        vt.out(vt.bright, sprintf('%-8.8s', ts), vt.normal, '  ')
+                    }
+                    else
+                        if (i) vt.out(' '.repeat(tab))
 
-                if (entry.remoteHost == last.remoteHost && entry.request == last.request) {
-                    last.ts = ts
-                    vt.out('\r')
-                    repeat++
-                }
-                else {
-                    vt.outln()
-                    last = entry
-                    repeat = 0
-                }
+                    vt.out(entry.host || '?', ' ', vt.normal)
+                    vt.out(' ', entry.status == '200' ? vt.cyan : vt.yellow, entry.status, ' ', vt.white)
+                    vt.out(sprintf(' %-14.14s ', entry.remoteHost || '?'))
+                    if (/(_WEBT=)/.test(entry.request)) {
+                        let out = entry.request.split('_WEBT=')
+                        let webt = parseInt(out[1]).toString()
+                        vt.out(out[0], vt.bright, '_WEBT=', vt.magenta, webt, vt.reset, out[1].substr(webt.length))
+                    }
+                    else
+                        vt.out(entry.request || '?')
+
+                    if (entry.remoteHost == last.remoteHost && entry.request == last.request) {
+                        last.ts = ts
+                        vt.out('\r')
+                        repeat++
+                    }
+                    else {
+                        vt.outln()
+                        last = entry
+                        repeat = 0
+                    }
+                })
             })
         })
-        vt.outln()
-        peek = {}
+        statusLine()
+    }
+
+    function statusLine(nl = false) {
+        vt.out(vt.Blue, vt.white, vt.faint, '| ')
+        if (messages >= 0)
+            vt.out(vt.normal, ` ${messages.toLocaleString()}`, vt.faint, ' messages  | ')
+        if (payload > 0)
+            vt.out(vt.normal, ` ${payload.toLocaleString()}`, vt.faint, ' bytes  | ')
+        if (skip.verbose || skip.webt)
+            vt.out(vt.normal, ` ${(skip.verbose + skip.webt).toLocaleString()}`, vt.faint, ' skipped  | ')
+        if (skip.error)
+            vt.out(vt.normal, ` ${skip.error}`, vt.faint, '  | ')
+        vt.out(vt.normal, ` ${new Date().toLocaleString()} `, vt.faint, '  |', vt.reset)
+        vt.out(vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- ')
+        if (nl)
+            vt.outln()
+        else
+            vt.out(vt.cll, '\r', vt.reset)
     }
 }

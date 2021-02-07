@@ -125,40 +125,33 @@ dns.lookup(host, (err, addr, family) => {
         res.end()
     })
 
-    app.post('/peek/api', (req, res) => {
-        const VIP = req.query.VIP
-        const USER = req.query.USER || 'nobody'
-        const client = req.header('x-forwarded-for') || req.hostname
-        audit(`POST new peek session requested by ${USER} from remote host: ${client}`)
-
-        let session = VIP == 'local' ? peek(true, 'samples') : peek(true)
-        let result = { host: os.hostname(), logs: session.logs }
-
-        res.json(result)
-        res.end()
-    })
-
     //  WebSocket endpoints: utilize upgraded socket connection to stream output to client
     wss.on('connection', (client, req) => {
         let params = new URL(req.url, `${protocol}://${addr}:${port}`).searchParams
-        const ANY = new RegExp('.*')
         const VIP = params.get('VIP')
         const USER = params.get('USER') || 'nobody'
-        const host = new RegExp(params.get('host') || ANY)
-        const request = new RegExp(params.get('request') || ANY)
-        const status = new RegExp(params.get('status') || ANY)
+        const host = new RegExp(params.get('host'))
+        const request = new RegExp(params.get('request'))
+        const status = new RegExp(params.get('status'))
         const webt = parseInt(params.get('webt')) || 0
+        const verbose = parseInt(params.get('verbose')) || 0
+        const xtra = parseInt(params.get('xtra')) || 0
         audit(`MONITOR peek-gw socket opened by ${USER}`)
 
         const logs = getLogs(VIP == 'local' ? 'samples' : apache.dir, false).logs
 
         logs.forEach((file) => {
+            const today = new Date().toLocaleDateString()
             let stat = fs.statSync(file)
-            let minutes = Math.trunc((stat.mtime.getTime() - stat.ctime.getTime()) / 60 / 1000) + 1
-            let lpm = Math.trunc(stat.size / 500) + 1
+            let lpm = Math.trunc(stat.size / 400) + 1
+
             //  DevOps not specific here, start with most recent events
-            if (host == ANY && !webt)
+            if (String(host) == '/.*/' && !webt) {
+                const minutes = Math.trunc((stat.mtime.getTime() - new Date(`${today} 00:00:00`).getTime())
+                    / 1000 / 60) + 1
                 lpm = Math.trunc(lpm / minutes) + 1
+                audit(`${path.basename(file)} (${stat.size.toLocaleString()}) ${minutes} ${lpm}`)
+            }
 
             let tail = new Tail(file, { nLines: lpm })
             let alpine = new Alpine(Alpine.LOGFORMATS.COMBINED)
@@ -173,15 +166,35 @@ dns.lookup(host, (err, addr, family) => {
                     //  now parse it
                     let result = alpine.parseLine(data)
 
+                    //  drop legacy protocol
+                    if (/(HTTP\/1\.1)*$/.test(result.request))
+                        result.request = result.request.split(' ').splice(0, 2).join(' ')
+
+                    //  filter out any good 'static' file requests
+                    if (!verbose && parseInt(result.status) == 200) {
+                        if (
+                            result.request == 'GET /favicon.ico' ||
+                            result.request.startsWith('GET /dyna/') ||
+                            result.request.startsWith('GET /images/') ||
+                            result.request.startsWith('GET /spellcheck/') ||
+                            /^(GET|POST) \/scripts\/(nph-mgwcgi|mgwms32.dll)(\/?)(\?MGWLPN=\w+)?$/.test(result.request) ||
+                            /RUN=lan&app=triggerCheck/.test(result.request)
+                        ) {
+                            client.send(JSON.stringify({ skip: '1', reason: 'verbose' }))
+                            return
+                        }
+                    }
+
                     //  DevOps specified a clinical session token
                     if (webt && /(_WEBT=)/.test(result.request)) {
                         params = new URL(result.request.split(' ')[1], `${protocol}://${addr}:${port}`).searchParams
-                        if (parseInt(params.get('_WEBT')) !== webt)
+                        if (parseInt(params.get('_WEBT')) !== webt) {
+                            client.send(JSON.stringify({ skip: '1', reason: 'webt' }))
                             return
+                        }
                     }
 
                     //  trim payload
-                    delete result.originalLine
                     delete result.logname
                     delete result.remoteUser
                     delete result.sizeCLF
@@ -190,9 +203,19 @@ dns.lookup(host, (err, addr, family) => {
                     if (host.test(result.remoteHost) && request.test(result.request) && status.test(result.status)) {
                         result.host = os.hostname()
 
-                        //  drop legacy protocol
-                        if (/(HTTP\/1\.1)*$/.test(result.request))
-                            result.request = result.request.split(' ').splice(0, 2).join(' ')
+                        //  condense UserAgent
+                        if (xtra && result['RequestHeader User-agent']) {
+                            const ol = result.originalLine
+                            //  machine
+                            result.userAgent = ol.indexOf('(Windows ') > 0 ? 'Win'
+                                : ol.indexOf('(X11; Cros') > 0 ? 'CrOS'
+                                    : ol.indexOf('(Macintosh;') > 0 ? 'Mac' : '-'
+                            //  browser
+                            result.userAgent += ol.indexOf(' Chrome/') > 0 ? '*'
+                                : ol.indexOf(' Trident/') > 0 ? 'IE'
+                                    : ol.indexOf('curl/') > 0 ? 'curl' : '-'
+                            delete result['RequestHeader User-agent']
+                        }
 
                         //  convert Apache timestamp to JavaScript Date
                         let a = result.time.split(' ')
@@ -201,11 +224,12 @@ dns.lookup(host, (err, addr, family) => {
                             + (new Date(d).toLocaleTimeString('en-US', { hour12: false }))
 
                         //  send result to peek console
+                        delete result.originalLine
                         client.send(JSON.stringify(result))
                     }
                 }
                 catch (err) {
-                    client.send(JSON.stringify({ error: err }))
+                    client.send(JSON.stringify({ skip: '1', reason: err.message }))
                 }
             })
 
