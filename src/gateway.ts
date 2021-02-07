@@ -109,10 +109,10 @@ dns.lookup(host, (err, addr, family) => {
     })
 
     //  web services
-    app.use('/', express.static(path.resolve(__dirname, 'assets'), { redirect: false }))
+    app.use('/peek/gw', express.static(path.resolve(__dirname, 'assets'), { redirect: false }))
 
     //  REST services
-    app.get(`/peek`, (req, res) => {
+    app.get('/peek/api', (req, res) => {
         let VIP = req.query.VIP
         let USER = req.query.USER || 'nobody'
         let console = req.header('x-forwarded-for') || req.hostname
@@ -125,7 +125,7 @@ dns.lookup(host, (err, addr, family) => {
         res.end()
     })
 
-    app.post(`/peek`, (req, res) => {
+    app.post('/peek/api', (req, res) => {
         const VIP = req.query.VIP
         const USER = req.query.USER || 'nobody'
         const client = req.header('x-forwarded-for') || req.hostname
@@ -141,35 +141,39 @@ dns.lookup(host, (err, addr, family) => {
     //  WebSocket endpoints: utilize upgraded socket connection to stream output to client
     wss.on('connection', (client, req) => {
         let params = new URL(req.url, `${protocol}://${addr}:${port}`).searchParams
+        const ANY = new RegExp('.*')
         const VIP = params.get('VIP')
         const USER = params.get('USER') || 'nobody'
-        const host = new RegExp(params.get('host') || '.*')
-        const request = new RegExp(params.get('request') || '.*')
-        const status = new RegExp(params.get('status') || '.*')
+        const host = new RegExp(params.get('host') || ANY)
+        const request = new RegExp(params.get('request') || ANY)
+        const status = new RegExp(params.get('status') || ANY)
         const webt = parseInt(params.get('webt')) || 0
         audit(`MONITOR peek-gw socket opened by ${USER}`)
 
-        const logs = (VIP == 'local' ? getLogs('samples', false) : getLogs(apache.dir, false)).logs
+        const logs = getLogs(VIP == 'local' ? 'samples' : apache.dir, false).logs
 
         logs.forEach((file) => {
             let stat = fs.statSync(file)
-            let minutes = Math.trunc((new Date().getTime() - stat.ctime.getTime()) / 60 / 1000) + 1
-            let lpm = Math.trunc(stat.size / 512 / minutes) + 1
-            if (lpm > 600) lpm = 600
+            let minutes = Math.trunc((stat.mtime.getTime() - stat.ctime.getTime()) / 60 / 1000) + 1
+            let lpm = Math.trunc(stat.size / 500) + 1
+            //  DevOps not specific here, start with most recent events
+            if (host == ANY && !webt)
+                lpm = Math.trunc(lpm / minutes) + 1
 
             let tail = new Tail(file, { nLines: lpm })
             let alpine = new Alpine(Alpine.LOGFORMATS.COMBINED)
 
             tail.on("line", (data) => {
                 try {
-                    //  strip leading ip addresses
+                    //  strip any X-Forwarded-For ip addresses first
                     while (/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[,].*$/.test(data)) {
                         const space = data.indexOf(', ')
                         data = data.substr(space + 2)
                     }
+                    //  now parse it
                     let result = alpine.parseLine(data)
 
-                    //  want only specific clinical session
+                    //  DevOps specified a clinical session token
                     if (webt && /(_WEBT=)/.test(result.request)) {
                         params = new URL(result.request.split(' ')[1], `${protocol}://${addr}:${port}`).searchParams
                         if (parseInt(params.get('_WEBT')) !== webt)
@@ -186,15 +190,17 @@ dns.lookup(host, (err, addr, family) => {
                     if (host.test(result.remoteHost) && request.test(result.request) && status.test(result.status)) {
                         result.host = os.hostname()
 
-                        //  drop trailing non-sense
+                        //  drop legacy protocol
                         if (/(HTTP\/1\.1)*$/.test(result.request))
                             result.request = result.request.split(' ').splice(0, 2).join(' ')
 
-                        //  convert Apache timestamp to Date TypeScript
+                        //  convert Apache timestamp to JavaScript Date
                         let a = result.time.split(' ')
                         let d = new Date(a[0].replace(':', ' '))    // + ' GMT' + a[1]
                         result.time = new Date(d).toLocaleDateString() + ' '
                             + (new Date(d).toLocaleTimeString('en-US', { hour12: false }))
+
+                        //  send result to peek console
                         client.send(JSON.stringify(result))
                     }
                 }
@@ -208,13 +214,13 @@ dns.lookup(host, (err, addr, family) => {
             })
         })
 
-        //  client → any terminates
+        //  client → any signal terminates
         client.on('message', (msg) => {
             client.close()
         })
 
         client.on('close', () => {
-            audit(`peek-gw socket closed`)
+            audit(`MONITOR peek-gw socket closed by ${USER}`)
         })
     })
 
@@ -222,7 +228,7 @@ dns.lookup(host, (err, addr, family) => {
         console.log(`self-interrupted ${passed}`)
 })
 
-//  only those that have entries recorded for today
+//  only those log files that have entries recorded for today
 function getLogs(dir = apache.dir, base = true): { logs: string[] } {
     const today = new Date().toLocaleDateString()
     let logs = glob.sync(path.resolve(dir, apache.files)).filter((file) => {
@@ -233,6 +239,7 @@ function getLogs(dir = apache.dir, base = true): { logs: string[] } {
     return { logs: logs }
 }
 
+//  enumerate & open today's current log files
 function peek(open = false, dir = apache.dir): { logs: string[], streams?: fs.ReadStream[] } {
     let logs = getLogs(dir, false).logs
     let streams: fs.ReadStream[] = []

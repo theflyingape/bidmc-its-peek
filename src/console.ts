@@ -25,8 +25,8 @@ const workstation = (process.env.SSH_CLIENT || process.env.IP_ADDR || os.hostnam
 vt.outln(vt.magenta, vt.bright, 'Peek log insight console', vt.reset, vt.faint, '  ::  ', vt.normal, USER, vt.faint, '  ::  ', vt.normal, vt.cyan, workstation)
 
 interface config {
-    name?: string,
-    port?: number,
+    report: number
+    request: string
     ssl?: { key: string, cert: string, requestCert: boolean, rejectUnauthorized: boolean }
 }
 
@@ -42,17 +42,16 @@ const ssl = {
     requestCert: config.ssl.requestCert,
     rejectUnauthorized: config.ssl.rejectUnauthorized
 }
+
 let peek = {}
+let port: number
 let servers: vip = {}
 let timer: NodeJS.Timer
 
-const port: number = config.port || 443
-Object.assign(config.ssl, {})
-
 let session = {
-    name: config.name || '',
+    name: '',
     host: '',
-    request: '',
+    request: config.request || '',
     status: '',
     user: '',
     webt: 0
@@ -122,7 +121,8 @@ vt.form = {
 
                 case 'H':
                     vt.outln('ost client (regular expression)')
-                    vt.outln('Example, type your workstation IP: ', workstation)
+                    vt.outln('Examples:')
+                    vt.outln(vt.magenta, vt.bright, workstation, vt.reset, ' ... yields your workstation requests')
                     vt.focus = 'host'
                     return
 
@@ -146,9 +146,9 @@ vt.form = {
                 case 'R':
                     vt.outln('equest (regular expression)')
                     vt.outln('Examples:')
-                    vt.outln(vt.magenta, vt.bright, '^GET.*$', vt.white, 'for GET only requests, no POSTS')
-                    vt.outln(vt.magenta, vt.bright, '(T \/csp\/).*$', vt.white, 'CSP requests only')
-                    vt.outln(vt.magenta, vt.bright, '^((?!(dyna|lan|trigger)).)*$', vt.white, 'exclude the paths containing these words')
+                    vt.outln(vt.magenta, vt.bright, '^GET.*$', vt.reset, ' ... yields GET only requests, no POSTS')
+                    vt.outln(vt.magenta, vt.bright, '(T \/csp\/).*$', vt.reset, ' ... yields CSP requests only')
+                    vt.outln(vt.magenta, vt.bright, '^((?!(dyna|lan|trigger)).)*$', vt.reset, ' ... exclude requests containing these words')
                     vt.focus = 'request'
                     return
 
@@ -199,7 +199,19 @@ vt.form = {
                 session.host = vt.entry
                 vt.out(` (set) `)
             }
-            vt.focus = 'menu'
+            dns.reverse(vt.entry, (err, hostnames) => {
+                if (err) dns.lookup(vt.entry, (err, addr, family) => {
+                    if (addr) {
+                        session.host = addr
+                        vt.outln('ip = ', addr)
+                    }
+                    vt.focus = 'menu'
+                })
+                else {
+                    vt.outln('hostname(s): ', hostnames.toString())
+                    vt.focus = 'menu'
+                }
+            })
         }, prompt: 'Filter on remote host: ', max: 72
     },
     request: {
@@ -257,44 +269,6 @@ function bracket(item: string, nl = false): string {
         nl ? ' ' : '', vt.reset, item.substr(1))
 }
 
-function getLogs() {
-    return new Promise<number>((resolve, reject) => {
-        let count = servers.apache.length
-        servers.apache.forEach(server => {
-            const reqUrl = `https://${server}:${port}/peek/`
-            const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
-            try {
-                got(`${reqUrl}?${params}`, {
-                    method: 'GET', headers: { 'x-forwarded-for': workstation },
-                    https: ssl
-                }).then(response => {
-                    vt.outln(vt.green, vt.bright, ` ${server} `)
-                    if (response.body) {
-                        const result = JSON.parse(response.body)
-                        vt.outln(vt.bright, result.host, vt.normal, ' apache logs: ', result.logs.toString())
-                    }
-                }).catch(err => {
-                    if (err.statusCode)
-                        console.error(err.statusCode, err.statusMessage)
-                    else {
-                        vt.out(vt.red, vt.faint, `*${server}*`, vt.reset)
-                        if (err.code !== 'ECONNREFUSED') vt.out(' - ', err.code)
-                        vt.outln()
-                    }
-                }).finally(() => {
-                    if (--count == 0)
-                        resolve(1)
-                })
-            }
-            catch (err) {
-                console.error(err.response)
-                reject(0)
-            }
-        })
-        if (count == 0) resolve(1)
-    })
-}
-
 function serverList() {
 
     vt.outln()
@@ -307,6 +281,7 @@ function serverList() {
     })
 
     if (session.name) {
+        port = session.name == 'local' ? 2018 : 443
         for (let service in vip) {
             vt.out(vt.bright, service, vt.normal, ': ')
             for (let name in vip[service]) {
@@ -332,6 +307,44 @@ function serverList() {
             }
         }
     }
+}
+
+function getLogs() {
+    return new Promise<number>((resolve, reject) => {
+        let count = servers.apache.length
+        servers.apache.forEach(server => {
+            const reqUrl = `https://${server}:${port}/peek/api/`
+            const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
+            try {
+                got(`${reqUrl}?${params}`, {
+                    method: 'GET', headers: { 'x-forwarded-for': workstation },
+                    https: ssl
+                }).then(response => {
+                    vt.outln(vt.green, vt.bright, ` ${server}:${port} `)
+                    if (response.body) {
+                        const result = JSON.parse(response.body)
+                        vt.outln(vt.bright, result.host, vt.normal, ' apache logs: ', result.logs.toString())
+                    }
+                }).catch(err => {
+                    if (err.statusCode)
+                        console.error(err.statusCode, err.statusMessage)
+                    else {
+                        vt.out(vt.red, vt.faint, `*${server}:${port}*`, vt.reset)
+                        if (err.code !== 'ECONNREFUSED') vt.out(' - ', err.code)
+                        vt.outln()
+                    }
+                }).finally(() => {
+                    if (--count == 0)
+                        resolve(1)
+                })
+            }
+            catch (err) {
+                console.error(err.response)
+                reject(0)
+            }
+        })
+        if (count == 0) resolve(1)
+    })
 }
 
 //  Shall we begin?
@@ -385,7 +398,7 @@ function monitor() {
 
         let count = servers.apache.length
         servers.apache.forEach(server => {
-            const reqUrl = `https://${server}:${port}/peek/`
+            const reqUrl = `https://${server}:${port}/peek/api/`
             const params = new URLSearchParams({
                 VIP: session.name, USER: USER,
                 host: session.host, request: session.request, status: session.status,
