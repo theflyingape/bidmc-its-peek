@@ -277,7 +277,7 @@ vt.form = {
         cb: () => {
             let webt = parseInt(vt.entry) || session.webt
             if (isNaN(+vt.entry)) webt = 0
-            if (webt !== session.webt) {
+            if (!webt || webt !== session.webt) {
                 session.webt = webt
                 vt.outln(` (${session.webt ? 'set' : 'unset'})`)
                 if (webt) {
@@ -289,7 +289,7 @@ vt.form = {
                     vt.outln('Host = any')
                 }
                 session.verbose = webt ? true : false
-                vt.outln('Verbose = ', session.verbose)
+                vt.out('Verbose = ', session.verbose)
             }
             vt.focus = 'menu'
         }, prompt: 'Enter WEBT number: ', max: 12
@@ -499,8 +499,6 @@ function monitor() {
                     else
                         messages++
                     payload += ev.data.length
-                    const refresh = messages < 10 ? 1 : messages < 100 ? 10 : 100
-                    if (messages > 0 && !(messages % refresh)) statusLine()
 
                     let alpine = JSON.parse(ev.data)
                     let date = new Date(alpine.time).toLocaleDateString()
@@ -529,6 +527,9 @@ function monitor() {
                         peek[time][alpine.host].push(alpine)
                         matches++
                     }
+
+                    const refresh = messages < 10 ? 1 : messages < 100 ? 10 : 100
+                    if (messages > 0 && !(messages % refresh)) statusLine()
                 }
                 catch (err) {
                     vt.beep()
