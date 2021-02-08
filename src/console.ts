@@ -486,12 +486,12 @@ function monitor() {
                     else
                         messages++
                     payload += ev.data.length
-
                     if (messages > 0 && !(messages % 100)) statusLine()
 
                     let alpine = JSON.parse(ev.data)
+                    let date = new Date(alpine.time).toLocaleDateString()
 
-                    if (alpine.skip) {
+                    if (date !== today || alpine.skip) {
                         switch (alpine.reason) {
                             case 'verbose':
                                 skip.verbose++
@@ -502,13 +502,12 @@ function monitor() {
                                 break
 
                             default:
+                                skip.verbose++
                                 skip.error = alpine.reason
                                 break
                         }
                     }
 
-
-                    let date = new Date(alpine.time).toLocaleDateString()
                     if (date == today) {
                         let time = new Date(alpine.time).toLocaleTimeString('en-US', { hour12: false })
                         if (!peek[time]) peek[time] = {}
@@ -574,11 +573,12 @@ function monitor() {
                 })
             })
         })
+        vt.outln()
         statusLine()
     }
 
     function statusLine(nl = false) {
-        vt.out(vt.Blue, vt.white, vt.faint, '| ')
+        vt.out(vt.blue, vt.reverse, vt.faint, '| ')
         if (messages >= 0)
             vt.out(vt.normal, ` ${messages.toLocaleString()}`, vt.faint, ' messages  | ')
         if (payload > 0)
