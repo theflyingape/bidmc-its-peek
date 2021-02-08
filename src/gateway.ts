@@ -130,7 +130,7 @@ dns.lookup(host, (err, addr, family) => {
         let params = new URL(req.url, `${protocol}://${addr}:${port}`).searchParams
         const VIP = params.get('VIP')
         const USER = params.get('USER') || 'nobody'
-        let host = new RegExp(params.get('host'))   //  if not 'known' here, maybe link it to webt later
+        let host = new RegExp(params.get('host'))   //  if 'unknown' here, identify if webt is set/found
         const request = new RegExp(params.get('request'))
         const status = new RegExp(params.get('status'))
         const webt = parseInt(params.get('webt')) || 0
@@ -168,11 +168,12 @@ dns.lookup(host, (err, addr, family) => {
 
                     //  DevOps specified a clinical session token
                     if (webt) {
-                        if (/(_WEBT=)/.test(result.request))
+                        if (/(_WEBT=)/.test(result.request)) {
                             params = new URL(result.request.split(' ')[1], `${protocol}://${addr}:${port}`).searchParams
-                        if (parseInt(params.get('_WEBT')) == webt) {
-                            if (String(host) !== String(new RegExp(result.remoteHost)))
-                                host = new RegExp(result.remoteHost)    //  found the workstation
+                            if (parseInt(params.get('_WEBT')) == webt) {
+                                if (String(host) !== String(new RegExp(result.remoteHost)))
+                                    host = new RegExp(result.remoteHost)    //  found the workstation
+                            }
                         }
                     }
 

@@ -428,8 +428,9 @@ function monitor() {
     vt.out(vt.red, `${config.report}`, vt.reset, '-second reporting interval ')
 
     timer = setInterval(() => {
-        if (messages) {
+        if (matches) {
             statusLine(true)
+            matches = 0
             messages = -1
             payload = 0
             skip = { verbose: 0, webt: 0 }
@@ -446,6 +447,7 @@ function monitor() {
     vt.outln(vt.reset, 'set ... ')
 
     //  init collection(s)
+    let matches = 0
     let messages = 0
     let payload = 0
     let peek = {}
@@ -525,6 +527,7 @@ function monitor() {
                         if (!peek[time]) peek[time] = {}
                         if (!peek[time][alpine.host]) peek[time][alpine.host] = []
                         peek[time][alpine.host].push(alpine)
+                        matches++
                     }
                 }
                 catch (err) {
@@ -589,9 +592,8 @@ function monitor() {
     }
 
     function statusLine(nl = false) {
-        vt.out(Math.abs(messages) > 0 ? vt.blue : vt.green, vt.reverse, vt.faint, '| ')
-        if (Math.abs(messages) >= 0)
-            vt.out(vt.normal, ` ${Math.abs(messages).toLocaleString()} `, vt.faint, ' messages  | ')
+        vt.out(matches > 0 ? vt.blue : vt.green, vt.reverse, vt.faint, '| ')
+        vt.out(vt.normal, ` ${Math.abs(messages).toLocaleString()} `, vt.faint, ' messages  | ')
         if (payload > 0)
             vt.out(vt.normal, ` ${payload.toLocaleString()} `, vt.faint, ' bytes  | ')
         if (skip.verbose || skip.webt)
