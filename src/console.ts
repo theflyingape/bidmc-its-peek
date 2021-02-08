@@ -279,8 +279,16 @@ vt.form = {
             if (isNaN(+vt.entry)) webt = 0
             if (webt !== session.webt) {
                 session.webt = webt
-                vt.out(` (${session.webt ? 'set' : 'unset'})`)
-                session.verbose = session.webt ? true : false
+                vt.outln(` (${session.webt ? 'set' : 'unset'})`)
+                if (webt) {
+                    session.host = 'unknown'
+                    vt.outln('Host = unknown')
+                }
+                else {
+                    session.host = ''
+                    vt.outln('Host = any')
+                }
+                session.verbose = webt ? true : false
                 vt.outln('Verbose = ', session.verbose)
             }
             vt.focus = 'menu'

@@ -130,7 +130,7 @@ dns.lookup(host, (err, addr, family) => {
         let params = new URL(req.url, `${protocol}://${addr}:${port}`).searchParams
         const VIP = params.get('VIP')
         const USER = params.get('USER') || 'nobody'
-        const host = new RegExp(params.get('host'))
+        let host = new RegExp(params.get('host'))   //  if not 'known' here, maybe link it to webt later
         const request = new RegExp(params.get('request'))
         const status = new RegExp(params.get('status'))
         const webt = parseInt(params.get('webt')) || 0
@@ -166,6 +166,16 @@ dns.lookup(host, (err, addr, family) => {
                     //  now parse it
                     let result = alpine.parseLine(data)
 
+                    //  DevOps specified a clinical session token
+                    if (webt) {
+                        if (/(_WEBT=)/.test(result.request))
+                            params = new URL(result.request.split(' ')[1], `${protocol}://${addr}:${port}`).searchParams
+                        if (parseInt(params.get('_WEBT')) == webt) {
+                            if (String(host) !== String(new RegExp(result.remoteHost)))
+                                host = new RegExp(result.remoteHost)    //  found the workstation
+                        }
+                    }
+
                     //  drop legacy protocol
                     if (/(HTTP\/1\.1)*$/.test(result.request))
                         result.request = result.request.split(' ').splice(0, 2).join(' ')
@@ -181,15 +191,6 @@ dns.lookup(host, (err, addr, family) => {
                             /RUN=lan&app=triggerCheck/.test(result.request)
                         ) {
                             client.send(JSON.stringify({ skip: '1', reason: 'verbose' }))
-                            return
-                        }
-                    }
-
-                    //  DevOps specified a clinical session token
-                    if (webt && /(_WEBT=)/.test(result.request)) {
-                        params = new URL(result.request.split(' ')[1], `${protocol}://${addr}:${port}`).searchParams
-                        if (parseInt(params.get('_WEBT')) !== webt) {
-                            client.send(JSON.stringify({ skip: '1', reason: 'webt' }))
                             return
                         }
                     }
@@ -231,6 +232,11 @@ dns.lookup(host, (err, addr, family) => {
                         //  send result to peek console
                         delete result.originalLine
                         client.send(JSON.stringify(result))
+                        return
+                    }
+                    else {
+                        client.send(JSON.stringify({ skip: '1', reason: webt ? 'webt' : 'verbose' }))
+                        return
                     }
                 }
                 catch (err) {
