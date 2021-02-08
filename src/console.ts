@@ -2,7 +2,6 @@
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
-import { SSL_OP_TLS_BLOCK_PADDING_BUG } from 'constants'
 import dns = require('dns')
 const got = require('got')
 import fs = require('fs')
@@ -165,14 +164,15 @@ vt.form = {
                     vt.focus = 'status'
                     return
 
+                case 'T':
+                    vt.outln('ime between reporting outputs')
+                    vt.focus = 'timer'
+                    return
+
                 case 'U':
                     vt.out('ser')
                     vt.focus = 'user'
                     return
-
-                case 'Q':
-                    vt.outln('uit')
-                    process.exit()
 
                 case 'V':
                     session.verbose = !session.verbose
@@ -189,9 +189,9 @@ vt.form = {
                     vt.out(`tra log info = ${session.xtra}`)
                     break
 
-                case '#':
-                    vt.focus = 'report'
-                    return
+                case 'Q':
+                    vt.outln('uit')
+                    process.exit()
 
                 default:
                     vt.beep()
@@ -199,7 +199,7 @@ vt.form = {
                     vt.outln('action: ', bracket('Get (default)'), ', ', bracket('Monitor'), ', ', bracket('Name (switch VIP)'), ', or ', bracket('Quit'))
                     vt.outln('apache: ', bracket('Status'), ', ', bracket('Host'), ', ', bracket('Request'))
                     vt.outln('caché:  ', bracket('User'), ', ', bracket('Webt'))
-                    vt.out('output: ', bracket('Verbose'), ', e', bracket('Xtra'))
+                    vt.out('output: ', bracket('Timer'), bracket('Verbose'), ', e', bracket('Xtra'))
             }
             vt.refocus()
         }, prompt: vt.attr(vt.off, '\n', vt.cyan, 'Peek: '), cancel: 'Q', enter: 'G', max: 1, eol: false
@@ -221,20 +221,13 @@ vt.form = {
             vt.entry = vt.entry || session.host
             if (vt.entry !== session.host) {
                 session.host = vt.entry
-                vt.out(` (set) `)
+                vt.outln(` (set) `)
+                session.verbose = true
+                vt.outln(vt.red, vt.bright, 'Verbosity is ON')
             }
             //  likely a single IP or name, let's see
             checkHost(session.host).finally(() => { vt.focus = 'menu' })
         }, prompt: 'Filter on remote host: ', max: 72
-    },
-    report: {
-        cb: () => {
-            let n = parseInt(vt.entry)
-            if (n >= 2 && n <= 20) {
-                config.report = n
-                vt.out(` (set) `)
-            }
-        }, prompt: 'Interval (2-20): ', max: 2
     },
     request: {
         cb: () => {
@@ -258,6 +251,16 @@ vt.form = {
             vt.focus = 'menu'
         }, prompt: 'Filter on status code: ', max: 72
     },
+    timer: {
+        cb: () => {
+            let n = parseInt(vt.entry)
+            if (n >= 3 && n <= 30) {
+                config.report = n
+                vt.out(` (set) `)
+            }
+            vt.focus = 'menu'
+        }, prompt: 'Interval (3-30): ', max: 2
+    },
     user: {
         cb: () => {
             vt.entry = vt.entry || session.user
@@ -277,6 +280,8 @@ vt.form = {
             if (webt !== session.webt) {
                 session.webt = webt
                 vt.out(` (${session.webt ? 'set' : 'unset'})`)
+                session.verbose = session.webt ? true : false
+                vt.outln('Verbose = ', session.verbose)
             }
             vt.focus = 'menu'
         }, prompt: 'Enter WEBT number: ', max: 12
@@ -427,8 +432,7 @@ function monitor() {
 
             messages = Math.abs(messages + 1)
         }
-        else
-            statusLine()
+        statusLine()
     }, config.report * 1000)
 
     vt.outln(vt.reset, 'set ... ')
@@ -438,6 +442,7 @@ function monitor() {
     let payload = 0
     let peek = {}
     let skip: skip = { verbose: 0, webt: 0 }
+    statusLine()
 
     return new Promise<number>((resolve, reject) => {
 
@@ -469,9 +474,7 @@ function monitor() {
             }
 
             wss[i].onclose = (ev) => {
-                if (servers.apache.length == count)
-                    vt.outln()
-                vt.out(vt.faint, 'peek-gw socket closed: ', vt.reset, `${--count} `, vt.faint, `remaining\r`, vt.reset, -250)
+                vt.outln(vt.bright, server, vt.faint, ' peek-gw socket closed: ', vt.reset, `${--count} `, vt.faint, `remaining `, vt.reset, vt.cll)
                 if (!count) resolve(1)
             }
 
@@ -486,7 +489,8 @@ function monitor() {
                     else
                         messages++
                     payload += ev.data.length
-                    if (messages > 0 && !(messages % 100)) statusLine()
+                    const refresh = messages < 10 ? 1 : messages < 100 ? 10 : 100
+                    if (messages > 0 && !(messages % refresh)) statusLine()
 
                     let alpine = JSON.parse(ev.data)
                     let date = new Date(alpine.time).toLocaleDateString()
@@ -574,13 +578,12 @@ function monitor() {
             })
         })
         vt.outln()
-        statusLine()
     }
 
     function statusLine(nl = false) {
-        vt.out(vt.blue, vt.reverse, vt.faint, '| ')
-        if (messages >= 0)
-            vt.out(vt.normal, ` ${messages.toLocaleString()} `, vt.faint, ' messages  | ')
+        vt.out(Math.abs(messages) > 0 ? vt.blue : vt.green, vt.reverse, vt.faint, '| ')
+        if (Math.abs(messages) >= 0)
+            vt.out(vt.normal, ` ${Math.abs(messages).toLocaleString()} `, vt.faint, ' messages  | ')
         if (payload > 0)
             vt.out(vt.normal, ` ${payload.toLocaleString()} `, vt.faint, ' bytes  | ')
         if (skip.verbose || skip.webt)
