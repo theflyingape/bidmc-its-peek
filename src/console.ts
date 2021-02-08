@@ -275,7 +275,7 @@ vt.form = {
     },
     webt: {
         cb: () => {
-            let webt = parseInt(vt.entry) || session.webt
+            let webt = parseInt(vt.entry)
             if (webt == 0 || webt !== session.webt) {
                 session.webt = webt
                 vt.outln(` (${session.webt ? 'set' : 'unset'})`)
