@@ -195,14 +195,14 @@ vt.form = {
 
                 default:
                     vt.beep()
-                    vt.outln(' -- invalid')
-                    vt.outln('action: ', bracket('Get (default)'), ', ', bracket('Monitor'), ', ', bracket('Name (switch VIP)'), ', or ', bracket('Quit'))
+                    vt.outln(' -- help')
+                    vt.outln('action: ', bracket('Get'), ', ', bracket('Monitor'), ', ', bracket('Name (switch VIP)'), ', or ', bracket('Quit (default)'))
                     vt.outln('apache: ', bracket('Status'), ', ', bracket('Host'), ', ', bracket('Request'))
                     vt.outln('caché:  ', bracket('User'), ', ', bracket('Webt'))
                     vt.out('output: ', bracket('Timer'), ', ', bracket('Verbose'), ', e', bracket('Xtra'))
             }
             vt.refocus()
-        }, prompt: vt.attr(vt.off, '\n', vt.cyan, 'Peek: '), cancel: 'Q', enter: 'G', max: 1, eol: false
+        }, prompt: vt.attr(vt.off, '\n', vt.cyan, 'Peek: '), enter: 'Q', max: 1, eol: false
     },
     name: {
         cb: () => {
@@ -600,7 +600,7 @@ function monitor() {
             vt.out(vt.normal, ` ${(skip.verbose + skip.webt).toLocaleString()} `, vt.faint, ' skipped  | ')
         if (skip.error)
             vt.out(vt.normal, ` ${skip.error} `, vt.faint, '  | ')
-        vt.out(vt.normal, ` ${new Date().toLocaleString()} `, vt.faint, ' |', vt.reset)
+        vt.out(vt.normal, ` ${new Date().toLocaleTimeString()} `, vt.faint, ' |', vt.reset)
         vt.out(vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- ')
         if (nl)
             vt.outln()
