@@ -6,9 +6,8 @@ After=local-fs.target network-online.target
 Type=simple
 User=root
 Group=cachedev
-ExecStart=/bin/node gateway.js
+ExecStart=/usr/local/sbin/peek-gw
 KillMode=process
-WorkingDirectory=/opt/peek
 
 [Install]
 WantedBy=multi-user.target
