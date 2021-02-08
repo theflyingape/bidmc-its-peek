@@ -276,8 +276,7 @@ vt.form = {
     webt: {
         cb: () => {
             let webt = parseInt(vt.entry) || session.webt
-            if (isNaN(+vt.entry)) webt = 0
-            if (!webt || webt !== session.webt) {
+            if (webt == 0 || webt !== session.webt) {
                 session.webt = webt
                 vt.outln(` (${session.webt ? 'set' : 'unset'})`)
                 if (webt) {
@@ -292,7 +291,7 @@ vt.form = {
                 vt.out('Verbose = ', session.verbose)
             }
             vt.focus = 'menu'
-        }, prompt: 'Enter WEBT number: ', max: 12
+        }, prompt: 'Enter WEBT number: ', max: 12, enter: '^'
     }
 }
 
@@ -601,7 +600,7 @@ function monitor() {
             vt.out(vt.normal, ` ${(skip.verbose + skip.webt).toLocaleString()} `, vt.faint, ' skipped  | ')
         if (skip.error)
             vt.out(vt.normal, ` ${skip.error} `, vt.faint, '  | ')
-        vt.out(vt.normal, ` ${new Date().toLocaleString()} `, vt.faint, '  |', vt.reset)
+        vt.out(vt.normal, ` ${new Date().toLocaleString()} `, vt.faint, ' |', vt.reset)
         vt.out(vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- ')
         if (nl)
             vt.outln()
