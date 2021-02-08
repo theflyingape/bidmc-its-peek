@@ -199,7 +199,7 @@ vt.form = {
                     vt.outln('action: ', bracket('Get (default)'), ', ', bracket('Monitor'), ', ', bracket('Name (switch VIP)'), ', or ', bracket('Quit'))
                     vt.outln('apache: ', bracket('Status'), ', ', bracket('Host'), ', ', bracket('Request'))
                     vt.outln('caché:  ', bracket('User'), ', ', bracket('Webt'))
-                    vt.out('output: ', bracket('Timer'), bracket('Verbose'), ', e', bracket('Xtra'))
+                    vt.out('output: ', bracket('Timer'), ', ', bracket('Verbose'), ', e', bracket('Xtra'))
             }
             vt.refocus()
         }, prompt: vt.attr(vt.off, '\n', vt.cyan, 'Peek: '), cancel: 'Q', enter: 'G', max: 1, eol: false
