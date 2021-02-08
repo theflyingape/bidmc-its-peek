@@ -548,9 +548,11 @@ function monitor() {
                     else
                         if (i) vt.out(' '.repeat(tab))
 
-                    vt.out(entry.host || '?', ' ', vt.normal)
+                    vt.out(entry.host, ' ', vt.normal)
                     vt.out(' ', entry.status == '200' ? vt.cyan : vt.yellow, entry.status, ' ', vt.white)
-                    vt.out(sprintf(' %-14.14s ', entry.remoteHost || '?'))
+                    vt.out(sprintf(' %-14.14s ', entry.remoteHost || '-?-'))
+                    if (session.xtra)
+                        vt.out(sprintf(' %-8.8s ', entry.userAgent || '-?-'))
                     if (/(_WEBT=)/.test(entry.request)) {
                         let out = entry.request.split('_WEBT=')
                         let webt = parseInt(out[1]).toString()

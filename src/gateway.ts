@@ -208,12 +208,17 @@ dns.lookup(host, (err, addr, family) => {
                             const ol = result.originalLine
                             //  machine
                             result.userAgent = ol.indexOf('(Windows ') > 0 ? 'Win'
-                                : ol.indexOf('(X11; Cros') > 0 ? 'CrOS'
-                                    : ol.indexOf('(Macintosh;') > 0 ? 'Mac' : '-'
+                                : ol.indexOf('(X11; CrOS') > 0 ? 'CrOS'
+                                    : ol.indexOf('(Macintosh;') > 0 ? 'Mac' : '.'
+                            result.userAgent += '/'
                             //  browser
-                            result.userAgent += ol.indexOf(' Chrome/') > 0 ? '*'
-                                : ol.indexOf(' Trident/') > 0 ? 'IE'
-                                    : ol.indexOf('curl/') > 0 ? 'curl' : '-'
+                            if (ol.indexOf(' Chrome/') > 0) {
+                                const version = parseInt(ol.split(' Chrome/')[1])
+                                result.userAgent += `${version}`
+                            }
+                            else
+                                result.userAgent += ol.indexOf(' Trident/') > 0 ? 'IE'
+                                    : ol.indexOf('curl/') > 0 ? 'curl' : '.'
                             delete result['RequestHeader User-agent']
                         }
 
