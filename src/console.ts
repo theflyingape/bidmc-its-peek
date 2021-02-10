@@ -375,7 +375,7 @@ module Console {
         return new Promise<number>((resolve, reject) => {
             let count = hosts.apache.length
             hosts.apache.forEach(server => {
-                const reqUrl = `https://${server}:${port}/peek/api/`
+                const reqUrl = `https://${server}:${port}/peek/api/apache`
                 const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
                 try {
                     got(`${reqUrl}?${params}`, {
@@ -471,7 +471,7 @@ module Console {
             let wss = []
 
             hosts.apache.forEach(server => {
-                const reqUrl = `https://${server}:${port}/peek/`
+                const reqUrl = `https://${server}:${port}/peek/apache/`
                 const params = new URLSearchParams({
                     VIP: session.name, USER: USER,
                     host: session.host, request: session.request, status: session.status,

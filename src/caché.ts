@@ -1,33 +1,49 @@
-/**
+/*
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
+import express = require('express')
 import fs = require('fs')
+import path = require('path')
+import { audit } from './gateway'
 
 module Caché {
 
-    export const db = require('./cache.node')
-    const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
+    export const API = encodeURI(`/${path.basename(__filename).split('.')[0]}`)
+    export const router = express.Router({
+        caseSensitive: true, strict: false, mergeParams: false
+    })
 
-    function openInstance(host: string, ns = 'CCC') {
-
-        let cachedb = new db.Cache()
-
-        try {
-            cachedb.open({
-                ip_address: host, tcp_port: 1972, namespace: ns,
-                username: api[ns].username, password: api[ns].password
-            })
+    //  REST services
+    router.get(API, (req, res) => {
+        let client = req.header('x-forwarded-for') || req.hostname
+        audit(`GET Caché from ${client}`)
+        console.log(req.url)
+    })
+    /*
+        export const db = require('./cache.node')
+        const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
+    
+        function openInstance(host: string, ns = 'CCC') {
+    
+            let cachedb = new db.Cache()
+    
+            try {
+                cachedb.open({
+                    ip_address: host, tcp_port: 1972, namespace: ns,
+                    username: api[ns].username, password: api[ns].password
+                })
+            }
+            catch(err) {
+                console.error(err)
+            }
         }
-        catch(err) {
-            console.error(err)
+    
+        function firstLogin(cachedb, ds = new Date().toLocaleDateString()) {
+            cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'FirstLogin', arguments: [ ds ] })
+    
         }
-    }
-
-    function firstLogin(cachedb, ds = new Date().toLocaleDateString()) {
-        cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'FirstLogin', arguments: [ ds ] })
-
-    }
+    */
 }
 
 export = Caché
