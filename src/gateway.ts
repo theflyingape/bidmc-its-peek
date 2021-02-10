@@ -113,10 +113,11 @@ dns.lookup(host, (err, addr, family) => {
 
     //  REST services
     app.get('/peek/api', (req, res) => {
+        console.log(req)
         let VIP = req.query.VIP
         let USER = req.query.USER || 'nobody'
-        let console = req.header('x-forwarded-for') || req.hostname
-        audit(`GET query logs list by ${USER} from remote host: ${console}`)
+        let client = req.header('x-forwarded-for') || req.hostname
+        audit(`GET query logs list by ${USER} from remote host: ${client}`)
 
         let session = VIP == 'local' ? getLogs('samples') : getLogs()
         let result = { host: os.hostname(), logs: session.logs }

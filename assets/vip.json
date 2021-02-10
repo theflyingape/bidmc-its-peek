@@ -1,60 +1,73 @@
 {
   "apache": {
-    "local": [
-      "local",
-      "localhost"
-    ],
-    "holmes-dev.caregroup.org": [
-      "watson.bidmc.org",
-      "cccdevweb01.bidmc.harvard.edu",
-      "cccdevweb02.bidmc.harvard.edu"
-    ],
-    "holmes-test.caregroup.org": [
-      "toby.bidmc.org",
-      "ccctestweb01.bidmc.org",
-      "ccctestweb02.bidmc.org",
-      "ccctestweb03.bidmc.org",
-      "ccctestweb04.bidmc.org"
-    ],
-    "holmes.caregroup.org": [
-      "mycroft.bidmc.harvard.edu",
-      "cccliveweb1.bidmc.harvard.edu",
-      "cccliveweb2.bidmc.harvard.edu",
-      "cccliveweb3.bidmc.harvard.edu",
-      "cccliveweb4.bidmc.harvard.edu"
-    ],
-    "webomr.bidmc.org": [
-      "mycroft.bidmc.org",
-      "cccprodweb01.bidmc.org",
-      "cccprodweb02.bidmc.org",
-      "cccprodweb03.bidmc.org",
-      "cccprodweb04.bidmc.org"
-    ]
+    "local": {
+      "caché": "local",
+      "hosts": ["localhost"]
+    },
+    "holmes.caregroup.org": {
+      "caché": "mycroft.bidmc.harvard.edu",
+      "hosts": [
+        "cccliveweb1.bidmc.harvard.edu",
+        "cccliveweb2.bidmc.harvard.edu",
+        "cccliveweb3.bidmc.harvard.edu",
+        "cccliveweb4.bidmc.harvard.edu"
+      ]
+    },
+    "holmes-dev.caregroup.org": {
+      "caché": "watson.bidmc.org",
+      "hosts": [
+        "cccdevweb01.bidmc.harvard.edu",
+        "cccdevweb02.bidmc.harvard.edu"
+      ]
+    },
+    "holmes-stage.caregroup.org": {
+      "caché": "toby.bidmc.org",
+      "hosts": [
+        "ccctestweb01.bidmc.org",
+        "ccctestweb02.bidmc.org",
+        "ccctestweb03.bidmc.org",
+        "ccctestweb04.bidmc.org"
+      ]
+    },
+    "holmes-test.caregroup.org": {
+      "caché": "toby.bidmc.org",
+      "hosts": [
+        "ccctestweb01.bidmc.org",
+        "ccctestweb02.bidmc.org",
+        "ccctestweb03.bidmc.org",
+        "ccctestweb04.bidmc.org"
+      ]
+    },
+    "webomr.bidmc.org": {
+      "caché": "mycroft.bidmc.org",
+      "hosts": [
+        "cccprodweb01.bidmc.org",
+        "cccprodweb02.bidmc.org",
+        "cccprodweb03.bidmc.org",
+        "cccprodweb04.bidmc.org"
+      ]
+    }
   },
   "caché": {
-    "local": [
-      "local",
-      "localhost"
-    ],
-    "watson.bidmc.org": [
-      "holmes-dev.caregroup.org",
-      "cccdevapp01.bidmc.org",
-      "cccdevapp02.bidmc.org"
-    ],
-    "toby.bidmc.org": [
-      "holmes-test.caregroup.org",
-      "ccctestapp01.bidmc.org",
-      "ccctestapp02.bidmc.org"
-    ],
-    "mycroft.bidmc.harvard.edu": [
-      "holmes.caregroup.org",
-      "mycroftapp1.bidmc.harvard.edu",
-      "mycroftapp2.bidmc.harvard.edu"
-    ],
-    "mycroft.bidmc.org": [
-      "webomr.bidmc.org",
-      "cccprodapp01.bidmc.org",
-      "cccprodapp02.bidmc.org"
-    ]
+    "local": {
+      "apache": "local",
+      "hosts": ["localhost"]
+    },
+    "watson.bidmc.org": {
+      "apache": "holmes-dev.caregroup.org",
+      "hosts": ["cccdevapp01.bidmc.org", "cccdevapp02.bidmc.org"]
+    },
+    "toby.bidmc.org": {
+      "apache": "holmes-stage.caregroup.org",
+      "hosts": ["ccctestapp01.bidmc.org", "ccctestapp02.bidmc.org"]
+    },
+    "mycroft.bidmc.harvard.edu": {
+      "apache": "holmes.caregroup.org",
+      "hosts": ["mycroftapp1.bidmc.harvard.edu", "mycroftapp2.bidmc.harvard.edu"]
+    },
+    "mycroft.bidmc.org": {
+      "apache": "webomr.bidmc.org",
+      "hosts": ["cccprodapp01.bidmc.org", "cccprodapp02.bidmc.org"]
+    }
   }
 }
