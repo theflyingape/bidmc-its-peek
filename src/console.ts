@@ -151,7 +151,7 @@ module Console {
 
                     case 'U':
                         vt.out('ser')
-                        vt.focus = 'user'
+                        vt.focus = 'username'
                         return
 
                     case 'V':
@@ -245,7 +245,7 @@ module Console {
             }, prompt: 'Interval (3-30): ', max: 2
         },
 
-        user: {
+        username: {
             cb: () => {
                 if (!/[a-z]+[a-z|0-9]+$/.test(vt.entry))
                     vt.entry = ''
@@ -254,7 +254,15 @@ module Console {
                     if (session.user) {
                         vt.out(' (set)')
                         session.verbose = true
-                        getTrail('username', session.user).finally(() => {
+                        getTrail('username', session.user).then((resolve) => {
+                            vt.outln(' INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
+                            vt.outln('-------------------------------------------------------------------------------------------------')
+                            resolve.forEach(instance => {
+                                instance.trail.forEach(trail => {
+                                    vt.outln(sprintf('%-10.10s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
+                                        trail.instance, trail.ID, trail.webt, trail.tm, trail.ke, trail.username, trail.usersim, trail.ip))
+                                })
+                            })
                             vt.focus = 'menu'
                         })
                         return
@@ -418,40 +426,37 @@ module Console {
     }
 
     function getTrail(by: string, criteria: string) {
-        return new Promise<number>((resolve, reject) => {
-            let count = hosts.caché.length
-            hosts.apache.forEach(server => {
-                const reqUrl = `https://${server}:${port}/peek/api/caché/${by}/${criteria}`
-                const params = new URLSearchParams({ INSTANCES: hosts.caché.toString(), USER: USER }).toString()
-                try {
-                    got(`${reqUrl}?${params}`, {
-                        method: 'GET', headers: { 'x-forwarded-for': workstation },
-                        https: ssl
-                    }).then(response => {
-                        vt.outln()
-                        vt.out(vt.green, vt.bright, reqUrl, vt.reset)
-                        if (response.body) {
-                            const result = JSON.parse(response.body)
-                            vt.out(' => (', vt.bright, result.host, vt.normal, '): ', result.toString())
-                        }
-                    }).catch(err => {
-                        vt.outln()
-                        vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
-                        if (err.statusCode)
-                            vt.out(err.statusCode, ': ', err.statusMessage)
-                        else
-                            vt.out(err.code)
-                    }).finally(() => {
-                        if (--count == 0)
-                            resolve(1)
-                    })
-                }
-                catch (err) {
-                    console.error(err.response)
-                    reject(0)
-                }
-            })
-            if (count == 0) resolve(1)
+        return new Promise<[any]>((resolve, reject) => {
+            let results
+            const server = hosts.apache[0]
+            const reqUrl = `https://${server}:${port}/peek/api/caché/${by}/${criteria}`
+            const params = new URLSearchParams({ INSTANCES: String(hosts.caché), USER: USER })
+            try {
+                got(`${reqUrl}?${params}`, {
+                    method: 'GET', headers: { 'x-forwarded-for': workstation },
+                    https: ssl
+                }).then(response => {
+                    vt.outln()
+                    vt.out(vt.green, vt.bright, reqUrl, vt.reset)
+                    if (response.body) {
+                        results = JSON.parse(response.body)
+                        vt.outln(` => ${results.length} webt session trail returned`)
+                    }
+                }).catch(err => {
+                    vt.outln()
+                    vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
+                    if (err.statusCode)
+                        vt.out(err.statusCode, ': ', err.statusMessage)
+                    else
+                        vt.out(err)
+                }).finally(() => {
+                    resolve(results)
+                })
+            }
+            catch (err) {
+                vt.out(err.response)
+                reject(results)
+            }
         })
     }
 

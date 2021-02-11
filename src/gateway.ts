@@ -46,7 +46,7 @@ console.log(`Node.js ${process.version} BIDMC ITS Peek gateway`)
 console.log(`on ${os.hostname()} (${process.platform}) at ` + new Date())
 
 process.chdir(__dirname)
-console.log(`cwd:\t\t${__dirname}`)
+console.log(`cwd:    \t${__dirname}`)
 
 module Gateway {
 
@@ -58,10 +58,10 @@ module Gateway {
         caseSensitive: true, strict: false, mergeParams: false
     })
 
-    export let hostname
+    export let hostname = os.hostname()
     export let listener
     export const ssl = config.ssl || null
-    export let username
+    export let username = process.env.USER
     export let wss: ws.Server
 
     export function audit(message, level = 'notice') {
@@ -107,7 +107,7 @@ module Gateway {
         })
         router.use((req, res, next) => {
             hostname = req.header('x-forwarded-for') || req.hostname
-            username = req.query.USER || 'nobody'
+            username = String(req.query.USER)
             //  TODO: ACLs
             audit(`${req.method} ${decodeURI(req.url)}`)
             next()
