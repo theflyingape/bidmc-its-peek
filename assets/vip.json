@@ -55,7 +55,7 @@
     },
     "watson.bidmc.org": {
       "apache": "holmes-dev.caregroup.org",
-      "hosts": ["cccdevapp01.bidmc.org", "cccdevapp02.bidmc.org"]
+      "hosts": ["watson-ecp.bidmc.org"]
     },
     "toby.bidmc.org": {
       "apache": "holmes-stage.caregroup.org",

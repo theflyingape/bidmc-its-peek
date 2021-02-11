@@ -29,6 +29,7 @@ module Console {
     export let hosts: hosts = {}
 
     export let session = {
+        vip: { apache:'', caché: '' },
         name: '',
         host: '.*',
         request: '.*',
@@ -195,7 +196,7 @@ module Console {
                 }
                 //  likely a single IP or name, let's see
                 checkHost(session.host).finally(() => { vt.focus = 'menu' })
-            }, prompt: 'Filter on remote host: ', cancel:'', max: 72
+            }, prompt: 'Filter on remote host: ', max: 72
         },
 
         name: {
@@ -251,15 +252,18 @@ module Console {
                 if (vt.entry !== session.user) {
                     session.user = vt.entry
                     if (session.user) {
+                        vt.out(' (set)')
                         session.verbose = true
-
+                        getTrail('username', session.user).finally(() => {
+                            vt.focus = 'menu'
+                        })
+                        return
                     }
-                    else {
+                    else
                         vt.out(' (unset)')
-                    }
                 }
                 vt.focus = 'menu'
-            }, prompt: ': ', max: 16
+            }, prompt: 'Enter a user account name (CCC.WEB.Session): ', max: 16
         },
 
         webt: {
@@ -333,6 +337,7 @@ module Console {
         hosts = {}
         Object.keys(vip).forEach(service => {
             hosts[service] = []
+            session.vip[service] = ''
         })
 
         if (session.name) {
@@ -342,15 +347,18 @@ module Console {
                 for (const name in vip[service]) {
                     const short = name.split('.')[0]
                     if (short == session.name) {
-                        hosts[service] = vip[service][name].hosts
                         fqdn = vip[service][name][Object.keys(vip[service][name])[0]]
+                        hosts[service] = vip[service][name].hosts
+                        session.vip[service] = name
                     }
                 }
             if (fqdn) {
                 for (const service in vip)
                     for (const name in vip[service])
-                        if (name == fqdn)
+                        if (name == fqdn) {
                             hosts[service] = vip[service][name].hosts
+                            session.vip[service] = name
+                        }
                 vt.outln(vt.reverse, vt.bright, ` ${Object.keys(hosts).join('+')} web-app servers `)
                 for (let service in hosts)
                     vt.outln(vt.magenta, vt.bright, service, vt.reset, ':\t', hosts[service].toString())
@@ -371,7 +379,7 @@ module Console {
     }
 
     function getLogs() {
-        vt.out('fetching active Apache log list ... ')
+        vt.out(`=> check for the active Apache log list from each ${session.vip.apache} server ... `)
         return new Promise<number>((resolve, reject) => {
             let count = hosts.apache.length
             hosts.apache.forEach(server => {
@@ -387,6 +395,44 @@ module Console {
                         if (response.body) {
                             const result = JSON.parse(response.body)
                             vt.out(' => (', vt.bright, result.host, vt.normal, '): ', result.logs.toString())
+                        }
+                    }).catch(err => {
+                        vt.outln()
+                        vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
+                        if (err.statusCode)
+                            vt.out(err.statusCode, ': ', err.statusMessage)
+                        else
+                            vt.out(err.code)
+                    }).finally(() => {
+                        if (--count == 0)
+                            resolve(1)
+                    })
+                }
+                catch (err) {
+                    console.error(err.response)
+                    reject(0)
+                }
+            })
+            if (count == 0) resolve(1)
+        })
+    }
+
+    function getTrail(by: string, criteria: string) {
+        return new Promise<number>((resolve, reject) => {
+            let count = hosts.caché.length
+            hosts.caché.forEach(server => {
+                const reqUrl = `https://${server}:${port}/peek/api/caché/${by}/${criteria}`
+                const params = new URLSearchParams({ INSTANCES: hosts.caché.toString(), USER: USER }).toString()
+                try {
+                    got(`${reqUrl}?${params}`, {
+                        method: 'GET', headers: { 'x-forwarded-for': workstation },
+                        https: ssl
+                    }).then(response => {
+                        vt.outln()
+                        vt.out(vt.green, vt.bright, reqUrl, vt.reset)
+                        if (response.body) {
+                            const result = JSON.parse(response.body)
+                            vt.out(' => (', vt.bright, result.host, vt.normal, '): ', result.toString())
                         }
                     }).catch(err => {
                         vt.outln()

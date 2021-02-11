@@ -109,14 +109,15 @@ module Gateway {
             hostname = req.header('x-forwarded-for') || req.hostname
             username = req.query.USER || 'nobody'
             //  TODO: ACLs
+            audit(`${req.method} ${decodeURI(req.url)}`)
             next()
         })
-        router.use(require('./apache').router)
-        router.use(require('./caché').router)
+        .use(require('./apache').router)
+        .use(require('./caché').router)   //  nvm use
         app.use('/peek/api', router)
 
         //  web services
-        app.use('/peek', express.static(path.resolve(__dirname, 'assets'), { redirect: false }))
+        app.use('/peek', express.static(path.resolve(__dirname, 'assets'), { redirect: true }))
 
         //  enable WebSocket endpoints
         wss = new ws.Server({ noServer: true, path: `/peek/apache/`, clientTracking: true })

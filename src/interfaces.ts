@@ -1,3 +1,8 @@
+interface cachedb {
+    server: string
+    cachedb: any
+}
+
 interface config {
     report: number
     ssl?: { key: string, cert: string, requestCert: boolean, rejectUnauthorized: boolean }

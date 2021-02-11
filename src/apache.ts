@@ -19,9 +19,13 @@ module Apache {
     })
 
     //  REST services
-    router.get(`${API}`, (req, res) => {
-        let VIP = req.query.VIP
+    router.get(`${API}/*`, (req, res, next) => {
+        next()
+    })
+    .get(`${API}`, (req, res) => {
+        audit(`GET ${API}: ${req.url} -> ${req.params}`)
 
+        let VIP = req.query.VIP
         audit(`GET query active Apache log list for ${VIP}`)
 
         let session = VIP == 'local' ? getLogs('samples') : getLogs()
