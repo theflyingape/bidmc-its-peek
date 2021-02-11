@@ -5,7 +5,6 @@
 import express = require('express')
 import fs = require('fs')
 import path = require('path')
-import { audit } from './gateway'
 
 module Caché {
 
@@ -44,7 +43,7 @@ module Caché {
     })
 
     //  DATABASE services
-    export const db = require('./cache.node')
+    export const db = require('./assets/cache.node')
     const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
 
     function openAll(instances: string[], ns = 'BIH'): cachedb[] {
