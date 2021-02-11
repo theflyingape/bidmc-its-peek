@@ -263,7 +263,7 @@ module Console {
                         vt.out(' (unset)')
                 }
                 vt.focus = 'menu'
-            }, prompt: 'Enter a user account name (CCC.WEB.Session): ', max: 16
+            }, prompt: 'Enter a user account: ', max: 16
         },
 
         webt: {
@@ -420,7 +420,7 @@ module Console {
     function getTrail(by: string, criteria: string) {
         return new Promise<number>((resolve, reject) => {
             let count = hosts.caché.length
-            hosts.caché.forEach(server => {
+            hosts.apache.forEach(server => {
                 const reqUrl = `https://${server}:${port}/peek/api/caché/${by}/${criteria}`
                 const params = new URLSearchParams({ INSTANCES: hosts.caché.toString(), USER: USER }).toString()
                 try {
