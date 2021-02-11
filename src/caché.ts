@@ -43,7 +43,7 @@ module Caché {
     })
 
     //  DATABASE services
-    export const db = require('./assets/cache.node')
+    export const db = require('./assets/cache1200.node')
     const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
 
     function openAll(instances: string[], ns = 'BIH'): cachedb[] {
