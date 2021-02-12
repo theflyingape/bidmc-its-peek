@@ -408,16 +408,17 @@ module Console {
                         vt.out(vt.green, vt.bright, reqUrl, vt.reset)
                         if (response.body) {
                             const result = JSON.parse(response.body)
-                            vt.out(' => (', vt.bright, result.host, vt.normal, '): ', result.logs.toString())
+                            vt.out(' => ', vt.bright, result.host, vt.normal, ': ', result.logs.toString())
                         }
                     }).catch(err => {
-                        hosts.apache.splice(n, 1)
                         vt.outln()
                         vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
                         if (err.statusCode)
                             vt.out(err.statusCode, ': ', err.statusMessage)
-                        else
+                        else {
                             vt.out(err)
+                            hosts.apache.splice(n, 1)
+                        }
                     }).finally(() => {
                         if (--count == 0)
                             resolve(1)
@@ -464,13 +465,14 @@ module Console {
                     vt.out(vt.green, vt.bright, reqUrl, vt.reset, ` => ${count} web sessions returned`)
                     session.verbose = (count > 0)
                 }).catch(err => {
-                    hosts.apache.splice(0, 1)
                     vt.outln()
                     vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
                     if (err.statusCode)
                         vt.out(err.statusCode, ': ', err.statusMessage)
-                    else
+                    else {
                         vt.out(err)
+                        hosts.apache.splice(0, 1)
+                }
                 }).finally(() => {
                     resolve(count)
                 })

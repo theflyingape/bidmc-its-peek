@@ -23,8 +23,6 @@ module Apache {
         next()
     })
     .get(`${API}`, (req, res) => {
-        audit(`GET ${API}: ${req.url} -> ${req.params}`)
-
         let VIP = req.query.VIP
         audit(`GET query active Apache log list for ${VIP}`)
 

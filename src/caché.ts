@@ -5,7 +5,6 @@
 import express = require('express')
 import fs = require('fs')
 import path = require('path')
-import { connected } from 'process'
 
 module Caché {
 
@@ -97,14 +96,13 @@ module Caché {
     }
 
     function webTrail(cachedb, args) {
-        const invoke = cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'Trail', arguments: args })
-        if (!invoke.ok || !isNaN(invoke.result)) invoke.result = {}
-        return invoke.ok && isNaN(invoke.result) ? JSON.parse(invoke.result) : null
+        const cos = cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'Trail', arguments: args })
+        return cos.ok && isNaN(cos.result) ? JSON.parse(cos.result) : null
     }
 
     function webtmaster(cachedb, webt:number): object {
-        const global = cachedb.retrieve({ global: 'webtmaster', subscripts: [ webt, 'login'] })
-        return global(global)
+        const cos = cachedb.retrieve({ global: 'webtmaster', subscripts: [ webt, 'login'] })
+        return global(cos)
     }
 }
 
