@@ -11,6 +11,7 @@ import xvt from 'xvt'
 
 process.on(`${process.title} uncaughtException`, (err, origin) => {
     console.error(origin, err)
+    process.exit(1)
 })
 process.title = 'peek'
 process.chdir(__dirname)
@@ -195,7 +196,16 @@ module Console {
                     vt.outln(vt.red, vt.bright, 'Verbosity is ON')
                 }
                 //  likely a single IP or name, let's see
-                checkHost(session.host).finally(() => { vt.focus = 'menu' })
+                checkHost(session.host).finally(() => {
+                    session.verbose = true
+                    getTrail('ip', session.host).then((resolve) => {
+                        if (!resolve) {
+                            session.host = ''
+                            session.verbose = false
+                        }
+                        vt.focus = 'menu'
+                    })
+                })
             }, prompt: 'Filter on remote host: ', max: 72
         },
 
@@ -247,31 +257,27 @@ module Console {
 
         username: {
             cb: () => {
-                if (!/[a-z]+[a-z|0-9]+$/.test(vt.entry))
-                    vt.entry = ''
-                if (vt.entry !== session.user) {
+                if (/[a-z]+[a-z|0-9]+$/.test(vt.entry)) {
                     session.user = vt.entry
-                    if (session.user) {
-                        vt.out(' (set)')
-                        session.verbose = true
-                        getTrail('username', session.user).then((resolve) => {
-                            vt.outln(' INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
-                            vt.outln('-------------------------------------------------------------------------------------------------')
-                            resolve.forEach(instance => {
-                                instance.trail.forEach(trail => {
-                                    vt.outln(sprintf('%-10.10s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
-                                        trail.instance, trail.ID, trail.webt, trail.tm, trail.ke, trail.username, trail.usersim, trail.ip))
-                                })
-                            })
-                            vt.focus = 'menu'
-                        })
-                        return
-                    }
-                    else
-                        vt.out(' (unset)')
+                    vt.out(' (set)')
+                }
+                else {
+                    vt.entry = ''
+                    vt.out(' (unset)')
+                }
+                if (session.user) {
+                    session.verbose = true
+                    getTrail('username', session.user).then((resolve) => {
+                        if (!resolve) {
+                            session.user = ''
+                            session.verbose = false
+                        }
+                        vt.focus = 'menu'
+                    })
+                    return
                 }
                 vt.focus = 'menu'
-            }, prompt: 'Enter a user account: ', max: 16
+            }, prompt: 'Enter a user account: ', enter:session.user, max: 16
         },
 
         webt: {
@@ -390,7 +396,7 @@ module Console {
         vt.out(`=> check for the active Apache log list from each ${session.vip.apache} server ... `)
         return new Promise<number>((resolve, reject) => {
             let count = hosts.apache.length
-            hosts.apache.forEach(server => {
+            hosts.apache.forEach((server, n) => {
                 const reqUrl = `https://${server}:${port}/peek/api/apache`
                 const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
                 try {
@@ -405,12 +411,13 @@ module Console {
                             vt.out(' => (', vt.bright, result.host, vt.normal, '): ', result.logs.toString())
                         }
                     }).catch(err => {
+                        hosts.apache.splice(n, 1)
                         vt.outln()
                         vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
                         if (err.statusCode)
                             vt.out(err.statusCode, ': ', err.statusMessage)
                         else
-                            vt.out(err.code)
+                            vt.out(err)
                     }).finally(() => {
                         if (--count == 0)
                             resolve(1)
@@ -426,8 +433,8 @@ module Console {
     }
 
     function getTrail(by: string, criteria: string) {
-        return new Promise<[any]>((resolve, reject) => {
-            let results
+        return new Promise<number>((resolve) => {
+            let count = 0
             const server = hosts.apache[0]
             const reqUrl = `https://${server}:${port}/peek/api/caché/${by}/${criteria}`
             const params = new URLSearchParams({ INSTANCES: String(hosts.caché), USER: USER })
@@ -437,12 +444,27 @@ module Console {
                     https: ssl
                 }).then(response => {
                     vt.outln()
-                    vt.out(vt.green, vt.bright, reqUrl, vt.reset)
                     if (response.body) {
-                        results = JSON.parse(response.body)
-                        vt.outln(` => ${results.length} webt session trail returned`)
+                        const cos = JSON.parse(response.body)
+                        cos.forEach(results => {
+                            if (typeof results.trail == 'object') results.trail.forEach(trail => {
+                                if (!count++) {
+                                    vt.outln(' INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
+                                    vt.outln('-------------------------------------------------------------------------------------------------')
+                                }
+                                const webt = trail.webt.split(',')
+                                vt.outln(sprintf('%-10.10s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
+                                    trail.instance, trail.ID, webt[0], trail.tm, trail.ke, trail.username, trail.usersim, trail.ip))
+                                for (let t = 1; t < webt.length; t++)
+                                    vt.outln(sprintf('%22s  %10d', '', webt[t]))
+                                session.host = trail.ip
+                            })
+                        })
                     }
+                    vt.out(vt.green, vt.bright, reqUrl, vt.reset, ` => ${count} web sessions returned`)
+                    session.verbose = (count > 0)
                 }).catch(err => {
+                    hosts.apache.splice(0, 1)
                     vt.outln()
                     vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
                     if (err.statusCode)
@@ -450,12 +472,12 @@ module Console {
                     else
                         vt.out(err)
                 }).finally(() => {
-                    resolve(results)
+                    resolve(count)
                 })
             }
             catch (err) {
                 vt.out(err.response)
-                reject(results)
+                resolve(0)
             }
         })
     }

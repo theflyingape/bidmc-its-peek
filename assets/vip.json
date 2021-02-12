@@ -55,11 +55,11 @@
     },
     "watson.bidmc.org": {
       "apache": "holmes-dev.caregroup.org",
-      "hosts": ["watson-ecp.bidmc.org"]
+      "hosts": ["watson.bidmc.org"]
     },
     "toby.bidmc.org": {
       "apache": "holmes-stage.caregroup.org",
-      "hosts": ["ccctestapp01.bidmc.org", "ccctestapp02.bidmc.org"]
+      "hosts": ["tobyapp1.bidmc.org", "tobyapp2.bidmc.org"]
     },
     "mycroft.bidmc.harvard.edu": {
       "apache": "holmes.caregroup.org",
@@ -67,7 +67,7 @@
     },
     "mycroft.bidmc.org": {
       "apache": "webomr.bidmc.org",
-      "hosts": ["cccprodapp01.bidmc.org", "cccprodapp02.bidmc.org"]
+      "hosts": ["mycroftapp1.bidmc.org", "mycroftapp1.bidmc.org"]
     }
   }
 }

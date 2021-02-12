@@ -1,6 +1,6 @@
 [Unit]
 Description=Peek gateway service into Apache logs
-After=local-fs.target network-online.target
+After=network.target remote-fs.target nss-lookup.target httpd-init.service
 
 [Service]
 Type=simple
@@ -8,6 +8,8 @@ User=root
 Group=cachedev
 ExecStart=/usr/local/sbin/peek-gw
 KillMode=process
+Restart=on-failure
+RestartSec="6s"
 
 [Install]
 WantedBy=multi-user.target

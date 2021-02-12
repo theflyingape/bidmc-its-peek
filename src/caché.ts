@@ -5,6 +5,7 @@
 import express = require('express')
 import fs = require('fs')
 import path = require('path')
+import { connected } from 'process'
 
 module Caché {
 
@@ -22,10 +23,17 @@ module Caché {
 
         let results = []
         instances.forEach(instance => {
-            results.push({ server: instance.server, trail: ipTrail(instance.cachedb, req.params.ip) })
+            let cos = webTrail(instance.cachedb, [, req.params.ip])
+            if (cos) {
+                const short = new RegExp(`/${instance.server.split('.')[0]}/i`)
+                if (!short.test(cos.instance)) cos.instance += "*"
+                Array().push.apply(results, cos)
+            }
         })
 
         closeAll(instances)
+
+        results.sort((a, b) => (a.ts > b.ts) ? 1 : -1)
         res.json(results)
         res.end
     })
@@ -34,10 +42,17 @@ module Caché {
 
         let results = []
         instances.forEach(instance => {
-            results.push({ server: instance.server, trail: usernameTrail(instance.cachedb, req.params.username) })
+            let cos = webTrail(instance.cachedb, [ , , req.params.username ])
+            if (cos) {
+                const short = new RegExp(`/${instance.server.split('.')[0]}/i`)
+                if (!short.test(cos.instance)) cos.instance += "*"
+                Array().push.apply(results, cos)
+            }
         })
 
         closeAll(instances)
+
+        results.sort((a, b) => (a.ts > b.ts) ? 1 : -1)
         res.json(results)
         res.end
     })
@@ -81,14 +96,10 @@ module Caché {
         return result
     }
 
-    function ipTrail(cachedb, ip:string) {
-        const invoke = cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'Trail', arguments: [, ip] })
-        return JSON.parse(invoke.result)
-    }
-
-    function usernameTrail(cachedb, username: string) {
-        const invoke = cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'Trail', arguments: [, , username] })
-        return JSON.parse(invoke.result)
+    function webTrail(cachedb, args) {
+        const invoke = cachedb.invoke_classmethod({ class: 'CCC.WEB.Session', method: 'Trail', arguments: args })
+        if (!invoke.ok || !isNaN(invoke.result)) invoke.result = {}
+        return invoke.ok && isNaN(invoke.result) ? JSON.parse(invoke.result) : null
     }
 
     function webtmaster(cachedb, webt:number): object {
