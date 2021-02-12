@@ -32,7 +32,9 @@ module Apache {
         res.end()
     })
     .get(`${API}/restart`, (req, res) => {
-        
+        res.json({ host: os.hostname(), code: 1 })
+        res.end()
+        process.exit(1)
     })
 
     const apache = config.apache || { dir: "/var/log/httpd", files: "*_log" }
