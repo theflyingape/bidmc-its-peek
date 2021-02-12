@@ -9,16 +9,11 @@ import http = require('http')
 import https = require('https')
 import os = require('os')
 import path = require('path')
-import syslog = require('modern-syslog')
-import url = require('url')
 import ws = require('ws')
-
-const URL = url.URL
 
 interface config {
     host?: string,
     port?: number,
-    loglevel?: string | number,
     apache?: { dir: string, files: string },
     ssl?: { key: string, cert: string }
 }
@@ -51,8 +46,6 @@ console.log(`cwd:    \t${__dirname}`)
 module Gateway {
 
     export let config: config = require('./assets/gateway.json')
-    config.loglevel = config.loglevel || 'LOG_NOTICE'
-    if (isNaN(+config.loglevel)) config.loglevel = syslog.level[config.loglevel]
 
     export const router = express.Router({
         caseSensitive: true, strict: false, mergeParams: false
@@ -65,14 +58,23 @@ module Gateway {
     export let wss: ws.Server
 
     export function audit(message, level = 'notice') {
-        message = `${message} [${username}@${hostname}]`
-        if (process.stdout.isTTY)
-            console.log(message)
-        else
-            syslog[level](message)
+        const ts = new Date(Date.now()).toLocaleDateString() + ' ' + new Date(Date.now()).toLocaleTimeString()
+        message = `${ts} [${username}@${hostname}] ${message}`
+        switch (level) {
+            case 'critical':
+                console.error(message)
+                break
+            case 'notice':
+                console.info(message)
+                break
+            case 'warn':
+                console.warn(message)
+                break
+            default:
+                console.log(message)
+                break
+        }
     }
-
-    audit(`syslog: \t${syslog.level[+config.loglevel]} - level ${config.loglevel} event messaging`)
 
     //  app server startup
     dns.lookup(config.host || 'localhost', (err, addr, family) => {
@@ -97,9 +99,6 @@ module Gateway {
         listener = `${protocol}://${addr}:${config.port}`
         console.log(` + listening on ${listener}/peek/`)
         console.log('*'.repeat(80))
-        syslog.open(process.title)
-        syslog.upto(+config.loglevel)
-        syslog.note(`listening on ${listener}/peek/`)
 
         //  REST services
         const router = express.Router({

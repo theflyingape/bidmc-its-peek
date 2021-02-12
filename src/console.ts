@@ -212,9 +212,15 @@ module Console {
         name: {
             cb: () => {
                 session.name = vt.entry
+                const restart = (session.name !== vt.entry.toLowerCase())
+                session.name = vt.entry.toLowerCase()
                 serverList()
-                if (session.name)
-                    getLogs().finally(() => { vt.focus = session.name ? 'menu' : 'name' })
+                if (session.name) {
+                    if (restart)
+                        restartGW().finally(() => { vt.focus = 'menu' })
+                    else
+                        getLogs().finally(() => { vt.focus = 'menu' })
+                }
                 else
                     vt.refocus()
             }, prompt: vt.attr(vt.red, 'Name: '), enter: 'local', max: 32
@@ -393,7 +399,7 @@ module Console {
     }
 
     function getLogs() {
-        vt.out(`=> check for the active Apache log list from each ${session.vip.apache} server ... `)
+        vt.out(` => check for each active Apache log list on ${session.vip.apache} farm ... `)
         return new Promise<number>((resolve, reject) => {
             let count = hosts.apache.length
             hosts.apache.forEach((server, n) => {
@@ -416,7 +422,7 @@ module Console {
                         if (err.statusCode)
                             vt.out(err.statusCode, ': ', err.statusMessage)
                         else {
-                            vt.out(err)
+                            vt.out(err, ' - dropping ', vt.uline, hosts.apache[n], vt.nouline)
                             hosts.apache.splice(n, 1)
                         }
                     }).finally(() => {
@@ -434,6 +440,7 @@ module Console {
     }
 
     function getTrail(by: string, criteria: string) {
+        vt.outln(` => retrieving web sessions from ${session.vip.caché} farm ... `)
         return new Promise<number>((resolve) => {
             let count = 0
             const server = hosts.apache[0]
@@ -449,14 +456,14 @@ module Console {
                         const results = JSON.parse(response.body)
                         results.forEach(trail => {
                             if (!count++) {
-                                vt.outln(' INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
-                                vt.outln('-------------------------------------------------------------------------------------------------')
+                                vt.outln('  INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
+                                vt.outln('--------------------------------------------------------------------------------------------------')
                             }
                             const webt = trail.webt.split(',')
-                            vt.outln(sprintf('%-10.10s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
+                            vt.outln(sprintf('%-11.11s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
                                 trail.instance, trail.ID, webt[0], trail.tm, trail.ke, trail.username, trail.usersim, trail.ip))
                             for (let t = 1; t < webt.length; t++)
-                                vt.outln(sprintf('%22s  %10d', '', webt[t]))
+                                vt.outln(sprintf('%23s  %10d', '', webt[t]))
                             session.host = trail.ip
                         })
                     }
@@ -677,6 +684,48 @@ module Console {
             else
                 vt.out(vt.cll, '\r', vt.reset)
         }
+    }
+
+
+    function restartGW() {
+        vt.out(`=> restarting each peek-gw service on ${session.vip.apache} web farm ... `)
+        return new Promise<number>((resolve, reject) => {
+            let count = hosts.apache.length
+            hosts.apache.forEach((server, n) => {
+                const reqUrl = `https://${server}:${port}/peek/api/apache/restart`
+                const params = new URLSearchParams({ VIP: session.name, USER: USER }).toString()
+                try {
+                    got(`${reqUrl}?${params}`, {
+                        method: 'GET', headers: { 'x-forwarded-for': workstation },
+                        https: ssl
+                    }).then(response => {
+                        vt.outln()
+                        vt.out(vt.green, vt.bright, reqUrl, vt.reset)
+                        if (response.body) {
+                            const result = JSON.parse(response.body)
+                            vt.out(' => ', vt.bright, result.host, vt.normal, ': ', result.code)
+                        }
+                    }).catch(err => {
+                        vt.outln()
+                        vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
+                        if (err.statusCode)
+                            vt.out(err.statusCode, ': ', err.statusMessage)
+                        else {
+                            vt.out(err, ' - dropping ', vt.uline, hosts.apache[n], vt.nouline)
+                            hosts.apache.splice(n, 1)
+                        }
+                    }).finally(() => {
+                        if (--count == 0)
+                            resolve(1)
+                    })
+                }
+                catch (err) {
+                    console.error(err.response)
+                    reject(0)
+                }
+            })
+            if (count == 0) resolve(1)
+        })
     }
 }
 

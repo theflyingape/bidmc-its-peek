@@ -86,7 +86,7 @@ module Caché {
                 Array().push.apply(results, obj)
             }
         })
-        results.sort((a, b) => (a.ts > b.ts) ? 1 : -1)
+        results.sort((a, b) => (a.tm > b.tm) ? 1 : -1)
     }
 
     export function webtmaster(node: cachedb, webt:number): object {

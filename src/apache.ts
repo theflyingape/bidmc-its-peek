@@ -31,6 +31,9 @@ module Apache {
         res.json(result)
         res.end()
     })
+    .get(`${API}/restart`, (req, res) => {
+        
+    })
 
     const apache = config.apache || { dir: "/var/log/httpd", files: "*_log" }
 

@@ -28,7 +28,6 @@
     "express": "^4.17.1",
     "glob": "^7.1.6",
     "got": "^11.8.1",
-    "modern-syslog": "^1.2.0",
     "seologs-alpine": "^1.0.1",
     "sprintf-js": "^1.1.2",
     "tail": "^2.2.0",
