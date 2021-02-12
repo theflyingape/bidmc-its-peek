@@ -51,7 +51,7 @@
   "caché": {
     "local": {
       "apache": "local",
-      "hosts": ["localhost"]
+      "hosts": ["localhost", "watson.bidmc.org"]
     },
     "watson.bidmc.org": {
       "apache": "holmes-dev.caregroup.org",

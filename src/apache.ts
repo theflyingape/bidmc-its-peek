@@ -24,7 +24,6 @@ module Apache {
     })
     .get(`${API}`, (req, res) => {
         let VIP = req.query.VIP
-        audit(`GET query active Apache log list for ${VIP}`)
 
         let session = VIP == 'local' ? getLogs('samples') : getLogs()
         let result = { host: os.hostname(), logs: session.logs }

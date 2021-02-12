@@ -1,6 +1,8 @@
 interface cachedb {
     server: string
-    cachedb: any
+    ns?: string
+    pid?: string
+    cmd?: any
 }
 
 interface config {

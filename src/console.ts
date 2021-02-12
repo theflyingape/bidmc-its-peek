@@ -446,33 +446,25 @@ module Console {
                 }).then(response => {
                     vt.outln()
                     if (response.body) {
-                        const cos = JSON.parse(response.body)
-                        cos.forEach(results => {
-                            if (typeof results.trail == 'object') results.trail.forEach(trail => {
-                                if (!count++) {
-                                    vt.outln(' INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
-                                    vt.outln('-------------------------------------------------------------------------------------------------')
-                                }
-                                const webt = trail.webt.split(',')
-                                vt.outln(sprintf('%-10.10s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
-                                    trail.instance, trail.ID, webt[0], trail.tm, trail.ke, trail.username, trail.usersim, trail.ip))
-                                for (let t = 1; t < webt.length; t++)
-                                    vt.outln(sprintf('%22s  %10d', '', webt[t]))
-                                session.host = trail.ip
-                            })
+                        const results = JSON.parse(response.body)
+                        results.forEach(trail => {
+                            if (!count++) {
+                                vt.outln(' INSTANCE    Session#      WEBT          Date/Time         ke    username  simulate   IP address ')
+                                vt.outln('-------------------------------------------------------------------------------------------------')
+                            }
+                            const webt = trail.webt.split(',')
+                            vt.outln(sprintf('%-10.10s  %10d  %10d  %-19.19s  %6d  %-8.8s  %8.8s  %s',
+                                trail.instance, trail.ID, webt[0], trail.tm, trail.ke, trail.username, trail.usersim, trail.ip))
+                            for (let t = 1; t < webt.length; t++)
+                                vt.outln(sprintf('%22s  %10d', '', webt[t]))
+                            session.host = trail.ip
                         })
                     }
-                    vt.out(vt.green, vt.bright, reqUrl, vt.reset, ` => ${count} web sessions returned`)
+                    vt.out(vt.green, vt.bright, reqUrl, vt.reset, ` => ${count} web session(s) returned`)
                     session.verbose = (count > 0)
                 }).catch(err => {
                     vt.outln()
-                    vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ')
-                    if (err.statusCode)
-                        vt.out(err.statusCode, ': ', err.statusMessage)
-                    else {
-                        vt.out(err)
-                        hosts.apache.splice(0, 1)
-                }
+                    vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ', err.message)
                 }).finally(() => {
                     resolve(count)
                 })
