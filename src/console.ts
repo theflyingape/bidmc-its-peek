@@ -703,7 +703,7 @@ module Console {
                         vt.out(vt.green, vt.bright, reqUrl, vt.reset)
                         if (response.body) {
                             const result = JSON.parse(response.body)
-                            vt.out(' => ', vt.bright, result.host, vt.normal, ': ', result.code)
+                            vt.out(' => ', vt.bright, result.host, vt.normal, `: (${result.code}`)
                         }
                     }).catch(err => {
                         vt.outln()
