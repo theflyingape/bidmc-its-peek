@@ -439,6 +439,7 @@ module Console {
         })
     }
 
+    //  requires only 1 web api invocation to pass the Caché instance(s) to query
     function getTrail(by: string, criteria: string) {
         vt.outln(` => retrieving web sessions from ${session.vip.caché} farm ... `)
         return new Promise<number>((resolve) => {
@@ -686,7 +687,6 @@ module Console {
         }
     }
 
-
     function restartGW() {
         vt.out(`=> restarting each peek-gw service on ${session.vip.apache} web farm ... `)
         return new Promise<number>((resolve, reject) => {
@@ -703,7 +703,7 @@ module Console {
                         vt.out(vt.green, vt.bright, reqUrl, vt.reset)
                         if (response.body) {
                             const result = JSON.parse(response.body)
-                            vt.out(' => ', vt.bright, result.host, vt.normal, `: (${result.code}`)
+                            vt.out(' => ', vt.bright, result.host, vt.normal, `: [${result.code}]`)
                         }
                     }).catch(err => {
                         vt.outln()
