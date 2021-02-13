@@ -4,40 +4,6 @@
       "caché": "local",
       "hosts": ["localhost"]
     },
-    "holmes.caregroup.org": {
-      "caché": "mycroft.bidmc.harvard.edu",
-      "hosts": [
-        "cccliveweb1.bidmc.harvard.edu",
-        "cccliveweb2.bidmc.harvard.edu",
-        "cccliveweb3.bidmc.harvard.edu",
-        "cccliveweb4.bidmc.harvard.edu"
-      ]
-    },
-    "holmes-dev.caregroup.org": {
-      "caché": "watson.bidmc.org",
-      "hosts": [
-        "cccdevweb01.bidmc.harvard.edu",
-        "cccdevweb02.bidmc.harvard.edu"
-      ]
-    },
-    "holmes-stage.caregroup.org": {
-      "caché": "toby.bidmc.org",
-      "hosts": [
-        "ccctestweb01.bidmc.org",
-        "ccctestweb02.bidmc.org",
-        "ccctestweb03.bidmc.org",
-        "ccctestweb04.bidmc.org"
-      ]
-    },
-    "holmes-test.caregroup.org": {
-      "caché": "toby.bidmc.org",
-      "hosts": [
-        "ccctestweb01.bidmc.org",
-        "ccctestweb02.bidmc.org",
-        "ccctestweb03.bidmc.org",
-        "ccctestweb04.bidmc.org"
-      ]
-    },
     "webomr.bidmc.org": {
       "caché": "mycroft.bidmc.org",
       "hosts": [
@@ -46,12 +12,31 @@
         "cccprodweb03.bidmc.org",
         "cccprodweb04.bidmc.org"
       ]
+    },
+    "webomr-dev.bidmc.org": {
+      "caché": "watson.bidmc.org",
+      "hosts": [
+        "cccdevweb01.bidmc.harvard.edu",
+        "cccdevweb02.bidmc.harvard.edu"
+      ]
+    },
+    "webomr-test.bidmc.org": {
+      "caché": "toby.bidmc.org",
+      "hosts": [
+        "ccctestweb01.bidmc.org",
+        "ccctestweb02.bidmc.org",
+        "ccctestweb03.bidmc.org",
+        "ccctestweb04.bidmc.org"
+      ]
     }
   },
   "caché": {
     "local": {
       "apache": "local",
-      "hosts": ["tobyapp1.bidmc.org", "tobyapp2.bidmc.org"]
+      "hosts": [
+        "tobyapp1.bidmc.org", "tobyapp2.bidmc.org",
+        "watsonapp1.bidmc.org", "watsonapp2.bidmc.org"
+      ]
     },
     "watson.bidmc.org": {
       "apache": "holmes-dev.caregroup.org",
@@ -60,10 +45,6 @@
     "toby.bidmc.org": {
       "apache": "holmes-stage.caregroup.org",
       "hosts": ["tobyapp1.bidmc.org", "tobyapp2.bidmc.org"]
-    },
-    "mycroft.bidmc.harvard.edu": {
-      "apache": "holmes.caregroup.org",
-      "hosts": ["mycroftapp1.bidmc.harvard.edu", "mycroftapp2.bidmc.harvard.edu"]
     },
     "mycroft.bidmc.org": {
       "apache": "webomr.bidmc.org",

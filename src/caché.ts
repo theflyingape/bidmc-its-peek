@@ -2,6 +2,7 @@
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
+import { audit } from './gateway'
 import express = require('express')
 import fs = require('fs')
 import path = require('path')
@@ -30,14 +31,14 @@ module Caché {
         webTrail([ , , req.params.username ])
         next()
     })
-    .use((req, res, next) => {
+    .use((req, res) => {
         closeAll()
         res.json(results)
         res.end
     })
 
     //  DATABASE services
-    export const db = require('./assets/cache1200.node')
+    export const db = require('./lib/cache1200.node')
     const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
     export let nodes: cachedb[]
     let instances: string[]
@@ -61,10 +62,11 @@ module Caché {
         try {
             const node = new db.Cache()
             const cos = node.open(Object.assign({ ip_address: host, namespace: ns }, api))
+            audit(`${host} (${ns}) => ${cos.ok ? cos.pid : 'failed'}`, cos.ok ? 'info' : 'critical')
             return cos.ok ? { server: host, ns: ns, pid: cos.cache_pid, cmd: node } : null
         }
         catch (err) {
-            console.error(`${err.message} for ${host} (${ns})`)
+            audit(`${err.message} for ${host} (${ns})`, 'critical')
             return null
         }
     }
@@ -84,8 +86,6 @@ module Caché {
                 const short = new RegExp(`/${node.server.split('.')[0]}/i`)
                 if (!short.test(obj.instance)) obj.instance += "*"
                 Array().push.apply(results, obj)
-                console.log(i, node.server)
-                console.log(results)
             }
         })
         results.sort((a, b) => (a.tm > b.tm) ? 1 : -1)
