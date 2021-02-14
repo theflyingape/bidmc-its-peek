@@ -38,11 +38,19 @@ module Caché {
     })
 
     //  DATABASE services
-    export const db = require('./lib/cache1200.node')
-    const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
-    export let nodes: cachedb[]
+    let api
+    let db
     let instances: string[]
+    let nodes: cachedb[]
     let results
+
+    try {
+        const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
+        db = require('./lib/cache1200.node')
+    }
+    catch (err) {
+        audit(`Caché integration not available: ${err.message}`, 'warn')
+    }
 
     export function openAll(ns = 'BIH'): cachedb[] {
         instances.forEach(server => {

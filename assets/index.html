@@ -2,30 +2,148 @@
 <html lang="en-US">
 
 <head>
-    <title>BIDMC ITS Peek Gateway</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-    <style>
-        body::after {
-            background-image: url('peek.png');
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: contain;
-            content: "";
-            opacity: 0.05;
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            z-index: -1;
-        }
-    </style>
+  <title>BIDMC ITS Peek Gateway</title>
+  <link href="favicon.ico" rel="icon" type="image/x-icon">
+  <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
+  <link href="uikit/css/uikit-core.min.css" rel="stylesheet">
+  <link href="uikit/css/uikit.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=1.0, shrink-to-fit=yes, user-scalable=no">
+  <script src="uikit/js/uikit.min.js"></script>
+  <script src="uikit/js/uikit-icons.min.js"></script>
+  <style>
+    body::after {
+      background-image: url('peek.png');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: "";
+      opacity: 0.02;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      pointer-events: none;
+      /*z-index: 0;*/
+    }
+  </style>
 </head>
 
-<body bgcolor="antiquewhite">
+<body bgcolor="white">
+
+  <div class="uk-margin">
+    <ul class="uk-tab uk-flex-center" uk-switcher="animation: uk-animation-fade">
+      <li>
+        <a href="#">DevOps<span class="uk-margin-small-left" uk-icon="icon: users" /></a>
+        <div uk-dropdown="mode: click">
+          <ul class="uk-nav uk-dropdown-nav">
+            <li class="uk-nav-header"><a href="#"><span class="uk-margin-small-right"
+                  uk-icon="icon: world"></span>Production</a></li>
+            <li><a href="#"><span class="uk-margin-small-right" uk-icon="icon: push"></span>Test</a></li>
+            <li><a href="#"><span class="uk-margin-small-right" uk-icon="icon: code"></span>Development</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="uk-active">
+        <a href="#">Monitor<span class="uk-margin-small-left" uk-icon="icon: list" /></a>
+        <div uk-dropdown="mode: click">
+          <ul class="uk-nav uk-dropdown-nav">
+            <li class="uk-nav-header"><a href="#"><span class="uk-margin-small-right"
+                  uk-icon="icon: world"></span>Production</a></li>
+            <li><a href="#"><span class="uk-margin-small-right" uk-icon="icon: push"></span>Test</a></li>
+            <li><a href="#"><span class="uk-margin-small-right" uk-icon="icon: code"></span>Development</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <ul class="uk-switcher">
+      <li>
+        <table class="uk-table uk-table-divider uk-table-hover">
+          <caption id="caché">Mycroft</caption>
+        </table>
+      </li>
+      <li>
+        <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">
+          <caption id="apache">webOMR</caption>
+          <thead>
+            <tr>
+              <th colspan=2>clients</th>
+              <th>cccdevweb01</th>
+              <th>cccdevweb02</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan=2>East campus</td>
+              <td>lan</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td>wifi</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td rowspan=2>West campus</td>
+              <td>lan</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td>wifi</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td rowspan=2>Remote sites</td>
+              <td>lan</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td>wifi</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td rowspan=2>Renaissance</td>
+              <td>lan</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td>vpn</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+            <tr>
+              <td>Internet</td>
+              <td>cyber</td>
+              <td class="uk-flex-center">0</td>
+              <td class="uk-flex-center">0</td>
+            </tr>
+          </tbody>
+          <thead>
+            <tr>
+              <th></th>
+              <th>totals</th>
+              <th class="uk-flex-center">0</th>
+              <th class="uk-flex-center">0</th>
+            </tr>
+          </thead>
+        </table>
+      </li>
+    </ul>
+  </div>
+
+  <noscript>https://www.google.com/chrome/</noscript>
+  <script src="bundle.js"></script>
 </body>
 
 </html>

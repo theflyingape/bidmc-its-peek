@@ -117,6 +117,7 @@ module Gateway {
 
         //  web services
         app.use('/peek', express.static(path.resolve(__dirname, 'assets'), { redirect: true }))
+        app.use('/peek/uikit', express.static(path.resolve(__dirname, 'node_modules/uikit/dist'), { redirect: false }))
 
         //  enable WebSocket endpoints
         wss = new ws.Server({ noServer: true, path: `/peek/apache/`, clientTracking: true })

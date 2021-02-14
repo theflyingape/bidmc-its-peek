@@ -15,6 +15,7 @@
     },
     "folders": [
         {
+            "name": "BIDMC ITS Peek",
             "path": "/home/rhurst/src/work/node/bidmc-its-peek"
         },
         {
