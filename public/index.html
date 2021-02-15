@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link href="favicon.ico" rel="icon" sizes="64x64" type="image/x-icon">
+  <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
+  <link href="uikit/css/uikit-core.min.css" rel="stylesheet">
+  <link href="uikit/css/uikit.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <script src="uikit/js/uikit.min.js"></script>
+  <script src="uikit/js/uikit-icons.min.js"></script>
+  <style>
+    body::after {
+      background-image: url('images/peek.png');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: "";
+      opacity: 0.02;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      pointer-events: none;
+      /*z-index: 0;*/
+    }
+  </style>
+</head>
+
+<body>
+  <noscript><strong>
+    We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.<br>
+    Please enable it to continue.
+  </strong></noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+</html>

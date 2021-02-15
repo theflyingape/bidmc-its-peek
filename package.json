@@ -1,14 +1,15 @@
 {
   "name": "@theflyingape/bidmc-its-peek",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "BIDMC ITS Peek Gateway & Console",
   "main": "gateway",
   "publisher": "theflyingape",
   "scripts": {
-    "build": "./tsc -p src && ./webpack",
-    "start": "node gateway",
+    "build": "tsc -p src && vue-cli-service build --mode production --dest portal --target app ",
+    "serve": "vue-cli-service serve",
+    "start": "tsc -p src && node gateway",
     "test": "npm start test",
-    "postinstall": "if [ ! -d keys ]; then mkdir keys; openssl req -newkey rsa:2048 -nodes -keyout keys/localhost.key -x509 -days 365 -out keys/localhost.cer -subj '/C=US/ST=Massachusetts/L=Boston/O=Beth Israel Deaconess Medical Center Inc/OU=IS Clinical Develpment/CN=localhost'; chmod g+r keys/localhost.key; fi",
+    "postinstall": "bin/post-install.sh",
     "prepare": "npm run build"
   },
   "author": "Robert Hurst",
@@ -28,20 +29,44 @@
     "express": "^4.17.1",
     "glob": "^7.1.6",
     "got": "^11.8.1",
+    "register-service-worker": "^1.7.1",
     "seologs-alpine": "^1.0.1",
     "sprintf-js": "^1.1.2",
     "tail": "^2.2.0",
     "uikit": "^3.6.16",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^9.1.2",
     "ws": "^7.4.2",
     "xvt": "^1.4.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "^7.5.4",
     "@types/express": "^4.17.11",
     "@types/node": "^14.14.27",
+    "@types/uikit": "^3.3.1",
     "@types/ws": "^7.2.1",
+    "@vue/cli-plugin-pwa": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
     "prettier": "2.2.1",
     "typescript": "^4.1.5",
-    "webpack-cli": "^4.5.0"
+    "vue-template-compiler": "^2.6.11"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "vue": {
+    "outputDir": "portal",
+    "publicPath": "/peek",
+    "indexPath": "index.html",
+    "pages": {
+      "index": {
+        "entry": "src/portal/main.ts",
+        "template": "public/index.html",
+        "title": "Peek Portal"
+      }
+    }
   }
 }

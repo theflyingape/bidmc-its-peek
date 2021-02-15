@@ -25,8 +25,8 @@ module Console {
     export const USER = process.env.USER || 'cacheusr'
     export const workstation = (process.env.SSH_CLIENT || process.env.IP_ADDR || os.hostname()).split(' ')[0]
 
-    export let config: config = JSON.parse(fs.readFileSync('assets/console.json').toString())
-    export const vip: vip = JSON.parse(fs.readFileSync('assets/vip.json').toString())
+    export let config: config = JSON.parse(fs.readFileSync('etc/console.json').toString())
+    export const vip: vip = JSON.parse(fs.readFileSync('etc/vip.json').toString())
     export let hosts: hosts = {}
 
     export let session = {

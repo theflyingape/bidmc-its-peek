@@ -13,7 +13,7 @@ $ ln -s /mnt/autofs/media/peek/bin/peek peek
 $ ln -s /mnt/autofs/media/peek/bin/peek-gw peek-gw
 
 $ vi /etc/httpd/conf.d/ccc*.conf
-# ... append assets/apache-localhost-proxy.conf
+# ... append etc/apache-localhost-proxy.conf
 
 $ cp /mnt/autofs/media/peek/peek-gw.service /etc/systemd/system/
 
