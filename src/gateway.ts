@@ -117,7 +117,6 @@ module Gateway {
 
         //  web portal
         app.use('/peek', express.static(path.resolve(__dirname, 'portal'), { redirect: true }))
-        //app.use('/peek/uikit', express.static(path.resolve(__dirname, 'node_modules/uikit/dist'), { redirect: true }))
 
         //  enable WebSocket endpoints
         wss = new ws.Server({ noServer: true, path: `/peek/apache/`, clientTracking: true })
