@@ -33,22 +33,19 @@
   "caché": {
     "local": {
       "apache": "local",
-      "hosts": [
-        "tobyapp1.bidmc.org", "tobyapp2.bidmc.org",
-        "watsonapp1.bidmc.org", "watsonapp2.bidmc.org"
-      ]
+      "hosts": [ "tobyapp1.bidmc.org", "tobyapp2.bidmc.org", "watson.bidmc.org" ]
     },
     "watson.bidmc.org": {
       "apache": "webomr-dev.bidmc.org",
       "hosts": ["watson.bidmc.org"]
     },
     "toby.bidmc.org": {
-      "apache": "webomr-test.caregroup.org",
+      "apache": "webomr-test.bidmc.org",
       "hosts": ["tobyapp1.bidmc.org", "tobyapp2.bidmc.org"]
     },
     "mycroft.bidmc.org": {
       "apache": "webomr.bidmc.org",
-      "hosts": ["mycroftapp1.bidmc.org", "mycroftapp1.bidmc.org"]
+      "hosts": ["mycroftapp1.bidmc.org", "mycroftapp2.bidmc.org"]
     }
   }
 }

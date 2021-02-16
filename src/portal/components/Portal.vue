@@ -40,8 +40,7 @@
               <tr>
                 <th>location</th>
                 <th>access</th>
-                <th>cccdevweb01</th>
-                <th>cccdevweb02</th>
+                <th v-for="h in hosts.apache" :key="h">{{ h.split('.')[0] }}</th>
               </tr>
             </thead>
             <tbody>
@@ -49,8 +48,7 @@
                 <tr style="vertical-align: middle" v-for="(j, access) in monitor[location]" :key="`${access}-${j}`">
                   <td><span v-once>{{ location }}</span></td>
                   <td><span v-once>{{ access }}</span></td>
-                  <td>0</td>
-                  <td>0</td>
+                  <td v-for="h in hosts.apache" :key="h">0</td>
                 </tr>
               </template>
             </tbody>
@@ -79,24 +77,24 @@
     <div id="offcanvas" uk-offcanvas="flip: true; overlay: true">
       <div class="uk-offcanvas-bar">
         <button class="uk-offcanvas-close" type="button" uk-close></button>
-        <h2>Peek Portal</h2>
+        <h2>👁️ Peek Portal</h2>
         <hr>
 
         <ul class="uk-nav uk-nav-default">
           <li class="uk-parent">
-            <ul class="uk-nav-header">Production <span class="uk-margin-small-left" uk-icon="icon: world"></span></ul>
+            <ul class="uk-nav-header"><a class="uk-icon-button" href="#" @click="farm='MYCROFT,webOMR'" uk-icon="icon: world"></a>&nbsp;Production</ul>
             <ul class="uk-nav-sub">
               <li><a href="#" @click="farm='MYCROFT,webOMR'">MYCROFT / webOMR</a></li>
             </ul>
             <hr>
 
-            <ul class="uk-nav-header">Test <span class="uk-margin-small-left" uk-icon="icon: push"></span></ul>
+            <ul class="uk-nav-header"><a class="uk-icon-button" href="#" @click="farm='TOBY,webomr-test'" uk-icon="icon: push"></a>&nbsp;Test</ul>
             <ul class="uk-nav-sub">
               <li><a href="#" @click="farm='TOBY,webomr-test'">TOBY / webOMR-test</a></li>
             </ul>
             <hr>
 
-            <ul class="uk-nav-header">Development <span class="uk-margin-small-left" uk-icon="icon: code"></span></ul>
+            <ul class="uk-nav-header"><a class="uk-icon-button" href="#" @click="farm='WATSON,webomr-dev'" uk-icon="icon: code"></a>&nbsp;Development</ul>
             <ul class="uk-nav-sub">
               <li><a href="#" @click="farm='WATSON,webomr-dev'">WATSON / webOMR-dev</a></li>
             </ul>
@@ -104,10 +102,13 @@
           </li>
         </ul>
 
-        <h4>About</h4>
+        <h4><a class="uk-icon-button" href="https://github.com/theflyingape/bidmc-its-peek" target="_blank"
+        uk-icon="icon: github"></a>&nbsp;About</h4>
         <p>
+          Insight activity into Caché and Apache web sessions.
         </p>
-        <p class="uk-align-right">- <em>Robert Hurst</em></p>
+        <p class="uk-align-right">- <em>Robert Hurst</em>
+        </p>
       </div>
     </div>
   </div>
@@ -121,20 +122,41 @@ interface alive {
   address: RegExp
   count: number
 }
+interface hosts {
+    apache?: string[]
+    caché?: string[]
+}
 
 interface monitor {
   location: { access: { address: string } }
 }
 
+interface vip {
+  apache: {
+    [fqdn: string]: {
+      caché: string,
+      hosts: string[]
+    }
+  }
+  caché: {
+    [fqdn: string]: {
+      apache: string,
+      hosts: string[]
+    }
+  }
+}
+
 @Component
 export default class Portal extends Vue {
   monitor = require("../../../etc/monitor.json");
+  vip: vip = require("../../../etc/vip.json");
 
   private _farm!: string;
   private _refresh!: string;
   apache = "";
   caché = "";
   client = [];
+  hosts: hosts = {};
   menu = "";
 
   get farm() {
@@ -142,8 +164,15 @@ export default class Portal extends Vue {
   }
   set farm(value: string) {
     this._farm = value;
-    this.caché = value.split(",")[0];
-    this.apache = value.split(",")[1];
+    const apache = value.split(",")[1];
+    const caché = value.split(",")[0];
+
+    this.hostList('apache', apache)
+    this.hostList('caché', caché)
+
+    this.apache = apache;
+    this.caché = caché;
+
     UIkit.offcanvas('#offcanvas').toggle();
   }
 
@@ -152,6 +181,16 @@ export default class Portal extends Vue {
   }
   set refresh(value: string) {
     this._refresh = value;
+  }
+
+  hostList(farm: "apache"|"caché", name: string) {
+    this.hosts[farm] = []
+
+    for (let fqdn in this.vip[farm]) {
+      const short = fqdn.split('.')[0]
+      if (short == name.toLowerCase())
+        this.hosts[farm] = this.vip[farm][fqdn].hosts
+    }
   }
 
   beforeCreate() {}

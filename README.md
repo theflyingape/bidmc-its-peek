@@ -6,22 +6,22 @@
 $ git clone https://github.com/theflyingape/bidmc-its-peek peek
 $ cd peek
 $ npm install
-$ sudo rsync -av --delete . /mnt/autofs/media/peek/
 $ sudo -s
-$ cd /usr/local/sbin
-$ ln -s /mnt/autofs/media/peek/bin/peek peek
-$ ln -s /mnt/autofs/media/peek/bin/peek-gw peek-gw
+% rsync -av --delete . /mnt/autofs/media/peek/
+% cd /usr/local/sbin
+% ln -s /mnt/autofs/media/peek/bin/peek peek
+% ln -s /mnt/autofs/media/peek/bin/peek-gw peek-gw
 
-$ vi /etc/httpd/conf.d/ccc*.conf
+% vi /etc/httpd/conf.d/ccc*.conf
 # ... append etc/apache-localhost-proxy.conf
 
-$ cp /mnt/autofs/media/peek/peek-gw.service /etc/systemd/system/
+% cp /mnt/autofs/media/peek/peek-gw.service /etc/systemd/system/
 
 # ... restart services
-$ systemctl daemon-reload
-$ systemctl enable peek-gw
-$ systemctl start peek-gw
-$ systemctl restart httpd
+% systemctl daemon-reload
+% systemctl enable peek-gw
+% systemctl start peek-gw
+% systemctl restart httpd
 ```
 
 [![Downloads](https://img.shields.io/npm/dy/bidmc-its-peek.svg)](https://www.npmjs.com/package/bidmc-its-peek)

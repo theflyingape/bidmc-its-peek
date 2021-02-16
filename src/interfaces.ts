@@ -23,11 +23,15 @@ interface hosts {
 
 interface vip {
     apache?: {
-        caché: string,
-        hosts: string[]
+        [fqdn: string]: {
+            caché: string,
+            hosts: string[]
+        }
     }
     caché?: {
-        apache: string,
-        hosts: string[]
+        [fqdn: string]: {
+            apache: string,
+            hosts: string[]
+        }
     }
 }
