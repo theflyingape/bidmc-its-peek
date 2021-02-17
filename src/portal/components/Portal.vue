@@ -232,7 +232,7 @@ export default class Portal extends Vue {
         this.alive[server] = { address: /(?:)/, count: 0 };
         this.messages[server] = 0;
 
-        const reqUrl = `wss://${server}/peek/apache/monitor/`;
+        const reqUrl = `wss://${server}/peek/apache/`;
 
         let i = this.wss.push(new WebSocket(reqUrl)) - 1;
 
