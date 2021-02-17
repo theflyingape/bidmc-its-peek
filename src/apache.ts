@@ -68,6 +68,7 @@ module Apache {
         const request = new RegExp(params.get('request'))
         const status = new RegExp(params.get('status'))
         const webt = parseInt(params.get('webt')) || 0
+        const monitor = parseInt(params.get('monitor')) || 0
         const verbose = parseInt(params.get('verbose')) || 0
         const xtra = parseInt(params.get('xtra')) || 0
         audit(`Apache socket ${req.url}`)
@@ -77,15 +78,19 @@ module Apache {
         logs.forEach((file) => {
             const today = new Date().toLocaleDateString()
             let stat = fs.statSync(file)
-            let lpm = Math.trunc(stat.size / 400) + 1
+            const minutes = Math.trunc((stat.mtime.getTime() - new Date(`${today} 00:00:00`).getTime())
+                / 1000 / 60) + 1
+            //  make a good guess ...
+            let lpm = Math.trunc(stat.size / 384) + 1
 
             //  DevOps not specific here, start with most recent events
-            if (String(host) == '/.*/' && !webt) {
-                const minutes = Math.trunc((stat.mtime.getTime() - new Date(`${today} 00:00:00`).getTime())
-                    / 1000 / 60) + 1
+            if (String(host) == '/.*/' && !webt)
                 lpm = Math.trunc(lpm / minutes) + 1
-                audit(`${path.basename(file)}  size:${stat.size.toLocaleString()}  minutes:${minutes}  lpm:${lpm}`)
-            }
+            //  let's rollback for seeding ... 
+            if (monitor)
+                lpm *= 30
+
+            audit(`${path.basename(file)}  size:${stat.size.toLocaleString()}  minutes:${minutes}  lpm:${lpm}`)
 
             let tail = new Tail(file, { nLines: lpm })
             let alpine = new Alpine(Alpine.LOGFORMATS.COMBINED)
@@ -164,9 +169,18 @@ module Apache {
                         result.time = new Date(d).toLocaleDateString() + ' '
                             + (new Date(d).toLocaleTimeString('en-US', { hour12: false }))
 
-                        //  send result to peek console
                         delete result.originalLine
-                        client.send(JSON.stringify(result))
+
+                        if (monitor)
+                        //  send remoteHost to peek monitor dashboard
+                            client.send(JSON.stringify({
+                                remoteHost: result.remoteHost,
+                                time: result.time
+                            }))
+                        else
+                        //  send result to peek cli console
+                            client.send(JSON.stringify(result))
+
                         return
                     }
                     else {

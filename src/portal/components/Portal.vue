@@ -20,7 +20,7 @@
       <!-- devops -->
       <li>
         <template v-if="caché">
-          <h3 style="text-align: right;">{{ caché }}</h3>
+          <h3 style="text-align: right">{{ caché }}</h3>
         </template>
         <template v-else>
           <div class="uk-align-right uk-width-1-4 uk-alert-primary" uk-alert>
@@ -34,21 +34,21 @@
       <!-- monitor -->
       <li>
         <template v-if="apache">
-          <h3 style="text-align: right;">{{ apache }}</h3>
+          <h3 style="text-align: right">{{ apache }}</h3>
           <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">
             <thead>
               <tr>
                 <th>location</th>
                 <th>access</th>
-                <th v-for="h in hosts.apache" :key="h">{{ h.split('.')[0] }}</th>
+                <th style="text-align: center" v-for="h in hosts.apache" :key="h">{{ h.split(".")[0] }}</th>
               </tr>
             </thead>
             <tbody>
               <template v-for="(i, location) in monitor">
                 <tr style="vertical-align: middle" v-for="(j, access) in monitor[location]" :key="`${access}-${j}`">
                   <td><span v-once>{{ location }}</span></td>
-                  <td><span v-once>{{ access }}</span></td>
-                  <td v-for="h in hosts.apache" :key="h">0</td>
+                  <td style="text-align: center"><span v-once>{{ access }}</span></td>
+                  <td style="text-align: center" v-for="h in hosts.apache" :key="h">0</td>
                 </tr>
               </template>
             </tbody>
@@ -58,8 +58,7 @@
                   <em>as of {{ refresh }}</em>
                 </th>
                 <th>totals</th>
-                <th>0</th>
-                <th>0</th>
+                <th style="text-align: center" v-for="h in hosts.apache" :key="h">{{ alive[h].count }}</th>
               </tr>
             </thead>
           </table>
@@ -78,72 +77,88 @@
       <div class="uk-offcanvas-bar">
         <button class="uk-offcanvas-close" type="button" uk-close></button>
         <h2>👁️ Peek Portal</h2>
-        <hr>
+        <hr />
 
         <ul class="uk-nav uk-nav-default">
           <li class="uk-parent">
-            <ul class="uk-nav-header"><a class="uk-icon-button" href="#" @click="farm='MYCROFT,webOMR'" uk-icon="icon: world"></a>&nbsp;Production</ul>
-            <ul class="uk-nav-sub">
-              <li><a href="#" @click="farm='MYCROFT,webOMR'">MYCROFT / webOMR</a></li>
+            <ul class="uk-nav-header">
+              <a class="uk-icon-button" href="#" @click="farm = 'MYCROFT,webOMR'" uk-icon="icon: world"></a
+              >&nbsp;Production
             </ul>
-            <hr>
+            <ul class="uk-nav-sub">
+              <li><a href="#" @click="farm = 'MYCROFT,webOMR'">MYCROFT / webOMR</a></li>
+            </ul>
+            <hr />
 
-            <ul class="uk-nav-header"><a class="uk-icon-button" href="#" @click="farm='TOBY,webomr-test'" uk-icon="icon: push"></a>&nbsp;Test</ul>
-            <ul class="uk-nav-sub">
-              <li><a href="#" @click="farm='TOBY,webomr-test'">TOBY / webOMR-test</a></li>
+            <ul class="uk-nav-header">
+              <a class="uk-icon-button" href="#" @click="farm = 'TOBY,webomr-test'" uk-icon="icon: push"></a
+              >&nbsp;Test
             </ul>
-            <hr>
+            <ul class="uk-nav-sub">
+              <li><a href="#" @click="farm = 'TOBY,webomr-test'">TOBY / webOMR-test</a></li>
+            </ul>
+            <hr />
 
-            <ul class="uk-nav-header"><a class="uk-icon-button" href="#" @click="farm='WATSON,webomr-dev'" uk-icon="icon: code"></a>&nbsp;Development</ul>
-            <ul class="uk-nav-sub">
-              <li><a href="#" @click="farm='WATSON,webomr-dev'">WATSON / webOMR-dev</a></li>
+            <ul class="uk-nav-header">
+              <a class="uk-icon-button" href="#" @click="farm = 'WATSON,webomr-dev'" uk-icon="icon: code"></a
+              >&nbsp;Development
             </ul>
-            <hr>
+            <ul class="uk-nav-sub">
+              <li><a href="#" @click="farm = 'WATSON,webomr-dev'">WATSON / webOMR-dev</a></li>
+            </ul>
+            <hr />
           </li>
         </ul>
 
-        <h4><a class="uk-icon-button" href="https://github.com/theflyingape/bidmc-its-peek" target="_blank"
-        uk-icon="icon: github"></a>&nbsp;About</h4>
-        <p>
-          Insight activity into Caché and Apache web sessions.
-        </p>
-        <p class="uk-align-right">- <em>Robert Hurst</em>
-        </p>
+        <h4>
+          <a
+            class="uk-icon-button"
+            href="https://github.com/theflyingape/bidmc-its-peek"
+            target="_blank"
+            uk-icon="icon: github"
+          ></a
+          >&nbsp;About
+        </h4>
+        <p>Insight activity into Caché and Apache web sessions.</p>
+        <p class="uk-align-right">- <em>Robert Hurst</em></p>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, VModel, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 const UIkit = require("uikit");
 
 interface alive {
-  address: RegExp
-  count: number
+  [fqdn: string]: {
+    address: RegExp;
+    count: number;
+  }
 }
+
 interface hosts {
-    apache?: string[]
-    caché?: string[]
+  apache: string[];
+  caché: string[];
 }
 
 interface monitor {
-  location: { access: { address: string } }
+  location: { access: { address: string } };
 }
 
 interface vip {
   apache: {
     [fqdn: string]: {
-      caché: string,
-      hosts: string[]
-    }
-  }
+      caché: string;
+      hosts: string[];
+    };
+  };
   caché: {
     [fqdn: string]: {
-      apache: string,
-      hosts: string[]
-    }
-  }
+      apache: string;
+      hosts: string[];
+    };
+  };
 }
 
 @Component
@@ -153,10 +168,12 @@ export default class Portal extends Vue {
 
   private _farm!: string;
   private _refresh!: string;
+
+  alive: alive = {}
   apache = "";
   caché = "";
   client = [];
-  hosts: hosts = {};
+  hosts: hosts = { apache: [], caché: [] };
   menu = "";
 
   get farm() {
@@ -167,13 +184,15 @@ export default class Portal extends Vue {
     const apache = value.split(",")[1];
     const caché = value.split(",")[0];
 
-    this.hostList('apache', apache)
-    this.hostList('caché', caché)
+    this.hostList("apache", apache);
+    this.hostList("caché", caché);
 
     this.apache = apache;
     this.caché = caché;
 
-    UIkit.offcanvas('#offcanvas').toggle();
+    UIkit.offcanvas("#offcanvas").toggle();
+
+    this.webMonitoring()
   }
 
   get refresh() {
@@ -183,21 +202,98 @@ export default class Portal extends Vue {
     this._refresh = value;
   }
 
-  hostList(farm: "apache"|"caché", name: string) {
-    this.hosts[farm] = []
+  hostList(farm: "apache" | "caché", name: string) {
+    this.hosts[farm] = [];
 
     for (let fqdn in this.vip[farm]) {
-      const short = fqdn.split('.')[0]
-      if (short == name.toLowerCase())
-        this.hosts[farm] = this.vip[farm][fqdn].hosts
+      const short = fqdn.split(".")[0];
+      if (short == name.toLowerCase()) this.hosts[farm] = this.vip[farm][fqdn].hosts;
     }
   }
 
+  //  Shall we begin?
+  webMonitoring() {
+    //  init collection(s)
+    let messages = 0;
+    let peek: { [host: string]: string } = {};
+
+    let timer = setInterval(() => {
+      if (messages > 0) {
+        messages = -1;
+
+        const copy = Object.assign({}, peek);
+        peek = {};
+        report(copy);
+
+        messages = Math.abs(messages + 1);
+      }
+
+      function report(copy: { [host: string]: string }) {
+        //  sort by host
+        Object.keys(copy)
+          .sort()
+          .forEach((host) => {
+            copy[host];
+          });
+      }
+    }, 6 * 1000);
+
+    return new Promise<number>((resolve, reject) => {
+    /*
+      wss.forEach((s) => {
+          s.close()
+      })
+    */
+      let count = this.hosts.apache.length;
+      let wss: WebSocket[] = [];
+
+      this.hosts.apache.forEach((server) => {
+        this.alive[server] = { address: /(?:)/, count: 0 }
+
+        const reqUrl = `wss://${server}/peek/apache/`;
+        const params = new URLSearchParams({
+          VIP: this.apache, monitor: String(+true), verbose: String(+true)
+        }).toString();
+
+        let i = wss.push(new WebSocket(`${reqUrl}?${params}`)) - 1;
+
+        wss[i].onopen = () => {
+          //  vt.outln(vt.faint, server, ' opened WebSocket')
+        };
+
+        wss[i].onclose = (ev) => {
+          if (!count) resolve(1);
+        };
+
+        wss[i].onerror = (ev) => {
+          //  vt.outln(vt.red, vt.bright, server, ' error ', ev.message)
+        };
+
+        wss[i].onmessage = (ev) => {
+          try {
+            if (messages < 0) messages--;
+            else messages++;
+
+            let result = JSON.parse(ev.data);
+            if (!peek[result.host]) {
+              this.alive[server].count++
+            }
+            peek[result.host] = new Date(result.time).toLocaleTimeString("en-US", { hour12: false });
+          } catch (err) {
+            //  vt.outln(vt.red, 'error: ', vt.reset, err.message)
+          }
+        };
+      });
+      if (count == 0) resolve(1);
+    });
+  }
+
+  //  hooks
   beforeCreate() {}
 
   created() {
-    this.menu = 'peek'
-    this.refresh = 'never'
+    this.menu = "peek";
+    this.refresh = "never";
   }
 
   beforeMount() {}
@@ -207,5 +303,4 @@ export default class Portal extends Vue {
   beforeDestroy() {}
   destroyed() {}
 }
-
 </script>
