@@ -39,26 +39,32 @@
             <thead>
               <tr>
                 <th>location</th>
-                <th>access</th>
+                <th style="text-align: center">access</th>
                 <th style="text-align: center" v-for="h in hosts.apache" :key="h">{{ h.split(".")[0] }}</th>
               </tr>
             </thead>
+            <!-- detail -->
             <tbody>
+      <!--
               <template v-for="(i, location) in monitor">
-                <tr style="vertical-align: middle" v-for="(j, access) in monitor[location]" :key="`${access}-${j}`">
+                <tr style="vertical-align: middle" v-for="j in monitor[location]" :key="j.access">
                   <td><span v-once>{{ location }}</span></td>
                   <td style="text-align: center"><span v-once>{{ access }}</span></td>
                   <td style="text-align: center" v-for="h in hosts.apache" :key="h">0</td>
                 </tr>
               </template>
+      -->
+              <tr style="vertical-align: middle">
+                <td></td>
+                <td style="text-align: right">total</td>
+                <td style="text-align: center" v-for="(obj, index) of alive" :key="index">{{ obj.count }}</td>
+              </tr>
             </tbody>
             <thead>
               <tr>
-                <th>
-                  <em>as of {{ refresh }}</em>
-                </th>
-                <th>totals</th>
-                <th style="text-align: center" v-for="h in hosts.apache" :key="h">{{ alive[h].count }}</th>
+                <th><em>as of {{ new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) }}</em></th>
+                <th>events</th>
+                <th style="text-align: center" v-for="(value, index) in messages" :key="index">{{ value }}</th>
               </tr>
             </thead>
           </table>
@@ -134,7 +140,7 @@ interface alive {
   [fqdn: string]: {
     address: RegExp;
     count: number;
-  }
+  };
 }
 
 interface hosts {
@@ -143,7 +149,11 @@ interface hosts {
 }
 
 interface monitor {
-  location: { access: { address: string } };
+  [location: string]: {
+    [access: string]: {
+      match: string
+    }
+  };
 }
 
 interface vip {
@@ -167,14 +177,15 @@ export default class Portal extends Vue {
   vip: vip = require("../../../etc/vip.json");
 
   private _farm!: string;
-  private _refresh!: string;
 
-  alive: alive = {}
+  alive: alive = {};
   apache = "";
   caché = "";
   client = [];
   hosts: hosts = { apache: [], caché: [] };
   menu = "";
+  messages: { [fqdn: string]: number } = {};
+  refresh = 0;
 
   get farm() {
     return this._farm;
@@ -195,19 +206,12 @@ export default class Portal extends Vue {
     this.webMonitoring()
   }
 
-  get refresh() {
-    return this._refresh;
-  }
-  set refresh(value: string) {
-    this._refresh = value;
-  }
-
   hostList(farm: "apache" | "caché", name: string) {
     this.hosts[farm] = [];
-
     for (let fqdn in this.vip[farm]) {
       const short = fqdn.split(".")[0];
-      if (short == name.toLowerCase()) this.hosts[farm] = this.vip[farm][fqdn].hosts;
+      if (short == name.toLowerCase())
+        this.hosts[farm] = this.vip[farm][fqdn].hosts;
     }
   }
 
@@ -217,29 +221,8 @@ export default class Portal extends Vue {
     let messages = 0;
     let peek: { [host: string]: string } = {};
 
-    let timer = setInterval(() => {
-      if (messages > 0) {
-        messages = -1;
-
-        const copy = Object.assign({}, peek);
-        peek = {};
-        report(copy);
-
-        messages = Math.abs(messages + 1);
-      }
-
-      function report(copy: { [host: string]: string }) {
-        //  sort by host
-        Object.keys(copy)
-          .sort()
-          .forEach((host) => {
-            copy[host];
-          });
-      }
-    }, 6 * 1000);
-
     return new Promise<number>((resolve, reject) => {
-    /*
+      /*
       wss.forEach((s) => {
           s.close()
       })
@@ -248,11 +231,20 @@ export default class Portal extends Vue {
       let wss: WebSocket[] = [];
 
       this.hosts.apache.forEach((server) => {
-        this.alive[server] = { address: /(?:)/, count: 0 }
+        this.alive[server] = { address: /(?:)/, count: 0 };
+        this.messages[server] = 0;
 
         const reqUrl = `wss://${server}/peek/apache/`;
         const params = new URLSearchParams({
-          VIP: this.apache, monitor: String(+true), verbose: String(+true)
+          VIP: this.apache,
+          USER: "peek-monitor",
+          host: ".*",
+          request: ".*",
+          status: ".*",
+          webt: String(0),
+          verbose: String(+true),
+          xtra: String(+false),
+          monitor: String(+true),
         }).toString();
 
         let i = wss.push(new WebSocket(`${reqUrl}?${params}`)) - 1;
@@ -275,10 +267,13 @@ export default class Portal extends Vue {
             else messages++;
 
             let result = JSON.parse(ev.data);
-            if (!peek[result.host]) {
-              this.alive[server].count++
+            if (result.remoteHost) {
+              this.messages[server]++;
+              if (!peek[result.remoteHost])
+                this.alive[server].count++;
+              peek[result.remoteHost] = result.time;
+              this.refresh = Date.now();
             }
-            peek[result.host] = new Date(result.time).toLocaleTimeString("en-US", { hour12: false });
           } catch (err) {
             //  vt.outln(vt.red, 'error: ', vt.reset, err.message)
           }
@@ -293,7 +288,6 @@ export default class Portal extends Vue {
 
   created() {
     this.menu = "peek";
-    this.refresh = "never";
   }
 
   beforeMount() {}
