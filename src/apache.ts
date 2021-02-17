@@ -8,6 +8,7 @@ import fs = require('fs')
 import glob = require('glob')
 import os = require('os')
 import path = require('path')
+import ws = require('ws')
 import Alpine = require('seologs-alpine')
 const Tail = require('tail').Tail
 
@@ -59,15 +60,13 @@ module Apache {
         return open ? { logs: logs, streams: streams } : { logs: logs }
     }
 
-    export function cliMonitor(client, req) {
-        let params = new URL(req.url, `${listener}`).searchParams
+    export function cliMonitor(client: ws, params: URLSearchParams) {
         let host = new RegExp(params.get('host'))   //  if 'unknown' here, identify if webt is set/found
         const request = new RegExp(params.get('request'))
         const status = new RegExp(params.get('status'))
         const webt = parseInt(params.get('webt')) || 0
         const verbose = parseInt(params.get('verbose')) || 0
         const xtra = parseInt(params.get('xtra')) || 0
-        audit(`Apache socket ${req.url}`)
 
         //  DevOps not specific here, start with most recent events
         tail((String(host) == '/.*/' && !webt), (result: apacheLog) => {
@@ -153,9 +152,7 @@ module Apache {
         })
     }
 
-    export function webMonitor(client, req) {
-        audit(`Apache socket ${req.url}`)
-
+    export function webMonitor(client: ws, params: URLSearchParams) {
         tail(true, (result: apacheLog) => {
             client.send(JSON.stringify({
                 remoteHost: result.remoteHost,

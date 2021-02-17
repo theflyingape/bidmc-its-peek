@@ -128,15 +128,17 @@ module Gateway {
 
         //  WebSocket endpoints: utilize upgraded socket connection to stream output to client
         wss.on('connection', (client, req) => {
-            const path = new URL(req.url, 'wss://localhost').pathname
+            const url = new URL(req.url, 'wss://localhost')
+            const params = url.searchParams
+            const path = url.pathname
 
             switch(path) {
                 case '/peek/apache/':
-                    require('./apache').cliMonitor(client, req)
-                    break
-
-                case '/peek/apache/monitor/':
-                    require('./apache').webMonitor(client, req)
+                    audit(`Apache socket ${req.url}`)
+                    if (params.get('VIP'))
+                        require('./apache').cliMonitor(client, params)
+                    else
+                        require('./apache').webMonitor(client, params)
                     break
 
                 default:
