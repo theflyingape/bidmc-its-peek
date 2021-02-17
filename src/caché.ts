@@ -70,7 +70,7 @@ module Caché {
         try {
             const node = new db.Cache()
             const cos = node.open(Object.assign({ ip_address: host, namespace: ns }, api))
-            audit(`${host} (${ns}) => ${cos.ok ? cos.pid : 'failed'}`, cos.ok ? 'info' : 'critical')
+            audit(`${host} (${ns}) -> ${cos.ok ? cos.cache_pid : 'failed'}`, cos.ok ? 'info' : 'critical')
             return cos.ok ? { server: host, ns: ns, pid: cos.cache_pid, cmd: node } : null
         }
         catch (err) {

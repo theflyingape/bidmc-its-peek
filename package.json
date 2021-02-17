@@ -5,7 +5,7 @@
   "main": "gateway",
   "publisher": "theflyingape",
   "scripts": {
-    "build": "tsc -p src && vue-cli-service build --mode production --dest portal --target app ",
+    "build": "tsc -p src && vue-cli-service build --mode production --dest portal --target app",
     "serve": "vue-cli-service serve",
     "start": "tsc -p src && node gateway",
     "test": "npm start test",

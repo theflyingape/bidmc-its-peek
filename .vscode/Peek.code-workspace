@@ -1,100 +1,84 @@
 {
-    "extensions": {
-        "recommendations": [
-            "eamodio.gitlens",
-            "humao.rest-client",
-            "intersystems-community.objectscript-pack",
-            "jheilingbrunner.vscode-gnupg-tool",
-            "keno.uikit-3-snippets",
-            "liximomo.sftp",
-            "ms-vscode.hexeditor",
-            "msjsdiag.debugger-for-chrome",
-            "octref.vetur",
-            "pdconsec.vscode-print",
-            "vscode-icons-team.vscode-icons",
-            "yzhang.markdown-all-in-one"
-        ]
+  "folders": [
+    {
+      "name": "BIDMC ITS Peek",
+      "path": "/home/rhurst/src/work/node/bidmc-its-peek"
     },
-    "folders": [
-        {
-            "name": "BIDMC ITS Peek",
-            "path": "/home/theflyingape/src/work/node/bidmc-its-peek"
-        },
-        {
-            "name": "watson:CCC",
-            "uri": "isfs://watson/?ns=CCC"
-        },
-        {
-            "name": "toby:CCC",
-            "uri": "isfs://toby/?ns=CCC"
-        },
-        {
-            "name": "mycroft:CCC",
-            "uri": "isfs://mycroft/?ns=CCC"
-        }
-    ],
-    "settings": {
-        "editor.cursorBlinking": "blink",
-        "editor.cursorStyle": "block",
-        "editor.cursorSmoothCaretAnimation": true,
-        "editor.fontFamily": "'Noto Sans Mono','Noto Color Emoji','Lucida Console',Consolas,monospace",
-        "editor.fontSize": 16,
-        "editor.formatOnSave": false,
-        "editor.minimap.enabled": false,
-        "editor.tabSize": 4,
-        "editor.wordWrap": "on",
-        "intersystems.servers": {
-            "watson": {
-                "webServer": {
-                    "scheme": "https",
-                    "host": "watson.bidmc.org",
-                    "port": 443
-                },
-                "description": "Development Caché 2018",
-                "username": "rhurst"
-            },
-            "toby": {
-                "webServer": {
-                    "scheme": "https",
-                    "host": "toby.bidmc.org",
-                    "port": 443
-                },
-                "description": "TEST Caché 2018",
-                "username": "rhurst"
-            },
-            "mycroft": {
-                "webServer": {
-                    "scheme": "https",
-                    "host": "mycroft.bidmc.org",
-                    "port": 443
-                },
-                "description": "LIVE Caché 2018",
-                "username": "rhurst"
-            },
-            "/default": "watson"
-        },
-        "objectscript.conn": {
-            "active": false,
-            "https": true,
-            "host": "watson.bidmc.org",
-            "port": 443,
-            "server": "watson",
-            "username": "rhurst",
-            "ns": "CCC"
-        },
-        "objectscript.serverSideEditing": true,
-        "objectscript.showExplorer": false,
-        "terminal.integrated.drawBoldTextInBrightColors": true,
-        "terminal.integrated.cursorBlinking": true,
-        "terminal.integrated.copyOnSelection": true,
-        "terminal.integrated.enableBell": true,
-        "terminal.integrated.experimentalUseTitleEvent": true,
-        "terminal.integrated.experimentalLinkProvider": true,
-        "terminal.integrated.fontFamily": "'Noto Sans Mono','Noto Color Emoji','Lucida Console',Consolas,monospace",
-        "terminal.integrated.fontSize": 14,
-        "terminal.integrated.fontWeight": "400",
-        "terminal.integrated.fontWeightBold": "500",
-        "window.zoomLevel": 0.5,
-        "workbench.colorTheme": "InterSystems Default Light"
+    {
+      "name": "watson:CCC",
+      "uri": "isfs://watson/?ns=CCC"
+    },
+    {
+      "name": "toby:CCC",
+      "uri": "isfs://toby/?ns=CCC"
+    },
+    {
+      "name": "mycroft:CCC",
+      "uri": "isfs://mycroft/?ns=CCC"
     }
+  ],
+  "settings": {
+    "editor.cursorBlinking": "blink",
+    "editor.cursorStyle": "block",
+    "editor.cursorSmoothCaretAnimation": true,
+    "editor.fontFamily": "'Noto Sans Mono','Noto Color Emoji','Lucida Console',Consolas,monospace",
+    "editor.fontSize": 16,
+    "editor.formatOnSave": false,
+    "editor.minimap.enabled": false,
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
+    "intersystems.servers": {
+      "watson": {
+        "webServer": {
+          "scheme": "https",
+          "host": "watson.bidmc.org",
+          "port": 443
+        },
+        "description": "Development Caché 2018",
+        "username": "rhurst"
+      },
+      "toby": {
+        "webServer": {
+          "scheme": "https",
+          "host": "toby.bidmc.org",
+          "port": 443
+        },
+        "description": "TEST Caché 2018",
+        "username": "rhurst"
+      },
+      "mycroft": {
+        "webServer": {
+          "scheme": "https",
+          "host": "mycroft.bidmc.org",
+          "port": 443
+        },
+        "description": "LIVE Caché 2018",
+        "username": "rhurst"
+      },
+      "/default": "watson"
+    },
+    "objectscript.conn": {
+      "active": false,
+      "https": true,
+      "host": "watson.bidmc.org",
+      "port": 443,
+      "server": "watson",
+      "username": "rhurst",
+      "ns": "CCC"
+    },
+    "objectscript.serverSideEditing": true,
+    "objectscript.showExplorer": false,
+    "terminal.integrated.drawBoldTextInBrightColors": true,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.enableBell": true,
+    "terminal.integrated.experimentalUseTitleEvent": true,
+    "terminal.integrated.experimentalLinkProvider": true,
+    "terminal.integrated.fontFamily": "'Noto Sans Mono','Noto Color Emoji','Lucida Console',Consolas,monospace",
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.fontWeight": "400",
+    "terminal.integrated.fontWeightBold": "500",
+    "window.zoomLevel": 0.5,
+    "workbench.colorTheme": "InterSystems Default Light"
+  }
 }

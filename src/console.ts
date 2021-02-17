@@ -330,7 +330,8 @@ module Console {
             if (name) {
                 try {
                     dns.reverse(name, (err, hostnames) => {
-                        if (hostnames.length)
+                        if (err) console.error(err.message)
+                        if (hostnames && hostnames.length)
                             vt.out('hostname(s): ', hostnames.toString())
                         resolve(1)
                     })
@@ -670,6 +671,7 @@ module Console {
         }
 
         function statusLine(nl = false) {
+            vt.out(vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- ', vt.reset)
             vt.out(matches > 0 ? vt.Blue : vt.Green, vt.black, '| ')
             vt.out(vt.white, vt.bright, ` ${Math.abs(messages).toLocaleString()} `, vt.normal, vt.black, 'messages  | ')
             if (payload > 0)
@@ -678,12 +680,11 @@ module Console {
                 vt.out(vt.white, vt.bright, ` ${(skip.verbose + skip.webt).toLocaleString()} `, vt.normal, vt.black, 'skipped  | ')
             if (skip.error)
                 vt.out(vt.yellow, vt.bright, ` ${skip.error} `, vt.normal, vt.black, '  | ')
-            vt.out(vt.white, vt.bright, ` ${new Date().toLocaleTimeString()} `, vt.normal, vt.black, ' |', vt.reset)
-            vt.out(vt.faint, ' -- press ', vt.normal, 'Ctrl/C', vt.faint, ' to stop -- ')
+            vt.out(vt.white, vt.bright, ` ${new Date().toLocaleTimeString()} `, vt.normal, vt.black, ' |')
             if (nl)
                 vt.outln()
             else
-                vt.out(vt.cll, '\r', vt.reset)
+                vt.out(vt.reset, vt.cll, '\r')
         }
     }
 

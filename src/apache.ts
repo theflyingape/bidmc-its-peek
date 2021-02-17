@@ -23,9 +23,7 @@ module Apache {
         next()
     })
         .get(`${API}`, (req, res) => {
-            let VIP = req.query.VIP
-
-            let session = VIP == 'local' ? getLogs('samples') : getLogs()
+            let session = getLogs()
             let result = { host: os.hostname(), logs: session.logs }
 
             res.json(result)
@@ -63,7 +61,6 @@ module Apache {
 
     export function cliMonitor(client, req) {
         let params = new URL(req.url, `${listener}`).searchParams
-        const VIP = params.get('VIP')
         let host = new RegExp(params.get('host'))   //  if 'unknown' here, identify if webt is set/found
         const request = new RegExp(params.get('request'))
         const status = new RegExp(params.get('status'))
@@ -167,8 +164,8 @@ module Apache {
         })
     }
 
-    export function tail(recent: boolean, cb: Function) {
-        const logs = getLogs(apache.dir, false).logs
+    function tail(recent: boolean, cb: Function) {
+        const logs = getLogs(os.hostname() == 'penguin' ? 'samples' : apache.dir, false).logs
 
         logs.forEach((file) => {
             const today = new Date().toLocaleDateString()
@@ -176,8 +173,8 @@ module Apache {
             const minutes = Math.trunc((stat.mtime.getTime() - new Date(`${today} 00:00:00`).getTime())
                 / 1000 / 60) + 1
             //  make a good guess ...
-            const lpm = Math.trunc(stat.size / 384) + 1
-            const lines = lpm * (recent ? 36 : 720)
+            const lpm = Math.trunc(stat.size / 384 / minutes)
+            const lines = lpm * (recent ? 36 : 720) + 1
 
             audit(`${path.basename(file)} size:${stat.size.toLocaleString()} => lpm:${lpm}; want ${lines} lines`)
 

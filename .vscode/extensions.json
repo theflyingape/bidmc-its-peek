@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "eamodio.gitlens",
+    "esbenp.prettier-vscode",
+    "humao.rest-client",
+    "intersystems-community.objectscript-pack",
+    "jheilingbrunner.vscode-gnupg-tool",
+    "keno.uikit-3-snippets",
+    "liximomo.sftp",
+    "ms-vscode.hexeditor",
+    "msjsdiag.debugger-for-chrome",
+    "octref.vetur",
+    "pdconsec.vscode-print",
+    "vscode-icons-team.vscode-icons",
+    "yzhang.markdown-all-in-one"
+  ]
+}
