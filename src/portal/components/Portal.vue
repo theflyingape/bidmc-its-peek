@@ -186,6 +186,7 @@ export default class Portal extends Vue {
   menu = "";
   messages: { [fqdn: string]: number } = {};
   refresh = 0;
+  wss: WebSocket[] = [];
 
   get farm() {
     return this._farm;
@@ -222,46 +223,33 @@ export default class Portal extends Vue {
     let peek: { [host: string]: string } = {};
 
     return new Promise<number>((resolve, reject) => {
-      /*
-      wss.forEach((s) => {
-          s.close()
-      })
-    */
+      this.wss.forEach((s) => { s.close() })
+
       let count = this.hosts.apache.length;
-      let wss: WebSocket[] = [];
+      this.wss = [];
 
       this.hosts.apache.forEach((server) => {
         this.alive[server] = { address: /(?:)/, count: 0 };
         this.messages[server] = 0;
 
-        const reqUrl = `wss://${server}/peek/apache/`;
-        const params = new URLSearchParams({
-          VIP: this.apache,
-          USER: "peek-monitor",
-          host: ".*",
-          request: ".*",
-          status: ".*",
-          webt: String(0),
-          verbose: String(+true),
-          xtra: String(+false),
-          monitor: String(+true),
-        }).toString();
+        const reqUrl = `wss://${server}/peek/apache/monitor/`;
 
-        let i = wss.push(new WebSocket(`${reqUrl}?${params}`)) - 1;
+        let i = this.wss.push(new WebSocket(reqUrl)) - 1;
 
-        wss[i].onopen = () => {
-          //  vt.outln(vt.faint, server, ' opened WebSocket')
+        this.wss[i].onopen = () => {
+          console.debug(i, reqUrl, 'websocket open')
         };
 
-        wss[i].onclose = (ev) => {
+        this.wss[i].onclose = (ev) => {
+          console.debug(i, reqUrl, 'websocket close')
           if (!count) resolve(1);
         };
 
-        wss[i].onerror = (ev) => {
-          //  vt.outln(vt.red, vt.bright, server, ' error ', ev.message)
+        this.wss[i].onerror = (ev) => {
+          console.error(i, reqUrl, 'websocket error')
         };
 
-        wss[i].onmessage = (ev) => {
+        this.wss[i].onmessage = (ev) => {
           try {
             if (messages < 0) messages--;
             else messages++;
@@ -275,7 +263,7 @@ export default class Portal extends Vue {
               this.refresh = Date.now();
             }
           } catch (err) {
-            //  vt.outln(vt.red, 'error: ', vt.reset, err.message)
+            console.error(i, reqUrl, 'websocket message', err.message)
           }
         };
       });

@@ -1,3 +1,16 @@
+interface apacheLog {
+    host: string
+    logname?: string
+    originalLine?: string
+    remoteHost: string
+    remoteUser?: string
+    request: string
+    sizeCLF?:string
+    status: string
+    time: string
+    userAgent: string
+}
+
 interface cachedb {
     server: string
     ns?: string

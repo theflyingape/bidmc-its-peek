@@ -18,7 +18,7 @@
     "folders": [
         {
             "name": "BIDMC ITS Peek",
-            "path": "/home/rhurst/src/work/node/bidmc-its-peek"
+            "path": "/home/theflyingape/src/work/node/bidmc-its-peek"
         },
         {
             "name": "watson:CCC",
@@ -74,7 +74,7 @@
             "/default": "watson"
         },
         "objectscript.conn": {
-            "active": true,
+            "active": false,
             "https": true,
             "host": "watson.bidmc.org",
             "port": 443,

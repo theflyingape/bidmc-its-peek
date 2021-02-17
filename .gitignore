@@ -2,6 +2,7 @@
 **/*.js.map
 **/*.d.ts
 **/node_modules/**
+.vscode/**
 portal/**
 keys/**
 samples/**

@@ -128,7 +128,29 @@ module Gateway {
 
         //  WebSocket endpoints: utilize upgraded socket connection to stream output to client
         wss.on('connection', (client, req) => {
-            require('./apache').tail(client, req)
+            const path = new URL(req.url, 'wss://localhost').pathname
+
+            switch(path) {
+                case '/peek/apache/':
+                    require('./apache').cliMonitor(client, req)
+                    break
+
+                case '/peek/apache/monitor/':
+                    require('./apache').webMonitor(client, req)
+                    break
+
+                default:
+                    audit(`invalid Apache socket attempt: ${path}`, 'critical')
+            }
+
+            //  client → any signal terminates
+            client.on('message', (msg) => {
+                client.close()
+            })
+
+            client.on('close', () => {
+                audit(`Apache socket closed`)
+            })
         })
 
         if (passed == 'test' && process.kill(process.pid, 'SIGINT'))
