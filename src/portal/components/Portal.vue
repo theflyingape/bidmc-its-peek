@@ -208,8 +208,7 @@ export default class Portal extends Vue {
     this.webMonitoring()
       .catch((reject) => {})
       .finally(() => {
-        this.ready = true;
-        console.debug('webMonitoring() done')
+        this.ready = false;
         this.$forceUpdate()
       });
   }
@@ -229,11 +228,9 @@ export default class Portal extends Vue {
     let peek: { [host: string]: string } = {};
 
     return new Promise<number>((resolve, reject) => {
-      this.wss.forEach((s) => {
-        s.close();
-      });
-
       let count = this.hosts.apache.length;
+      this.ready = true
+      this.wss.forEach((s) => { s.close(); });
       this.wss = [];
 
       this.hosts.apache.forEach((server) => {
@@ -247,6 +244,7 @@ export default class Portal extends Vue {
         this.wss[i].onopen = () => {
           UIkit.notification({ message: `WebSocket opened: ${reqUrl}`, pos: "bottom-left", status: "success" });
           this.messages[server] = 0
+          this.ready = true
         };
 
         this.wss[i].onclose = (ev) => {

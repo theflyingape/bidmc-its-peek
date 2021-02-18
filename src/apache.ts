@@ -153,19 +153,28 @@ module Apache {
     }
 
     export function webMonitor(client: ws, params: URLSearchParams) {
+        let hosts = 0
         let payload = {}
 
         tail(true, (result: apacheLog) => {
-            if (result.remoteHost && result.time)
+            if (result.remoteHost && result.time) {
                 payload[result.remoteHost] = result.time
+                hosts++
+            }
         })
 
         let timer = setInterval(() => {
-            const copy = Object.assign({}, payload)
-            payload = {}
-            client.send(JSON.stringify(copy), (err) => {
-                if (err) clearInterval(timer)
-            })
+            if (hosts) {
+                const copy = Object.assign({}, payload)
+                payload = {}
+                hosts = 0
+                client.send(JSON.stringify(copy), (err) => {
+                    if (err) {
+                        audit(`webMonitor: ${err.message}`, 'warn')
+                        clearInterval(timer)
+                    }
+                })
+            }
         }, 1000)
     }
 
