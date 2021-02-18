@@ -45,7 +45,7 @@
             </thead>
             <!-- detail -->
             <tbody>
-      <!--
+              <!--
               <template v-for="(i, location) in monitor">
                 <tr style="vertical-align: middle" v-for="j in monitor[location]" :key="j.access">
                   <td><span v-once>{{ location }}</span></td>
@@ -62,9 +62,9 @@
             </tbody>
             <thead>
               <tr>
-                <th><em>as of {{ new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) }}</em></th>
+                <th><em>as of {{ refresh ? new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) : 'never' }}</em></th>
                 <th>events</th>
-                <th style="text-align: center" v-for="(value, index) in messages" :key="index">{{ value }}</th>
+                <th style="text-align: center" v-for="(value, index) in messages" :key="index"><span v-html="value"></span></th>
               </tr>
             </thead>
           </table>
@@ -151,8 +151,8 @@ interface hosts {
 interface monitor {
   [location: string]: {
     [access: string]: {
-      match: string
-    }
+      match: string;
+    };
   };
 }
 
@@ -184,7 +184,8 @@ export default class Portal extends Vue {
   client = [];
   hosts: hosts = { apache: [], caché: [] };
   menu = "";
-  messages: { [fqdn: string]: number } = {};
+  messages: { [fqdn: string]: string|number } = {};
+  ready = false;
   refresh = 0;
   wss: WebSocket[] = [];
 
@@ -205,14 +206,19 @@ export default class Portal extends Vue {
     UIkit.offcanvas("#offcanvas").toggle();
 
     this.webMonitoring()
+      .catch((reject) => {})
+      .finally(() => {
+        this.ready = true;
+        console.debug('webMonitoring() done')
+        this.$forceUpdate()
+      });
   }
 
   hostList(farm: "apache" | "caché", name: string) {
     this.hosts[farm] = [];
     for (let fqdn in this.vip[farm]) {
       const short = fqdn.split(".")[0];
-      if (short == name.toLowerCase())
-        this.hosts[farm] = this.vip[farm][fqdn].hosts;
+      if (short == name.toLowerCase()) this.hosts[farm] = this.vip[farm][fqdn].hosts;
     }
   }
 
@@ -223,30 +229,35 @@ export default class Portal extends Vue {
     let peek: { [host: string]: string } = {};
 
     return new Promise<number>((resolve, reject) => {
-      this.wss.forEach((s) => { s.close() })
+      this.wss.forEach((s) => {
+        s.close();
+      });
 
       let count = this.hosts.apache.length;
       this.wss = [];
 
       this.hosts.apache.forEach((server) => {
         this.alive[server] = { address: /(?:)/, count: 0 };
-        this.messages[server] = 0;
+        this.messages[server] = '<div uk-spinner></div>';
 
         const reqUrl = `wss://${server}/peek/apache/`;
 
         let i = this.wss.push(new WebSocket(reqUrl)) - 1;
 
         this.wss[i].onopen = () => {
-          console.debug(i, reqUrl, 'websocket open')
+          UIkit.notification({ message: `WebSocket opened: ${reqUrl}`, pos: "bottom-left", status: "success" });
+          this.messages[server] = 0
         };
 
         this.wss[i].onclose = (ev) => {
-          console.debug(i, reqUrl, 'websocket close')
+          UIkit.notification({ message: `WebSocket closed: ${reqUrl}`, pos: "bottom-left", status: "warning" });
+          this.messages[server] = `<em>${this.messages[server]}</em>`
+          count--;
           if (!count) resolve(1);
         };
 
         this.wss[i].onerror = (ev) => {
-          console.error(i, reqUrl, 'websocket error')
+          UIkit.notification({ message: `WebSocket error: ${reqUrl}`, pos: "bottom-left", status: "danger" });
         };
 
         this.wss[i].onmessage = (ev) => {
@@ -254,16 +265,22 @@ export default class Portal extends Vue {
             if (messages < 0) messages--;
             else messages++;
 
-            let result = JSON.parse(ev.data);
-            if (result.remoteHost) {
-              this.messages[server]++;
-              if (!peek[result.remoteHost])
-                this.alive[server].count++;
-              peek[result.remoteHost] = result.time;
-              this.refresh = Date.now();
+            let result: { [remoteHost: string]: string } = JSON.parse(ev.data);
+            for (let remoteHost in result) {
+              this.messages[server] = +this.messages[server] + 1
+              if (!peek[remoteHost]) this.alive[server].count++;
+              peek[remoteHost] = result[remoteHost];
             }
+
+            this.messages[server] = +this.messages[server]+ Object.keys(result).length;
+            this.refresh = Date.now();
           } catch (err) {
-            console.error(i, reqUrl, 'websocket message', err.message)
+            UIkit.notification({
+              message: `WebSocket message error: ${err.message} from ${server}`,
+              pos: "bottom-left",
+              status: "danger",
+            });
+            console.error(reqUrl, "websocket message", err.message);
           }
         };
       });

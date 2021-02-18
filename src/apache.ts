@@ -153,12 +153,20 @@ module Apache {
     }
 
     export function webMonitor(client: ws, params: URLSearchParams) {
+        let payload = {}
+
         tail(true, (result: apacheLog) => {
-            client.send(JSON.stringify({
-                remoteHost: result.remoteHost,
-                time: result.time
-            }))
+            if (result.remoteHost && result.time)
+                payload[result.remoteHost] = result.time
         })
+
+        let timer = setInterval(() => {
+            const copy = Object.assign({}, payload)
+            payload = {}
+            client.send(JSON.stringify(copy), (err) => {
+                if (err) clearInterval(timer)
+            })
+        }, 1000)
     }
 
     function tail(recent: boolean, cb: Function) {
