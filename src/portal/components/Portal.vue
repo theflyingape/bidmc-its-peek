@@ -34,30 +34,49 @@
       <!-- monitor -->
       <li>
         <template v-if="apache">
-          <h3 style="text-align: right">{{ apache }}</h3>
+          <div style="text-align: right">
+            <a class="uk-button uk-button-primary" href="#modal-scrollbar" uk-toggle>
+              <b>{{ apache }}</b>
+            </a>
+          </div>
           <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto" id="dashboard">
+            <!-- header line -->
             <thead>
               <tr>
-                <th>location</th>
+                <th style="text-align: center">location</th>
                 <th style="text-align: center">access</th>
-                <th style="text-align: center" v-for="server in hosts.apache" :key="server">{{ server.split('.')[0] }}</th>
+                <th style="text-align: center" v-for="server in hosts.apache" :key="server">
+                  {{ server.split(".")[0] }}
+                </th>
               </tr>
             </thead>
-            <!-- detail -->
-            <tbody>
-              <!--
-              <template v-for="(i, location) in monitor">
-                <tr style="vertical-align: middle" v-for="j in monitor[location]" :key="j.access">
-                  <td><span v-once>{{ location }}</span></td>
-                  <td style="text-align: center"><span v-once>{{ access }}</span></td>
-                  <td style="text-align: center" v-for="h in hosts.apache" :key="h">0</td>
-                </tr>
+            <tbody v-if="ready">
+              <!-- detail line -->
+              <template v-for="(o1, location) in dashboard" v-bind="location">
+                <template v-for="(o2, access, n) in dashboard[location]" v-bind="access">
+                  <tr style="text-align: center" :key="`${location}-${access}`">
+                    <td
+                      v-if="n == 0"
+                      :rowspan="Object.keys(dashboard[location]).length"
+                      style="vertical-align: middle"
+                      :key="`${location}-${access}1`"
+                    >
+                      {{ location }}
+                    </td>
+                    <td :key="`${location}-${access}2`">{{ access }}</td>
+                    <td v-for="(value, server) in dashboard[location][access]" :key="server">
+                      {{ value || "-" }}
+                    </td>
+                  </tr>
+                </template>
               </template>
-              -->
-              <tr style="vertical-align: middle">
+              <!-- total line -->
+              <tr v-if="ready" style="vertical-align: middle">
                 <td></td>
-                <td style="text-align: right">total:</td>
-                <td style="text-align: center" v-for="(value, index) in alive" :key="index">{{ value.count || "-" }}</td>
+                <td style="text-align: right"><b>- total:</b></td>
+                <td style="text-align: center" v-for="(value, index) in alive" :key="index">
+                  <b>{{ value || "-" }}</b>
+                </td>
               </tr>
             </tbody>
             <thead>
@@ -65,12 +84,12 @@
                 <th>
                   <em
                     >as of
-                    {{ refresh ? new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) : "never" }}</em
-                  >
+                    {{ refresh ? new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) : "never" }}
+                  </em>
                 </th>
                 <th>events</th>
-                <th style="text-align: center" v-for="(value, index) in messages" :key="index">
-                  <span v-html="value || '-'"></span>
+                <th style="text-align: center" v-for="server in hosts.apache" :key="server">
+                  <span v-html="messages[server] || '-'"></span>
                 </th>
               </tr>
             </thead>
@@ -86,10 +105,18 @@
       </li>
     </ul>
 
+    <div id="modal-scrollbar" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <span v-html="`<pre>${JSON.stringify(peek,null,2)}</pre>` || '-empty-'"></span>
+      </div>
+    </div>
+
     <div id="offcanvas" uk-offcanvas="flip: true; overlay: true">
       <div class="uk-offcanvas-bar">
         <button class="uk-offcanvas-close" type="button" uk-close></button>
         <h2>👁️ Peek Portal</h2>
+        <a class="uk-icon-button" href="#" onclick="location.reload(true)" uk-icon="icon: refresh"></a>&nbsp;Reload
         <hr />
 
         <ul class="uk-nav uk-nav-default">
@@ -144,9 +171,14 @@ import { Component, Vue } from "vue-property-decorator";
 const UIkit = require("uikit");
 
 interface alive {
-  [fqdn: string]: {
-    address: RegExp;
-    count: number;
+  [fqdn: string]: number;
+}
+
+interface dashboard {
+  [location: string]: {
+    [access: string]: {
+      [server: string]: number;
+    };
   };
 }
 
@@ -157,9 +189,7 @@ interface hosts {
 
 interface monitor {
   [location: string]: {
-    [access: string]: {
-      match: string;
-    };
+    [access: string]: string[];
   };
 }
 
@@ -180,7 +210,8 @@ interface vip {
 
 @Component
 export default class Portal extends Vue {
-  monitor = require("../../../etc/monitor.json");
+  ipRangeCheck = require("ip-range-check");
+  monitor: monitor = require("../../../etc/monitor.json");
   vip: vip = require("../../../etc/vip.json");
 
   private _farm!: string;
@@ -189,9 +220,16 @@ export default class Portal extends Vue {
   apache = "";
   caché = "";
   client = [];
+  dashboard: dashboard = {};
   hosts: hosts = { apache: [], caché: [] };
   menu = "";
   messages: { [fqdn: string]: string | number } = {};
+  peek: {
+    [host: string]: {
+      server: string;
+      ts: Date;
+    };
+  } = {};
   ready = false;
   refresh = 0;
   wss: WebSocket[] = [];
@@ -201,20 +239,34 @@ export default class Portal extends Vue {
   }
   set farm(value: string) {
     this._farm = value;
+    this.alive = {};
+    this.messages = {};
+
     this.apache = value.split(",")[1];
     this.caché = value.split(",")[0];
 
     this.hostList("apache", this.apache);
     this.hostList("caché", this.caché);
 
+    this.dashboard = {};
+    for (const location in this.monitor) {
+      this.dashboard[location] = {};
+      for (const access in this.monitor[location]) {
+        this.dashboard[location][access] = {};
+        this.hosts.apache.forEach((server) => {
+          this.dashboard[location][access][server] = 0;
+        });
+      }
+    }
+
     UIkit.offcanvas("#offcanvas").toggle();
 
-    this.webMonitoring()
-      .catch((reject) => {})
-      .finally(() => {
-        this.ready = false;
-        this.$forceUpdate();
-      });
+    if (this.hosts.apache.length)
+      this.webMonitoring()
+        .catch((reject) => {})
+        .finally(() => {
+          this.$forceUpdate();
+        });
   }
 
   hostList(farm: "apache" | "caché", name: string) {
@@ -225,10 +277,21 @@ export default class Portal extends Vue {
     }
   }
 
+  topology(client: string): { location: string; access: string } {
+    for (const l in this.monitor) {
+      for (const a in this.monitor[l]) {
+        if (this.ipRangeCheck(client, this.monitor[l][a])) {
+          return { location: l, access: a };
+        }
+      }
+    }
+    return { location: "", access: "" };
+  }
+
   //  Shall we begin?
   webMonitoring() {
     //  init collection(s)
-    let peek: { [host: string]: Date } = {};
+    this.peek = {};
 
     return new Promise<number>((resolve, reject) => {
       this.wss.forEach((s) => {
@@ -236,11 +299,11 @@ export default class Portal extends Vue {
       });
       this.wss = [];
 
-      let count = this.hosts.apache.length;
-      this.ready = true;
+      let count = 0;
+      this.ready = false;
 
       this.hosts.apache.forEach((server) => {
-        this.alive[server] = { address: /(?:)/, count: 0 };
+        this.alive[server] = 0;
         this.messages[server] = "<div uk-spinner></div>";
 
         const reqUrl = `wss://${server}/peek/apache/`;
@@ -248,36 +311,52 @@ export default class Portal extends Vue {
         let i = this.wss.push(new WebSocket(reqUrl)) - 1;
 
         this.wss[i].onopen = () => {
-          UIkit.notification({ message: `WebSocket opened: ${reqUrl}`, pos: "bottom-left", status: "success" });
+          UIkit.notification({ message: `WebSocket opened: ${server}`, pos: "bottom-left", status: "success" });
           this.messages[server] = 0;
-          this.ready = true;
+          count++;
+          if (count == this.hosts.apache.length) this.ready = true;
         };
 
         this.wss[i].onclose = (ev) => {
-          UIkit.notification({ message: `WebSocket closed: ${reqUrl}`, pos: "bottom-left", status: "warning" });
+          UIkit.notification({ message: `WebSocket closed: ${server}`, pos: "bottom-left", status: "warning" });
           this.messages[server] = `<em>${this.messages[server]}</em>`;
           count--;
           if (!count) resolve(1);
         };
 
         this.wss[i].onerror = (ev) => {
-          UIkit.notification({ message: `WebSocket error: ${reqUrl}`, pos: "bottom-left", status: "danger" });
+          UIkit.notification({ message: `WebSocket error: ${server}`, pos: "bottom-left", status: "danger" });
         };
 
         this.wss[i].onmessage = (ev) => {
           try {
-            let result: { [remoteHost: string]: string } = JSON.parse(ev.data);
+            const result: { [remoteHost: string]: string } = JSON.parse(ev.data);
+
             for (let remoteHost in result) {
-              this.messages[server] = +this.messages[server] + 1;
-              if (!peek[remoteHost]) this.alive[server].count++;
-              peek[remoteHost] = new Date(result[remoteHost]);
+              const where = this.topology(remoteHost);
+              if (this.peek[remoteHost]) {
+                //  fail-over?
+                const from = this.peek[remoteHost].server;
+                if (from !== server) {
+                  this.dashboard[where.location][where.access][from]--;
+                  this.alive[from]--;
+                }
+              } else {
+                //  new client
+                this.dashboard[where.location][where.access][server]++;
+                this.alive[server]++;
+              }
+              this.peek[remoteHost] = { server: server, ts: new Date(result[remoteHost]) };
             }
-            for (let remoteHost in peek) {
-              const then = peek[remoteHost].valueOf() || 0
-              const elapsed = Date.now() - then
-              if (elapsed > 1199000) {
-                this.alive[server].count--;
-                delete peek[remoteHost]
+            //  idle?
+            for (let remoteHost in this.peek) {
+              const where = this.topology(remoteHost);
+              const then = this.peek[remoteHost].ts.valueOf() || 0;
+              const elapsed = Date.now() - then;
+              if (elapsed > 1199500) {
+                this.alive[server]--;
+                this.dashboard[where.location][where.access][server]--;
+                delete this.peek[remoteHost];
               }
             }
 
@@ -293,7 +372,6 @@ export default class Portal extends Vue {
           }
         };
       });
-      if (count == 0) resolve(1);
     });
   }
 

@@ -29,6 +29,7 @@
     "express": "^4.17.1",
     "glob": "^7.1.6",
     "got": "^11.8.1",
+    "ip-range-check": "^0.2.0",
     "register-service-worker": "^1.7.1",
     "seologs-alpine": "^1.0.1",
     "sprintf-js": "^1.1.2",
