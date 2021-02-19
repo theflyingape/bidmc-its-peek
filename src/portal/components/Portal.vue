@@ -41,7 +41,7 @@
           </div>
           <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto" id="dashboard">
             <!-- header line -->
-            <thead v-once>
+            <thead>
               <tr>
                 <th style="text-align: center">location</th>
                 <th style="text-align: center">access</th>
@@ -108,7 +108,7 @@
     <div id="modal-scrollbar" uk-modal>
       <div class="uk-modal-dialog uk-modal-body">
         <button class="uk-modal-close-default" type="button" uk-close></button>
-        <span v-html="`<pre>${JSON.stringify(peek,null,2)}</pre>` || '-empty-'"></span>
+        <span v-html="`<pre>${JSON.stringify(peek, null, 2)}</pre>` || '-empty-'"></span>
       </div>
     </div>
 
@@ -333,33 +333,48 @@ export default class Portal extends Vue {
 
             for (let remoteHost in result) {
               const where = this.topology(remoteHost);
-              if (!where.location) continue
+              if (!where.location || !where.access) {
+                UIkit.notification({
+                  message: `skipping ${remoteHost} from ${server}`,
+                  pos: "bottom-left",
+                  status: "warning",
+                });
+                continue;
+              }
               this.messages[server] = +this.messages[server] + Object.keys(result).length;
 
               if (this.peek[remoteHost]) {
-                //  fail-over?
                 const from = this.peek[remoteHost].server;
                 if (from !== server)
-                  console.debug('fail-over from:', from, 'to', server, remoteHost, where)
+                  console.debug(
+                    remoteHost,
+                    "switched ",
+                    from.split(".")[0],
+                    "to",
+                    server.split("."[0]),
+                    "on",
+                    result[remoteHost]
+                  );
               }
               this.peek[remoteHost] = { server: server, ts: new Date(result[remoteHost]) };
             }
 
-            for (const location in this.monitor)
-              for (const access in this.monitor[location])
-                this.dashboard[location][access][server] = 0;
-            this.alive[server] = 0
+            for (const location in this.dashboard)
+              for (const access in this.dashboard[location]) this.dashboard[location][access][server] = 0;
+            this.alive[server] = 0;
             //  idle?
             for (let remoteHost in this.peek) {
+              if (this.peek[remoteHost].server !== server)
+                continue
               const where = this.topology(remoteHost);
               const then = this.peek[remoteHost].ts.valueOf() || 0;
               const elapsed = Date.now() - then;
-              if (elapsed > 1199500)
-                delete this.peek[remoteHost];
-              else {
+              if (elapsed < 1200000) {
                 this.dashboard[where.location][where.access][server]++;
                 this.alive[server]++;
               }
+              else
+                delete this.peek[remoteHost];
             }
           } catch (err) {
             UIkit.notification({
