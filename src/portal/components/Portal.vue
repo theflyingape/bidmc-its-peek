@@ -271,6 +271,8 @@ export default class Portal extends Vue {
               this.messages[server] = +this.messages[server] + 1;
               if (!peek[remoteHost]) this.alive[server].count++;
               peek[remoteHost] = new Date(result[remoteHost]);
+            }
+            for (let remoteHost in peek) {
               const then = peek[remoteHost].valueOf() || 0
               const elapsed = Date.now() - then
               if (elapsed > 1199000) {
