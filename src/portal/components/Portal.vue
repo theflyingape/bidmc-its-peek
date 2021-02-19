@@ -228,7 +228,6 @@ export default class Portal extends Vue {
   //  Shall we begin?
   webMonitoring() {
     //  init collection(s)
-    let messages = 0;
     let peek: { [host: string]: Date } = {};
 
     return new Promise<number>((resolve, reject) => {
@@ -267,17 +266,15 @@ export default class Portal extends Vue {
 
         this.wss[i].onmessage = (ev) => {
           try {
-            if (messages < 0) messages--;
-            else messages++;
-
             let result: { [remoteHost: string]: string } = JSON.parse(ev.data);
             for (let remoteHost in result) {
               this.messages[server] = +this.messages[server] + 1;
               if (!peek[remoteHost]) this.alive[server].count++;
               peek[remoteHost] = new Date(result[remoteHost]);
-              const elapsed = Date.now() - peek[remoteHost].valueOf()
+              const then = peek[remoteHost].valueOf() || 0
+              const elapsed = Date.now() - then
               if (elapsed > 1199000) {
-                this.alive[server].count++;
+                this.alive[server].count--;
                 delete peek[remoteHost]
               }
             }
