@@ -35,12 +35,12 @@
       <li>
         <template v-if="apache">
           <h3 style="text-align: right">{{ apache }}</h3>
-          <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">
+          <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto" id="dashboard">
             <thead>
               <tr>
                 <th>location</th>
                 <th style="text-align: center">access</th>
-                <th style="text-align: center" v-for="h in hosts.apache" :key="h">{{ h.split(".")[0] }}</th>
+                <th style="text-align: center" v-for="server in hosts.apache" :key="server">{{ server.split('.')[0] }}</th>
               </tr>
             </thead>
             <!-- detail -->
@@ -53,18 +53,25 @@
                   <td style="text-align: center" v-for="h in hosts.apache" :key="h">0</td>
                 </tr>
               </template>
-      -->
+              -->
               <tr style="vertical-align: middle">
                 <td></td>
-                <td style="text-align: right">total</td>
-                <td style="text-align: center" v-for="(obj, index) of alive" :key="index">{{ obj.count }}</td>
+                <td style="text-align: right">total:</td>
+                <td style="text-align: center" v-for="(value, index) in alive" :key="index">{{ value.count || "-" }}</td>
               </tr>
             </tbody>
             <thead>
               <tr>
-                <th><em>as of {{ refresh ? new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) : 'never' }}</em></th>
+                <th>
+                  <em
+                    >as of
+                    {{ refresh ? new Date(refresh).toLocaleTimeString("en-US", { hour12: false }) : "never" }}</em
+                  >
+                </th>
                 <th>events</th>
-                <th style="text-align: center" v-for="(value, index) in messages" :key="index"><span v-html="value"></span></th>
+                <th style="text-align: center" v-for="(value, index) in messages" :key="index">
+                  <span v-html="value || '-'"></span>
+                </th>
               </tr>
             </thead>
           </table>
@@ -184,7 +191,7 @@ export default class Portal extends Vue {
   client = [];
   hosts: hosts = { apache: [], caché: [] };
   menu = "";
-  messages: { [fqdn: string]: string|number } = {};
+  messages: { [fqdn: string]: string | number } = {};
   ready = false;
   refresh = 0;
   wss: WebSocket[] = [];
@@ -194,14 +201,11 @@ export default class Portal extends Vue {
   }
   set farm(value: string) {
     this._farm = value;
-    const apache = value.split(",")[1];
-    const caché = value.split(",")[0];
+    this.apache = value.split(",")[1];
+    this.caché = value.split(",")[0];
 
-    this.hostList("apache", apache);
-    this.hostList("caché", caché);
-
-    this.apache = apache;
-    this.caché = caché;
+    this.hostList("apache", this.apache);
+    this.hostList("caché", this.caché);
 
     UIkit.offcanvas("#offcanvas").toggle();
 
@@ -209,7 +213,7 @@ export default class Portal extends Vue {
       .catch((reject) => {})
       .finally(() => {
         this.ready = false;
-        this.$forceUpdate()
+        this.$forceUpdate();
       });
   }
 
@@ -225,17 +229,20 @@ export default class Portal extends Vue {
   webMonitoring() {
     //  init collection(s)
     let messages = 0;
-    let peek: { [host: string]: string } = {};
+    let peek: { [host: string]: Date } = {};
 
     return new Promise<number>((resolve, reject) => {
-      let count = this.hosts.apache.length;
-      this.ready = true
-      this.wss.forEach((s) => { s.close(); });
+      this.wss.forEach((s) => {
+        s.close();
+      });
       this.wss = [];
+
+      let count = this.hosts.apache.length;
+      this.ready = true;
 
       this.hosts.apache.forEach((server) => {
         this.alive[server] = { address: /(?:)/, count: 0 };
-        this.messages[server] = '<div uk-spinner></div>';
+        this.messages[server] = "<div uk-spinner></div>";
 
         const reqUrl = `wss://${server}/peek/apache/`;
 
@@ -243,13 +250,13 @@ export default class Portal extends Vue {
 
         this.wss[i].onopen = () => {
           UIkit.notification({ message: `WebSocket opened: ${reqUrl}`, pos: "bottom-left", status: "success" });
-          this.messages[server] = 0
-          this.ready = true
+          this.messages[server] = 0;
+          this.ready = true;
         };
 
         this.wss[i].onclose = (ev) => {
           UIkit.notification({ message: `WebSocket closed: ${reqUrl}`, pos: "bottom-left", status: "warning" });
-          this.messages[server] = `<em>${this.messages[server]}</em>`
+          this.messages[server] = `<em>${this.messages[server]}</em>`;
           count--;
           if (!count) resolve(1);
         };
@@ -265,12 +272,17 @@ export default class Portal extends Vue {
 
             let result: { [remoteHost: string]: string } = JSON.parse(ev.data);
             for (let remoteHost in result) {
-              this.messages[server] = +this.messages[server] + 1
+              this.messages[server] = +this.messages[server] + 1;
               if (!peek[remoteHost]) this.alive[server].count++;
-              peek[remoteHost] = result[remoteHost];
+              peek[remoteHost] = new Date(result[remoteHost]);
+              const elapsed = Date.now() - peek[remoteHost].valueOf()
+              if (elapsed > 1199000) {
+                this.alive[server].count++;
+                delete peek[remoteHost]
+              }
             }
 
-            this.messages[server] = +this.messages[server]+ Object.keys(result).length;
+            this.messages[server] = +this.messages[server] + Object.keys(result).length;
             this.refresh = Date.now();
           } catch (err) {
             UIkit.notification({

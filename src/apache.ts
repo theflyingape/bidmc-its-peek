@@ -129,12 +129,6 @@ module Apache {
                         delete result['RequestHeader User-agent']
                     }
 
-                    //  convert Apache timestamp to JavaScript Date
-                    let a = result.time.split(' ')
-                    let d = new Date(a[0].replace(':', ' '))    // + ' GMT' + a[1]
-                    result.time = new Date(d).toLocaleDateString() + ' '
-                        + (new Date(d).toLocaleTimeString('en-US', { hour12: false }))
-
                     delete result.originalLine
 
                     //  send result to peek cli console
@@ -203,6 +197,7 @@ module Apache {
                 }
                 //  now parse it
                 const result = alpine.parseLine(data)
+                result.time = time(result.time)
                 cb(result)
             })
 
@@ -210,6 +205,14 @@ module Apache {
                 audit(`ERROR: ${error}`, 'critical')
             })
         })
+    }
+
+    //  convert Apache timestamp to JavaScript Date
+    function time(logDate: string) {
+        const a = logDate.split(' ')
+        const d = new Date(a[0].replace(':', ' '))    // + ' GMT' + a[1]
+        return new Date(d).toLocaleDateString() + ' '
+            + (new Date(d).toLocaleTimeString('en-US', { hour12: false }))
     }
 }
 
