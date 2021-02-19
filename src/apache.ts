@@ -149,6 +149,7 @@ module Apache {
     export function webMonitor(client: ws, params: URLSearchParams) {
         let hosts = 0
         let payload = {}
+        let last = new Date()
 
         tail(true, (result: apacheLog) => {
             if (result.remoteHost && result.time) {
@@ -158,10 +159,11 @@ module Apache {
         })
 
         let timer = setInterval(() => {
-            if (hosts) {
+            const elapsed = new Date().valueOf() - last.valueOf()
+            if (hosts || elapsed > 5000) {
                 const copy = Object.assign({}, payload)
                 payload = {}
-                hosts = 0
+                last = new Date()
                 client.send(JSON.stringify(copy), (err) => {
                     if (err) {
                         audit(`webMonitor: ${err.message}`, 'warn')

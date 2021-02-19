@@ -41,7 +41,7 @@
           </div>
           <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto" id="dashboard">
             <!-- header line -->
-            <thead>
+            <thead v-once>
               <tr>
                 <th style="text-align: center">location</th>
                 <th style="text-align: center">access</th>
@@ -314,7 +314,6 @@ export default class Portal extends Vue {
           UIkit.notification({ message: `WebSocket opened: ${server}`, pos: "bottom-left", status: "success" });
           this.messages[server] = 0;
           count++;
-          if (count == this.hosts.apache.length) this.ready = true;
         };
 
         this.wss[i].onclose = (ev) => {
@@ -334,34 +333,34 @@ export default class Portal extends Vue {
 
             for (let remoteHost in result) {
               const where = this.topology(remoteHost);
+              if (!where.location) continue
+              this.messages[server] = +this.messages[server] + Object.keys(result).length;
+
               if (this.peek[remoteHost]) {
                 //  fail-over?
                 const from = this.peek[remoteHost].server;
-                if (from !== server) {
-                  this.dashboard[where.location][where.access][from]--;
-                  this.alive[from]--;
-                }
-              } else {
-                //  new client
-                this.dashboard[where.location][where.access][server]++;
-                this.alive[server]++;
+                if (from !== server)
+                  console.debug('fail-over from:', from, 'to', server, remoteHost, where)
               }
               this.peek[remoteHost] = { server: server, ts: new Date(result[remoteHost]) };
             }
+
+            for (const location in this.monitor)
+              for (const access in this.monitor[location])
+                this.dashboard[location][access][server] = 0;
+            this.alive[server] = 0
             //  idle?
             for (let remoteHost in this.peek) {
               const where = this.topology(remoteHost);
               const then = this.peek[remoteHost].ts.valueOf() || 0;
               const elapsed = Date.now() - then;
-              if (elapsed > 1199500) {
-                this.alive[server]--;
-                this.dashboard[where.location][where.access][server]--;
+              if (elapsed > 1199500)
                 delete this.peek[remoteHost];
+              else {
+                this.dashboard[where.location][where.access][server]++;
+                this.alive[server]++;
               }
             }
-
-            this.messages[server] = +this.messages[server] + Object.keys(result).length;
-            this.refresh = Date.now();
           } catch (err) {
             UIkit.notification({
               message: `WebSocket message error: ${err.message} from ${server}`,
@@ -370,6 +369,9 @@ export default class Portal extends Vue {
             });
             console.error(reqUrl, "websocket message", err.message);
           }
+
+          if (count) this.ready = true;
+          this.refresh = Date.now();
         };
       });
     });
