@@ -161,11 +161,10 @@ module Apache {
 
         let timer = setInterval(() => {
             const elapsed = new Date().valueOf() - last.valueOf()
-            if (idle < 59994)
-                idle = elapsed > idle ? idle + 909 : 0
             if (hosts || elapsed > idle) {
                 const copy = Object.assign({}, payload)
                 payload = {}
+                idle = hosts ? 0 : idle < 59994 ? idle + 909 : idle
                 hosts = 0
                 last = new Date()
                 client.send(JSON.stringify(copy), (err) => {
