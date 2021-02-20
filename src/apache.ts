@@ -163,6 +163,7 @@ module Apache {
             if (hosts || elapsed > 5000) {
                 const copy = Object.assign({}, payload)
                 payload = {}
+                hosts = 0
                 last = new Date()
                 client.send(JSON.stringify(copy), (err) => {
                     if (err) {
