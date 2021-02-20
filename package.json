@@ -68,6 +68,23 @@
         "template": "public/index.html",
         "title": "Peek Portal"
       }
+    },
+    "pwa": {
+      "manifestOptions": {
+        "name": "Peek",
+        "short_name": "👁️",
+        "background_color":"#D2E4F8",
+        "icons": [
+          {"src":"./images/peek-128x128.png","sizes":"128x128","type":"image/png"}
+        ]
+      },
+      "iconPaths": {
+        "favicon32": null,
+        "favicon16": null,
+        "appleTouchIcon": null,
+        "maskIcon": null,
+        "msTileImage": null
+      }
     }
   }
 }
