@@ -148,8 +148,9 @@ module Apache {
 
     export function webMonitor(client: ws, params: URLSearchParams) {
         let hosts = 0
-        let payload = {}
+        let idle = 0
         let last = new Date()
+        let payload = {}
 
         tail(true, (result: apacheLog) => {
             if (result.remoteHost && result.time) {
@@ -160,7 +161,9 @@ module Apache {
 
         let timer = setInterval(() => {
             const elapsed = new Date().valueOf() - last.valueOf()
-            if (hosts || elapsed > 5000) {
+            if (idle < 59994)
+                idle = elapsed > idle ? idle + 909 : 0
+            if (hosts || elapsed > idle) {
                 const copy = Object.assign({}, payload)
                 payload = {}
                 hosts = 0
