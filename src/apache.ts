@@ -148,7 +148,7 @@ module Apache {
 
     export function webMonitor(client: ws, params: URLSearchParams) {
         let hosts = 0
-        let idle = 0
+        let idle = 2500
         let last = new Date()
         let payload = {}
 
@@ -164,7 +164,7 @@ module Apache {
             if (hosts || elapsed > idle) {
                 const copy = Object.assign({}, payload)
                 payload = {}
-                idle = hosts ? 0 : idle < 59994 ? idle + 909 : idle
+                idle = hosts ? 15000 : idle < 60000 ? idle + 15000 : idle
                 hosts = 0
                 last = new Date()
                 client.send(JSON.stringify(copy), (err) => {
