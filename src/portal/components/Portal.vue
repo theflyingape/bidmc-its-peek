@@ -36,7 +36,7 @@
         <template v-if="apache">
           <div style="text-align: right">
             <a class="uk-button uk-button-primary" href="#modal-scrollbar" uk-toggle>
-              <b>{{ apache }}</b>
+              <b>{{ apache }}</b><span class="uk-margin-small-left" uk-icon="icon: info" />
             </a>
           </div>
           <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto" id="dashboard">
