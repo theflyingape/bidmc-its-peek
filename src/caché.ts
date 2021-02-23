@@ -33,8 +33,7 @@ module Caché {
         })
         .use((req, res) => {
             closeAll()
-            res.send(JSON.stringify(results))
-            res.end
+            res.send(results)
         })
 
     //  DATABASE services
