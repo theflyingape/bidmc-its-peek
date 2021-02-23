@@ -192,21 +192,16 @@ module Console {
                 if (vt.entry !== session.host) {
                     session.host = vt.entry
                     vt.outln(` (set) `)
-                    session.verbose = true
-                    vt.outln(vt.red, vt.bright, 'Verbosity is ON')
                 }
                 //  likely a single IP or name, let's see
                 checkHost(session.host).finally(() => {
-                    session.verbose = true
                     getTrail('ip', session.host).then((resolve) => {
-                        if (!resolve) {
+                        if (!resolve)
                             session.host = ''
-                            session.verbose = false
-                        }
                         vt.focus = 'menu'
                     })
                 })
-            }, prompt: 'Filter on remote host: ', max: 72
+            }, prompt: 'Filter on remote host: ', enter: '.*', max: 72
         },
 
         name: {
@@ -292,19 +287,12 @@ module Console {
                 if (webt == 0 || webt !== session.webt) {
                     session.webt = webt
                     vt.outln(` (${session.webt ? 'set' : 'unset'})`)
-                    if (webt) {
-                        session.host = 'unknown'
-                        vt.outln('Host = unknown')
-                    }
-                    else {
-                        session.host = ''
-                        vt.outln('Host = any')
-                    }
+                    if (webt) session.host = '.*'
                     session.verbose = webt ? true : false
                     vt.out('Verbose = ', session.verbose)
                 }
                 vt.focus = 'menu'
-            }, prompt: 'Enter WEBT number: ', max: 12, enter: '^'
+            }, prompt: 'Enter WEBT number: ', max: 12, enter: '0'
         }
     }
 

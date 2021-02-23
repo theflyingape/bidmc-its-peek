@@ -418,7 +418,11 @@ export default class Portal extends Vue {
               if (this.peek[remoteHost]) {
                 const from = this.peek[remoteHost].server
                 if (from !== server)
-                  console.debug(remoteHost, 'switched ', from.split('.')[0], 'to', server.split('.'[0]), 'on', result[remoteHost])
+                  UIkit.notification({
+                    message: `${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`,
+                    pos: 'bottom-left',
+                    status: 'warning',
+                  })
               }
               this.peek[remoteHost] = { server: server, ts: new Date(result[remoteHost]) }
             }

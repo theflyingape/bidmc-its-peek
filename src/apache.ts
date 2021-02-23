@@ -61,7 +61,7 @@ module Apache {
     }
 
     export function cliMonitor(client: ws, params: URLSearchParams) {
-        let host = new RegExp(params.get('host'))   //  if 'unknown' here, identify if webt is set/found
+        let host = new RegExp(params.get('host'))
         const request = new RegExp(params.get('request'))
         const status = new RegExp(params.get('status'))
         const webt = parseInt(params.get('webt')) || 0
@@ -72,14 +72,10 @@ module Apache {
         tail((String(host) == '/.*/' && !webt), (result: apacheLog) => {
             try {
                 //  DevOps specified a clinical session token
-                if (webt) {
-                    if (/(_WEBT=)/.test(result.request)) {
-                        params = new URL(result.request.split(' ')[1], `${listener}`).searchParams
-                        if (parseInt(params.get('_WEBT')) == webt) {
-                            if (String(host) !== String(new RegExp(result.remoteHost)))
-                                host = new RegExp(result.remoteHost)    //  found the workstation
-                        }
-                    }
+                if (webt && /(_WEBT=)/.test(result.request)) {
+                    params = new URL(result.request.split(' ')[1], `${listener}`).searchParams
+                    if (parseInt(params.get('_WEBT')) !== webt)
+                        return
                 }
 
                 //  drop legacy protocol
