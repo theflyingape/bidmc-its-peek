@@ -33,11 +33,11 @@
   "caché": {
     "local": {
       "apache": "local",
-      "hosts": [ "tobyapp1.bidmc.org", "tobyapp2.bidmc.org", "watson.bidmc.org" ]
+      "hosts": [ "localhost" ]
     },
     "watson.bidmc.org": {
       "apache": "webomr-dev.bidmc.org",
-      "hosts": ["watson.bidmc.org"]
+      "hosts": ["watsonapp1.bidmc.harvard.edu", "watsonapp2.bidmc.harvard.edu"]
     },
     "toby.bidmc.org": {
       "apache": "webomr-test.bidmc.org",

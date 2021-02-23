@@ -30,7 +30,7 @@ module Console {
     export let hosts: hosts = {}
 
     export let session = {
-        vip: { apache:'', caché: '' },
+        vip: { apache: '', caché: '' },
         name: '',
         host: '.*',
         request: '.*',
@@ -223,7 +223,7 @@ module Console {
                 }
                 else
                     vt.refocus()
-            }, prompt: vt.attr(vt.red, 'Name: '), enter: 'local', max: 32
+            }, prompt: vt.attr(vt.red, 'Name: '), max: 32
         },
 
         request: {
@@ -283,7 +283,7 @@ module Console {
                     return
                 }
                 vt.focus = 'menu'
-            }, prompt: 'Enter a user account: ', enter:session.user, max: 16
+            }, prompt: 'Enter a user account: ', enter: session.user, max: 16
         },
 
         webt: {
