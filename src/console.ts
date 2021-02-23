@@ -267,12 +267,8 @@ module Console {
                     vt.out(' (unset)')
                 }
                 if (session.user) {
-                    session.verbose = true
                     getTrail('username', session.user).then((resolve) => {
-                        if (!resolve) {
-                            session.user = ''
-                            session.verbose = false
-                        }
+                        if (!resolve) session.user = ''
                         vt.focus = 'menu'
                     })
                     return
@@ -288,8 +284,6 @@ module Console {
                     session.webt = webt
                     vt.outln(` (${session.webt ? 'set' : 'unset'})`)
                     if (webt) session.host = '.*'
-                    session.verbose = webt ? true : false
-                    vt.out('Verbose = ', session.verbose)
                 }
                 vt.focus = 'menu'
             }, prompt: 'Enter WEBT number: ', max: 12, enter: '0'
@@ -458,7 +452,6 @@ module Console {
                         })
                     }
                     vt.out(vt.green, vt.bright, reqUrl, vt.reset, ` => ${count} web session(s) returned`)
-                    session.verbose = (count > 0)
                 }).catch(err => {
                     vt.outln()
                     vt.out(vt.red, vt.faint, `${reqUrl}`, vt.reset, ' - ', err.message)

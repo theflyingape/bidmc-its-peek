@@ -72,10 +72,10 @@ module Apache {
         tail((String(host) == '/.*/' && !webt), (result: apacheLog) => {
             try {
                 //  DevOps specified a clinical session token
-                if (webt && /(_WEBT=)/.test(result.request)) {
+                if (webt) {
+                    if (!/(_WEBT=)/.test(result.request)) return
                     params = new URL(result.request.split(' ')[1], `${listener}`).searchParams
-                    if (parseInt(params.get('_WEBT')) !== webt)
-                        return
+                    if (parseInt(params.get('_WEBT')) !== webt) return
                 }
 
                 //  drop legacy protocol
