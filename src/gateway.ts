@@ -2,6 +2,7 @@
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
+import cors = require('cors')
 import dns = require('dns')
 import express = require('express')
 import fs = require('fs')
@@ -109,11 +110,9 @@ module Gateway {
             username = String(req.query.USER)
             //  TODO: ACLs
             audit(`${req.method} ${decodeURI(req.url)}`)
-            //  cors
-            res.header("Access-Control-Allow-Origin", "*")
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
             next()
         })
+            .use(cors())
             .use(require('./apache').router)
             .use(require('./caché').router)   //  nvm use
         app.use('/peek/api', router)

@@ -26,6 +26,7 @@
     "gateway"
   ],
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "glob": "^7.1.6",
     "got": "^11.8.1",
@@ -73,9 +74,13 @@
       "manifestOptions": {
         "name": "Peek",
         "short_name": "👁️",
-        "background_color":"#D2E4F8",
+        "background_color": "#D2E4F8",
         "icons": [
-          {"src":"./images/peek-128x128.png","sizes":"128x128","type":"image/png"}
+          {
+            "src": "./images/peek-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png"
+          }
         ]
       },
       "iconPaths": {
