@@ -21,21 +21,21 @@ module Caché {
         results = []
         next()
     })
-    .get(`${API}/ip/:ip`, (req, res, next) => {
-        openAll()
-        webTrail([, req.params.ip])
-        next()
-    })
-    .get(`${API}/username/:username`, (req, res, next) => {
-        openAll()
-        webTrail([ , , req.params.username ])
-        next()
-    })
-    .use((req, res) => {
-        closeAll()
-        res.json(results)
-        res.end
-    })
+        .get(`${API}/ip/:ip`, (req, res, next) => {
+            openAll()
+            webTrail([, req.params.ip])
+            next()
+        })
+        .get(`${API}/username/:username`, (req, res, next) => {
+            openAll()
+            webTrail([, , req.params.username])
+            next()
+        })
+        .use((req, res) => {
+            closeAll()
+            res.send(JSON.stringify(results))
+            res.end
+        })
 
     //  DATABASE services
     let api
@@ -99,8 +99,8 @@ module Caché {
         results.sort((a, b) => (a.tm > b.tm) ? 1 : -1)
     }
 
-    export function webtmaster(node: cachedb, webt:number): object {
-        const cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [ webt, 'login'] })
+    export function webtmaster(node: cachedb, webt: number): object {
+        const cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
         return cos.ok ? global(cos) : null
     }
 
@@ -110,7 +110,7 @@ module Caché {
         return `${Math.floor(((now.getTime() + 4070908800000) / 86400000))},${((now.getHours() * 60 * 60) + (now.getMinutes() * 60) + now.getSeconds())}`
     }
 
-    export function $zd(horolog:string|number, format:number): string {
+    export function $zd(horolog: string | number, format: number): string {
         let ms = parseInt(String(horolog))
         ms = ms < 131072 ? ms * 86400000 - 4070908800000 : ms
         const js = new Date(ms)
@@ -120,34 +120,34 @@ module Caché {
 
         switch (format) {
             case 2:
-            //  dd Mon yyyy
+                //  dd Mon yyyy
                 ds = js.toLocaleDateString(en, { day: '2-digit' }) + ' ' + js.toLocaleDateString(en, { month: 'short' }) + ' ' + js.toLocaleDateString(en, { year: 'numeric' })
                 break
             case 2:
                 //  yyyy-mm-dd
-                ds = js.toLocaleDateString(en, { year: 'numeric' }) + '-' + js.toLocaleDateString(en, { month: '2-digit' }) + '-' + js.toLocaleDateString(en, { day: '2-digit' }) 
+                ds = js.toLocaleDateString(en, { year: 'numeric' }) + '-' + js.toLocaleDateString(en, { month: '2-digit' }) + '-' + js.toLocaleDateString(en, { day: '2-digit' })
                 break
             case 5:
-            //  Mon dd, yyyy
+                //  Mon dd, yyyy
                 options = { dateStyle: 'medium' }
                 break
             case 9:
-            //  Month dd, yyyy
+                //  Month dd, yyyy
                 options = { dateStyle: 'long' }
                 break
             case 11:
-            //  Day
-                options = { weekday:'short' }
+                //  Day
+                options = { weekday: 'short' }
                 break
             default:
-            //  mm/dd/yyyy
+                //  mm/dd/yyyy
                 options = { month: '2-digit', day: '2-digit', year: 'numeric' }
         }
 
         return String(ds ? ds : js.toLocaleDateString(en, options))
     }
 
-    export function $zdt(horolog:string|number, format): string {
+    export function $zdt(horolog: string | number, format): string {
         const date = $zd(horolog, format)
         const secs = parseInt(String(horolog).split(',')[1])
         const js = new Date(1000 * secs)
@@ -155,7 +155,7 @@ module Caché {
         let dt = ''
         let options = {}
 
-        switch(format) {
+        switch (format) {
             default:
                 options = { hour12: false }
         }

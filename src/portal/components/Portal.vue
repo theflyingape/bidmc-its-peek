@@ -66,7 +66,10 @@
                     </td>
                     <td :key="`${location}-${access}2`">{{ access }}</td>
                     <td v-for="(value, server) in dashboard[location][access]" :key="server">
-                      {{ value || '-' }}
+                      <button v-if="value" class="uk-button uk-button-link" @click="webtTrail(location, access, server)" type="button">
+                        {{ value }}
+                      </button>
+                      <span v-else>-</span>
                     </td>
                   </tr>
                 </template>
@@ -105,6 +108,19 @@
         </template>
       </li>
     </ul>
+
+    <!-- detail listing off a location/access/server -->
+    <div id="modal-scrollbar-cell" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <span
+          v-html="
+            `<b>${webtrail.location} - ${webtrail.access} on ${webtrail.server}</b>
+        <pre>${JSON.stringify(webtrail.peek, null, 2)}</pre>` || '-empty-'
+          "
+        ></span>
+      </div>
+    </div>
 
     <div id="modal-scrollbar" uk-modal>
       <div class="uk-modal-dialog uk-modal-body">
@@ -189,6 +205,17 @@ interface monitor {
   }
 }
 
+interface trail {
+  ID: string
+  instance: string
+  ip: string
+  ke: string
+  tm: string
+  username: string
+  usersim: string
+  webt: string
+}
+
 interface vip {
   apache: {
     [fqdn: string]: {
@@ -200,6 +227,19 @@ interface vip {
     [fqdn: string]: {
       apache: string
       hosts: string[]
+    }
+  }
+}
+
+interface webtrail {
+  location?: string
+  access?: string
+  server?: string
+  peek: {
+    [host: string]: {
+      username: string
+      webt: string
+      ts: Date
     }
   }
 }
@@ -228,6 +268,7 @@ export default class Portal extends Vue {
   } = {}
   ready = false
   refresh = 0
+  webtrail: webtrail = { peek: {} }
   wss: WebSocket[] = []
 
   get farm() {
@@ -282,6 +323,42 @@ export default class Portal extends Vue {
       }
     }
     return { location: '', access: '' }
+  }
+
+  webtTrail(location: string, access: string, server: string) {
+    this.webtrail = { location: location, access: access, server: server, peek: {} }
+    UIkit.modal('#modal-scrollbar-cell').show()
+
+    for (let remoteHost in this.peek) {
+      if (this.peek[remoteHost].server !== server) continue
+      const where = this.topology(remoteHost)
+      if (where.location !== location || where.access !== access) continue
+
+      const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
+      const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché), USER: 'portal' })
+      console.debug(`${reqUrl}?${params}`)
+
+      fetch(`${reqUrl}?${params}`, { method: 'GET', mode: 'no-cors' })
+        .then((response) => {
+          console.debug(response)
+          if (!response.ok) throw response
+          return response.json()
+        })
+        .then((results) => {
+          console.debug(results)
+          results.forEach((trail: trail) => {
+            const webt = trail.webt.split(',')
+            this.webtrail.peek[trail.ip] = {
+              username: trail.username,
+              webt: webt[webt.length - 1],
+              ts: this.peek[trail.ip].ts,
+            }
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    }
   }
 
   //  Shall we begin?
