@@ -34,6 +34,7 @@ module Caché {
         .use((req, res) => {
             closeAll()
             res.send(results)
+            res.end()
         })
 
     //  DATABASE services

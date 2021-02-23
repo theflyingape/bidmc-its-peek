@@ -81,6 +81,7 @@ module Gateway {
     dns.lookup(config.host || 'localhost', (err, addr, family) => {
         const app = express()
         app.set('trust proxy', ['loopback', addr])
+        app.options('*', cors())
 
         let protocol = 'https'
         let server

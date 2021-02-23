@@ -338,20 +338,19 @@ export default class Portal extends Vue {
       const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
       console.debug(`${reqUrl}?${params}`)
 
-      fetch(`${reqUrl}?${params}`, { method: 'GET', mode: 'no-cors' })
+      fetch(`${reqUrl}?${params}`, { method: 'GET' })
         .then((response) => {
           console.debug(response)
-          return response.json()
-        })
-        .then((results) => {
-          console.debug(results)
-          results.forEach((trail: trail) => {
-            const webt = trail.webt.split(',')
-            this.webtrail.peek[trail.ip] = {
-              username: trail.username,
-              webt: webt[webt.length - 1],
-              ts: this.peek[trail.ip].ts,
-            }
+          response.json().then((results) => {
+            console.debug(results)
+            results.forEach((trail: trail) => {
+              const webt = trail.webt.split(',')
+              this.webtrail.peek[trail.ip] = {
+                username: trail.username,
+                webt: webt[webt.length - 1],
+                ts: this.peek[trail.ip].ts,
+              }
+            })
           })
         })
         .catch((err) => {
