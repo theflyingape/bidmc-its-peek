@@ -237,8 +237,9 @@ interface webtrail {
   server?: string
   peek: {
     [host: string]: {
-      username: string
-      webt: string
+      username?: string
+      instance?: string
+      webt?: string
       ts: Date
     }
   }
@@ -333,6 +334,7 @@ export default class Portal extends Vue {
       if (this.peek[remoteHost].server !== server) continue
       const where = this.topology(remoteHost)
       if (where.location !== location || where.access !== access) continue
+      this.webtrail.peek[remoteHost] = { ts: this.peek[remoteHost].ts }
 
       const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
       const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
@@ -340,13 +342,12 @@ export default class Portal extends Vue {
 
       fetch(`${reqUrl}?${params}`, { method: 'GET' })
         .then((response) => {
-          console.debug(response)
           response.json().then((results) => {
-            console.debug(results)
             results.forEach((trail: trail) => {
               const webt = trail.webt.split(',')
               this.webtrail.peek[trail.ip] = {
                 username: trail.username,
+                instance: trail.instance,
                 webt: webt[webt.length - 1],
                 ts: this.peek[trail.ip].ts,
               }
