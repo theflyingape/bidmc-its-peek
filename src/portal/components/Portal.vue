@@ -335,13 +335,12 @@ export default class Portal extends Vue {
       if (where.location !== location || where.access !== access) continue
 
       const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
-      const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché), USER: 'portal' })
+      const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
       console.debug(`${reqUrl}?${params}`)
 
       fetch(`${reqUrl}?${params}`, { method: 'GET', mode: 'no-cors' })
         .then((response) => {
           console.debug(response)
-          if (!response.ok) throw response
           return response.json()
         })
         .then((results) => {

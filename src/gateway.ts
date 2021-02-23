@@ -109,10 +109,13 @@ module Gateway {
             username = String(req.query.USER)
             //  TODO: ACLs
             audit(`${req.method} ${decodeURI(req.url)}`)
+            //  cors
+            res.header("Access-Control-Allow-Origin", "*")
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
             next()
         })
-        .use(require('./apache').router)
-        .use(require('./caché').router)   //  nvm use
+            .use(require('./apache').router)
+            .use(require('./caché').router)   //  nvm use
         app.use('/peek/api', router)
 
         //  web portal
@@ -132,7 +135,7 @@ module Gateway {
             const params = url.searchParams
             const path = url.pathname
 
-            switch(path) {
+            switch (path) {
                 case '/peek/apache/':
                     audit(`Apache socket ${req.url}`)
                     if (params.get('VIP'))
