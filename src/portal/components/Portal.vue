@@ -330,14 +330,14 @@ export default class Portal extends Vue {
     this.webtrail = { location: location, access: access, server: server, peek: {} }
     UIkit.modal('#modal-scrollbar-cell').show()
 
-    //  let's not obsess over the webt info here ...
-    if (Object.keys(this.peek).length < 6)
-      for (let remoteHost in this.peek) {
-        if (this.peek[remoteHost].server !== server) continue
-        const where = this.topology(remoteHost)
-        if (where.location !== location || where.access !== access) continue
-        this.webtrail.peek[remoteHost] = { ts: this.peek[remoteHost].ts }
+    for (let remoteHost in this.peek) {
+      if (this.peek[remoteHost].server !== server) continue
+      const where = this.topology(remoteHost)
+      if (where.location !== location || where.access !== access) continue
+      this.webtrail.peek[remoteHost] = { ts: this.peek[remoteHost].ts }
 
+      //  let's not obsess over the webt info here ...
+      if (this.dashboard[location][access][server] < 6) {
         const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
         const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
         console.debug(`${reqUrl}?${params}`)
@@ -360,6 +360,7 @@ export default class Portal extends Vue {
             console.error(err)
           })
       }
+    }
   }
 
   //  Shall we begin?
