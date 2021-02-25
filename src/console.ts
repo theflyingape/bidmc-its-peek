@@ -477,8 +477,6 @@ module Console {
             vt.outln('Status code filter: ', vt.yellow, `/${session.status}/`)
         if (session.webt)
             vt.outln('For Caché webt filter: ', vt.magenta, vt.bright, `'${session.webt}'`)
-        if (session.user)
-            vt.outln('For the user logged: ', vt.magenta, vt.bright, `'${session.user}'`)
         if (session.verbose)
             vt.outln(vt.red, vt.bright, 'Verbosity is ON')
         if (session.xtra)

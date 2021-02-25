@@ -6,15 +6,15 @@
     },
     {
       "name": "watson:CCC",
-      "uri": "isfs://watson/?ns=CCC"
+      "uri": "isfs://watson:CCC/"
     },
     {
       "name": "toby:CCC",
-      "uri": "isfs://toby/?ns=CCC"
+      "uri": "isfs://toby:CCC/"
     },
     {
       "name": "mycroft:CCC",
-      "uri": "isfs://mycroft/?ns=CCC"
+      "uri": "isfs://mycroft:CCC/"
     }
   ],
   "settings": {

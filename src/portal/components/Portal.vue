@@ -75,7 +75,7 @@
                 </template>
               </template>
               <!-- total line -->
-              <tr v-if="ready" style="vertical-align: middle">
+              <tr style="vertical-align: middle">
                 <td></td>
                 <td style="text-align: right"><b>- total:</b></td>
                 <td style="text-align: center" v-for="(value, index) in alive" :key="index">
@@ -330,34 +330,36 @@ export default class Portal extends Vue {
     this.webtrail = { location: location, access: access, server: server, peek: {} }
     UIkit.modal('#modal-scrollbar-cell').show()
 
-    for (let remoteHost in this.peek) {
-      if (this.peek[remoteHost].server !== server) continue
-      const where = this.topology(remoteHost)
-      if (where.location !== location || where.access !== access) continue
-      this.webtrail.peek[remoteHost] = { ts: this.peek[remoteHost].ts }
+    //  let's not obsess over the webt info here ...
+    if (Object.keys(this.peek).length < 6)
+      for (let remoteHost in this.peek) {
+        if (this.peek[remoteHost].server !== server) continue
+        const where = this.topology(remoteHost)
+        if (where.location !== location || where.access !== access) continue
+        this.webtrail.peek[remoteHost] = { ts: this.peek[remoteHost].ts }
 
-      const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
-      const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
-      console.debug(`${reqUrl}?${params}`)
+        const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
+        const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
+        console.debug(`${reqUrl}?${params}`)
 
-      fetch(`${reqUrl}?${params}`, { method: 'GET' })
-        .then((response) => {
-          response.json().then((results) => {
-            results.forEach((trail: trail) => {
-              const webt = trail.webt.split(',')
-              this.webtrail.peek[trail.ip] = {
-                username: trail.username,
-                instance: trail.instance,
-                webt: webt[webt.length - 1],
-                ts: this.peek[trail.ip].ts,
-              }
+        fetch(`${reqUrl}?${params}`, { method: 'GET' })
+          .then((response) => {
+            response.json().then((results) => {
+              results.forEach((trail: trail) => {
+                const webt = trail.webt.split(',')
+                this.webtrail.peek[trail.ip] = {
+                  username: trail.username,
+                  instance: trail.instance,
+                  webt: webt[webt.length - 1],
+                  ts: this.peek[trail.ip].ts,
+                }
+              })
             })
           })
-        })
-        .catch((err) => {
-          console.error(err)
-        })
-    }
+          .catch((err) => {
+            console.error(err)
+          })
+      }
   }
 
   //  Shall we begin?
@@ -396,6 +398,7 @@ export default class Portal extends Vue {
         }
 
         this.wss[i].onerror = (ev) => {
+          this.messages[server] = '<div uk-spinner></div>'
           UIkit.notification({ message: `WebSocket error: ${server}`, pos: 'bottom-left', status: 'danger' })
         }
 
@@ -449,7 +452,7 @@ export default class Portal extends Vue {
             console.error(reqUrl, 'websocket message', err.message)
           }
 
-          if (count) this.ready = true
+          this.ready = true
           this.refresh = Date.now()
         }
       })
