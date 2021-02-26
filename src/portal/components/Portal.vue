@@ -237,10 +237,11 @@ interface webtrail {
   server?: string
   peek: {
     [host: string]: {
-      username?: string
+      ts: string
       instance?: string
+      pathname: string
       webt?: string
-      ts: Date
+      username?: string
     }
   }
 }
@@ -265,6 +266,8 @@ export default class Portal extends Vue {
     [host: string]: {
       server: string
       ts: Date
+      pathname: string
+      webt?: string
     }
   } = {}
   ready = false
@@ -334,11 +337,16 @@ export default class Portal extends Vue {
       if (this.peek[remoteHost].server !== server) continue
       const where = this.topology(remoteHost)
       if (where.location !== location || where.access !== access) continue
-      this.webtrail.peek[remoteHost] = { ts: this.peek[remoteHost].ts }
+      this.webtrail.peek[remoteHost] = {
+        ts: this.peek[remoteHost].ts.toLocaleString(),
+        instance: this.webtrail.peek[remoteHost].instance,
+        pathname: this.peek[remoteHost].pathname,
+        webt: this.peek[remoteHost].webt,
+        username: this.webtrail.peek[remoteHost].username,
+      }
 
-      //  let's not obsess over the webt info here ...
-      if (this.dashboard[location][access][server] < 6) {
-        const reqUrl = `https://${server}/peek/api/caché/ip/${remoteHost}`
+      if (this.peek[remoteHost].webt && !this.webtrail.peek[remoteHost].username) {
+        const reqUrl = `https://${server}/peek/api/caché/webt/${this.peek[remoteHost].webt}`
         const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
         console.debug(`${reqUrl}?${params}`)
 
@@ -346,13 +354,8 @@ export default class Portal extends Vue {
           .then((response) => {
             response.json().then((results) => {
               results.forEach((trail: trail) => {
-                const webt = trail.webt.split(',')
-                this.webtrail.peek[trail.ip] = {
-                  username: trail.username,
-                  instance: trail.instance,
-                  webt: webt[webt.length - 1],
-                  ts: this.peek[trail.ip].ts,
-                }
+                this.webtrail.peek[remoteHost].username = trail.username
+                this.webtrail.peek[remoteHost].instance = trail.instance
               })
             })
           })
@@ -405,7 +408,13 @@ export default class Portal extends Vue {
 
         this.wss[i].onmessage = (ev) => {
           try {
-            const result: { [remoteHost: string]: string } = JSON.parse(ev.data)
+            const result: {
+              [remoteHost: string]: {
+                ts: Date
+                pathname: string
+                webt?: string
+              }
+            } = JSON.parse(ev.data)
 
             for (let remoteHost in result) {
               const where = this.topology(remoteHost)
@@ -417,7 +426,7 @@ export default class Portal extends Vue {
                 })
                 continue
               }
-              this.messages[server] = +this.messages[server] + Object.keys(result).length
+              this.messages[server] = +this.messages[server] + 1
 
               if (this.peek[remoteHost]) {
                 const from = this.peek[remoteHost].server
@@ -428,7 +437,13 @@ export default class Portal extends Vue {
                     status: 'warning',
                   })
               }
-              this.peek[remoteHost] = { server: server, ts: new Date(result[remoteHost]) }
+              this.peek[remoteHost] = {
+                server: server,
+                ts: result[remoteHost].ts,
+                pathname: result[remoteHost].pathname,
+              }
+              //  keep any last webt received
+              if (result[remoteHost].webt) this.peek[remoteHost].webt = result[remoteHost].webt
             }
 
             for (const location in this.dashboard) for (const access in this.dashboard[location]) this.dashboard[location][access][server] = 0

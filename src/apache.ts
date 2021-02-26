@@ -150,7 +150,11 @@ module Apache {
 
         tail(true, (result: apacheLog) => {
             if (result.remoteHost && result.time) {
-                payload[result.remoteHost] = result.time
+                payload[result.remoteHost] = {}
+                payload[result.remoteHost].ts = result.time
+                let url = new URL(result.request.split(' ')[1], `${listener}`)
+                payload[result.remoteHost].pathname = url.pathname
+                if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
                 hosts++
             }
         })

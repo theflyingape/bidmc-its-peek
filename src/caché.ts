@@ -31,6 +31,15 @@ module Caché {
             webTrail([, , req.params.username])
             next()
         })
+        .get(`${API}/webt/:webt`, (req, res, next) => {
+            openAll()
+            let results: { username?: string } = {}
+            let webt = parseInt(req.params.webt)
+            if (webt) nodes.forEach((node, i) => {
+                if (!results.username) results = webtmaster(node, webt)
+            })
+            next()
+        })
         .use((req, res) => {
             closeAll()
             res.send(results)
