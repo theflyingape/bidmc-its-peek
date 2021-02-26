@@ -90,8 +90,15 @@ module Caché {
 
     export function global(nosql): object {
         let result = {}
-        for (let n in nosql.key)
-            result[nosql.key[n]] = nosql.value[n]
+        if (nosql.global) {
+            result[nosql.global] = {}
+            nosql.forEach(cstr => {
+                if (cstr.subscripts) {
+                    let n = cstr.subscripts.length - 1
+                    result[nosql.global][cstr.subscripts[n]] = cstr.data
+                }
+            })
+        }
         return result
     }
 
