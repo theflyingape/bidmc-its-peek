@@ -33,10 +33,10 @@ module Caché {
         })
         .get(`${API}/webt/:webt`, (req, res, next) => {
             openAll()
-            let results: { username?: string } = {}
+            let results: { webtmaster?: string } = {}
             let webt = parseInt(req.params.webt)
             if (webt) nodes.forEach((node, i) => {
-                if (!results.username) results = webtmaster(node, webt)
+                if (!results.webtmaster) results = webtmaster(node, webt)
             })
             next()
         })
@@ -90,15 +90,13 @@ module Caché {
 
     export function global(nosql): {} {
         let result = {}
-        if (nosql.global) {
-            result[nosql.global] = {}
-            nosql.forEach(cstr => {
-                if (cstr.subscripts) {
-                    let n = cstr.subscripts.length - 1
-                    result[nosql.global][cstr.subscripts[n]] = cstr.data
-                }
-            })
-        }
+        nosql.forEach((cstr, i) => {
+            if (!i) result[cstr.global] = {}
+            if (cstr.subscripts) {
+                let n = cstr.subscripts.length - 1
+                result[cstr.global][cstr.subscripts[n]] = cstr.data
+            }
+        })
         return result
     }
 

@@ -352,11 +352,11 @@ export default class Portal extends Vue {
 
         fetch(`${reqUrl}?${params}`, { method: 'GET' })
           .then((response) => {
-            response.json().then((results) => {
-              results.forEach((trail: trail) => {
-                this.webtrail.peek[remoteHost].username = trail.username
-                this.webtrail.peek[remoteHost].instance = trail.instance
-              })
+            response.json().then((global) => {
+              if (global.webtmaster) {
+                this.webtrail.peek[remoteHost].username = global.webtmaster.username || ''
+                this.webtrail.peek[remoteHost].instance = global.webtmaster.instance || ''
+              }
             })
           })
           .catch((err) => {
