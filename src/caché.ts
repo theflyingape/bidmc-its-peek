@@ -31,12 +31,18 @@ module Caché {
             webTrail([, , req.params.username])
             next()
         })
-        .get(`${API}/webt/:webt`, (req, res, next) => {
+        .post(`${API}/webt/:webtList`, (req, res, next) => {
             openAll()
             results = {}
-            let webt = parseInt(req.params.webt)
-            if (webt) nodes.forEach((node, i) => {
-                if (!results.webtmaster) results = webtmaster(node, webt)
+            let webtList = req.body
+            console.debug('webtList', webtList)
+            webtList.forEach((webt) => {
+                console.debug('webt', webt)
+                /*
+                nodes.forEach((node, i) => {
+                    if (!results.webtmaster) results = webtmaster(node, webt)
+                })
+                */
             })
             next()
         })
