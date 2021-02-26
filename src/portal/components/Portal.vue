@@ -348,11 +348,10 @@ export default class Portal extends Vue {
       if (this.peek[remoteHost].webt && !this.webtrail.peek[remoteHost].username) {
         const reqUrl = `https://${server}/peek/api/caché/webt/${this.peek[remoteHost].webt}`
         const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
-        console.debug(`${reqUrl}?${params}`)
-
         fetch(`${reqUrl}?${params}`, { method: 'GET' })
           .then((response) => {
             response.json().then((global) => {
+              console.debug(global)
               if (global.webtmaster) {
                 this.webtrail.peek[remoteHost].username = global.webtmaster.username || ''
                 this.webtrail.peek[remoteHost].instance = global.webtmaster.instance || ''

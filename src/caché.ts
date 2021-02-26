@@ -33,7 +33,7 @@ module Caché {
         })
         .get(`${API}/webt/:webt`, (req, res, next) => {
             openAll()
-            let results: { webtmaster?: string } = {}
+            results = {}
             let webt = parseInt(req.params.webt)
             if (webt) nodes.forEach((node, i) => {
                 if (!results.webtmaster) results = webtmaster(node, webt)
