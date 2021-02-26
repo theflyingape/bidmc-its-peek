@@ -32,11 +32,11 @@ module Caché {
             next()
         })
         .get(`${API}/webt/:webt`, (req, res, next) => {
-            openAll()
+            openAll('WEB')
             let results: { username?: string } = {}
             let webt = parseInt(req.params.webt)
             if (webt) nodes.forEach((node, i) => {
-                if (typeof results.username == 'undefined') results = webtmaster(node, webt)
+                if (!results.username) results = webtmaster(node, webt) || {}
             })
             next()
         })
