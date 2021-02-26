@@ -32,11 +32,11 @@ module Caché {
             next()
         })
         .get(`${API}/webt/:webt`, (req, res, next) => {
-            openAll('WEB')
+            openAll()
             let results: { username?: string } = {}
             let webt = parseInt(req.params.webt)
             if (webt) nodes.forEach((node, i) => {
-                if (!results.username) results = webtmaster(node, webt) || {}
+                if (!results.username) results = webtmaster(node, webt)
             })
             next()
         })
@@ -115,9 +115,9 @@ module Caché {
         results.sort((a, b) => (a.tm > b.tm) ? 1 : -1)
     }
 
-    export function webtmaster(node: cachedb, webt: number): object {
+    export function webtmaster(node: cachedb, webt: number): {} {
         const cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
-        return cos.ok ? global(cos) : null
+        return cos
     }
 
     //  TODO: account for UTC
