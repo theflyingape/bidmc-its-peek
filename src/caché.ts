@@ -36,7 +36,7 @@ module Caché {
             let results: { username?: string } = {}
             let webt = parseInt(req.params.webt)
             if (webt) nodes.forEach((node, i) => {
-                if (!results.username) results = webtmaster(node, webt)
+                if (typeof results.username == 'undefined') results = webtmaster(node, webt)
             })
             next()
         })
