@@ -88,7 +88,7 @@ module Caché {
         }
     }
 
-    export function global(nosql): object {
+    export function global(nosql): {} {
         let result = {}
         if (nosql.global) {
             result[nosql.global] = {}
@@ -117,7 +117,7 @@ module Caché {
 
     export function webtmaster(node: cachedb, webt: number): {} {
         const cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
-        return cos
+        return global(cos)
     }
 
     //  TODO: account for UTC
