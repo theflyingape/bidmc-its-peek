@@ -205,17 +205,6 @@ interface monitor {
   }
 }
 
-interface trail {
-  ID: string
-  instance: string
-  ip: string
-  ke: string
-  tm: string
-  username: string
-  usersim: string
-  webt: string
-}
-
 interface vip {
   apache: {
     [fqdn: string]: {
@@ -237,9 +226,9 @@ interface webtrail {
   server?: string
   peek: {
     [host: string]: {
-      ts: string
+      ts?: string
       instance?: string
-      pathname: string
+      pathname?: string
       webt?: string
       username?: string
     }
@@ -337,13 +326,11 @@ export default class Portal extends Vue {
       if (this.peek[remoteHost].server !== server) continue
       const where = this.topology(remoteHost)
       if (where.location !== location || where.access !== access) continue
-      this.webtrail.peek[remoteHost] = {
-        ts: this.peek[remoteHost].ts.toLocaleString(),
-        instance: this.webtrail.peek[remoteHost].instance,
-        pathname: this.peek[remoteHost].pathname,
-        webt: this.peek[remoteHost].webt,
-        username: this.webtrail.peek[remoteHost].username,
-      }
+      if (!this.webtrail.peek[remoteHost]) this.webtrail.peek[remoteHost] = {}
+      this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleString()
+      if (this.peek[remoteHost].pathname && !/(\/scripts\/)/.test(this.peek[remoteHost].pathname))
+        this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
+      if (this.peek[remoteHost].webt) this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
 
       if (this.peek[remoteHost].webt && !this.webtrail.peek[remoteHost].username) {
         const reqUrl = `https://${server}/peek/api/caché/webt/${this.peek[remoteHost].webt}`
@@ -351,7 +338,6 @@ export default class Portal extends Vue {
         fetch(`${reqUrl}?${params}`, { method: 'GET' })
           .then((response) => {
             response.json().then((global) => {
-              console.debug(global)
               if (global.webtmaster) {
                 this.webtrail.peek[remoteHost].username = global.webtmaster.username || ''
                 this.webtrail.peek[remoteHost].instance = global.webtmaster.instance || ''
@@ -409,7 +395,7 @@ export default class Portal extends Vue {
           try {
             const result: {
               [remoteHost: string]: {
-                ts: Date
+                ts: string
                 pathname: string
                 webt?: string
               }
@@ -438,7 +424,7 @@ export default class Portal extends Vue {
               }
               this.peek[remoteHost] = {
                 server: server,
-                ts: result[remoteHost].ts,
+                ts: new Date(result[remoteHost].ts),
                 pathname: result[remoteHost].pathname,
               }
               //  keep any last webt received
