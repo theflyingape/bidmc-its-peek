@@ -17,18 +17,19 @@ module Caché {
     //  REST services
     //  bug?: using /caché as a POST endpoint fails to work
     router.post(`/data/webt`, (req, res) => {
-        let webtList = req.body
         instances = (String(req.query.INSTANCES) || 'localhost').split(',')
-        openAll()
+        nodes = []
         results = []
-        webtList.forEach((ip) => {
+        openAll()
+        const jsData = req.body
+        jsData.forEach((client) => {
             let result = {}
-            result = {}
             let ccc: { webtmaster?: {} } = {}
             for (let node in nodes) {
-                ccc = webtmaster(nodes[node], ip.webt)
+                const webt = parseInt(client.webt)
+                ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
-                    result = Object.assign({ remoteHost: ip }, ccc.webtmaster)
+                    result = Object.assign({ remoteHost: client.ip }, ccc.webtmaster)
                     break
                 }
             }

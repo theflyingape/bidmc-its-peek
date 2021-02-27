@@ -386,7 +386,7 @@ export default class Portal extends Vue {
   webTrail(location: string, access: string, server: string) {
     return new Promise<number>((resolve, reject) => {
       this.webtrail = { location: location, access: access, server: server, peek: {} }
-      let ccc: { [ip: string]: string } = {}
+      let ccc: [{ ip?: string; webt?: string }?] = []
 
       for (let remoteHost in this.peek) {
         if (this.peek[remoteHost].server !== server) continue
@@ -398,15 +398,19 @@ export default class Portal extends Vue {
           this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
         if (this.peek[remoteHost].webt) this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
         if (this.peek[remoteHost].webt && !this.webtrail.peek[remoteHost].username) {
-          ccc[remoteHost] = this.peek[remoteHost].webt || ''
+          ccc.push({ ip: remoteHost, webt: this.peek[remoteHost].webt })
         }
       }
 
       if (Object.keys(ccc).length) {
-        const reqUrl = `https://${server}/peek/api/caché/webt/`
+        const reqUrl = `https://${server}/peek/api/data/webt/`
         const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
         console.debug(JSON.stringify(ccc))
-        fetch(`${reqUrl}?${params}`, { method: 'POST', body: JSON.stringify(ccc) })
+        fetch(`${reqUrl}?${params}`, {
+          method: 'POST',
+          headers: new Headers({ 'content-type': 'application/json' }),
+          body: JSON.stringify(ccc),
+        })
           .then((response) => {
             response.json().then((globals) => {
               globals.forEach((global: { remoteHost: string; username: string; instance: string }) => {
