@@ -385,7 +385,6 @@ export default class Portal extends Vue {
 
   webTrail(location: string, access: string, server: string) {
     return new Promise<number>((resolve, reject) => {
-      this.webtrail = { location: location, access: access, server: server, peek: {} }
       let ccc: [{ ip?: string; webt?: string }?] = []
 
       for (let remoteHost in this.peek) {
@@ -394,7 +393,11 @@ export default class Portal extends Vue {
         if (where.location !== location || where.access !== access) continue
         if (!this.webtrail.peek[remoteHost]) this.webtrail.peek[remoteHost] = {}
         this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleTimeString()
-        if (this.peek[remoteHost].pathname && !/(\/scripts\/)/.test(this.peek[remoteHost].pathname))
+        if (
+          this.peek[remoteHost].pathname &&
+          !/(\/dyna\/)/.test(this.peek[remoteHost].pathname) &&
+          !/(\/scripts\/)/.test(this.peek[remoteHost].pathname)
+        )
           this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
         if (this.peek[remoteHost].webt) this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
         if (this.peek[remoteHost].webt && !this.webtrail.peek[remoteHost].username) {
@@ -405,7 +408,6 @@ export default class Portal extends Vue {
       if (Object.keys(ccc).length) {
         const reqUrl = `https://${server}/peek/api/data/webt/`
         const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
-        console.debug(JSON.stringify(ccc))
         fetch(`${reqUrl}?${params}`, {
           method: 'POST',
           headers: new Headers({ 'content-type': 'application/json' }),
@@ -417,22 +419,23 @@ export default class Portal extends Vue {
                 this.webtrail.peek[global.remoteHost].username = global.username || ''
                 this.webtrail.peek[global.remoteHost].instance = global.instance || ''
               })
+              resolve(1)
             })
           })
           .catch((err) => {
             console.error(err)
             reject(0)
           })
-          .finally(() => {
-            resolve(Object.keys(ccc).length)
-          })
       } else resolve(0)
     })
   }
 
   webtrailFormatter(location: string, access: string, server: string) {
-    this.webtrailTable = 'Loading ... <div uk-spinner></div>'
-    UIkit.modal('#modal-webTrail').show()
+    if (!this.webtrail.enable) {
+      this.webtrail = { location: location, access: access, server: server, peek: {} }
+      UIkit.modal('#modal-webTrail').show()
+      this.webtrailTable = 'Loading ... <div uk-spinner></div>'
+    }
     //  harvest content details
     this.webTrail(location, access, server).finally(() => {
       let html = `<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">`
@@ -538,6 +541,7 @@ export default class Portal extends Vue {
                 this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
                 this.peek[remoteHost].pathname = result[remoteHost].pathname
               } else {
+                //  new client
                 this.peek[remoteHost] = {
                   server: server,
                   ts: new Date(result[remoteHost].ts),
@@ -561,7 +565,10 @@ export default class Portal extends Vue {
                 this.alive[server]++
               } else delete this.peek[remoteHost]
             }
+            //  update any active modal
             this.peekFormatter()
+            if (this.webtrail.enable && this.webtrail.location && this.webtrail.access && this.webtrail.server == server)
+              this.webtrailFormatter(this.webtrail.location, this.webtrail.access, this.webtrail.server)
           } catch (err) {
             UIkit.notification({
               message: `WebSocket message error: ${err.message} from ${server}`,
