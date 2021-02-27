@@ -1,7 +1,7 @@
 /**
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
-import bodyParser = require('body-parser')
+
 import cors = require('cors')
 import dns = require('dns')
 import express = require('express')
@@ -113,7 +113,6 @@ module Gateway {
             audit(`${req.method} ${decodeURI(req.url)}`)
             next()
         })
-            .use(bodyParser.urlencoded({ extended: true }))
             .use(cors())
             .use(require('./apache').router)
             .use(require('./caché').router)   //  nvm use

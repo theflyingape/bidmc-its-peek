@@ -14,13 +14,13 @@ const Tail = require('tail').Tail
 
 module Apache {
 
-    export const API = encodeURI(`/${path.basename(__filename).split('.')[0]}`)
+    export const API = encodeURI(`/${path.basename(__filename).split('.')[0]}/`)
     export const router = express.Router({
         caseSensitive: true, strict: false, mergeParams: false
     })
 
     //  REST services
-    router.get(`${API}/*`, (req, res, next) => {
+    router.get(`${API}*`, (req, res, next) => {
         next()
     })
         .get(`${API}`, (req, res) => {
@@ -30,7 +30,7 @@ module Apache {
             res.json(result)
             res.end()
         })
-        .get(`${API}/restart`, (req, res) => {
+        .get(`${API}restart`, (req, res) => {
             res.json({ host: os.hostname(), code: 1 })
             res.end()
             process.exit(1)

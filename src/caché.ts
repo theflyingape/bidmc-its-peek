@@ -9,41 +9,48 @@ import path = require('path')
 
 module Caché {
 
-    export const API = encodeURI(`/${path.basename(__filename).split('.')[0]}`)
+    export const API = encodeURI(`/${path.basename(__filename).split('.')[0]}/`)
     export const router = express.Router({
         caseSensitive: true, strict: false, mergeParams: false
-    })
+    }).use(express.json({ strict: false }))
 
     //  REST services
-    router.get(`${API}/*`, (req, res, next) => {
+    //  bug?: using /caché as a POST endpoint fails to work
+    router.post(`/data/webt`, (req, res) => {
+        let webtList = req.body
         instances = (String(req.query.INSTANCES) || 'localhost').split(',')
-        nodes = []
+        openAll()
         results = []
-        next()
+        webtList.forEach((ip) => {
+            let result = {}
+            result = {}
+            let ccc: { webtmaster?: {} } = {}
+            for (let node in nodes) {
+                ccc = webtmaster(nodes[node], ip.webt)
+                if (ccc.webtmaster) {
+                    result = Object.assign({ remoteHost: ip }, ccc.webtmaster)
+                    break
+                }
+            }
+            results.push(result)
+        })
+        closeAll()
+        res.send(results)
     })
-        .get(`${API}/ip/:ip`, (req, res, next) => {
+        .get(`${API}*`, (req, res, next) => {
+            instances = (String(req.query.INSTANCES) || 'localhost').split(',')
+            nodes = []
+            results = []
+            next()
+        })
+        .get(`${API}ip/:ip`, (req, res, next) => {
             openAll()
             webTrail([, req.params.ip])
             next()
         })
-        .get(`${API}/username/:username`, (req, res, next) => {
+        .get(`${API}username/:username`, (req, res, next) => {
             openAll()
             webTrail([, , req.params.username])
-            next()
-        })
-        .post(`${API}/webt/:webtList`, (req, res, next) => {
-            openAll()
-            results = {}
-            let webtList = req.body
-            console.debug('webtList', webtList)
-            webtList.forEach((webt) => {
-                console.debug('webt', webt)
-                /*
-                nodes.forEach((node, i) => {
-                    if (!results.webtmaster) results = webtmaster(node, webt)
-                })
-                */
-            })
             next()
         })
         .use((req, res) => {
