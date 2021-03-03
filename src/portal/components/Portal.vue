@@ -1,11 +1,9 @@
 <template>
   <div class="uk-container">
     <div class="uk-float-right">
-      <div class="uk-tooltip uk-tooltip-bottom-center uk-display-inline-block uk-margin-remove uk-position-relative">
-        {{ menu }}
-      </div>
       <a class="uk-navbar-toggle" href="#offcanvas" uk-navbar-toggle-icon uk-toggle></a>
     </div>
+
     <!-- tabs -->
     <ul class="uk-tab" uk-switcher="animation: uk-animation-fade">
       <li>
@@ -24,9 +22,7 @@
         </template>
         <template v-else>
           <div class="uk-align-right uk-width-1-4 uk-alert-primary" uk-alert>
-            <button class="uk-alert-close" type="button" uk-close></button>
-            <h3><span class="uk-badge">NOTE</span></h3>
-            <p>Please use <span uk-icon="icon: menu"></span> menu button to select a <b>Caché</b> farm</p>
+            <p style="text-align: right">Please use <span uk-icon="icon: menu"></span> menu button to select a <b>Caché</b> farm</p>
           </div>
         </template>
       </li>
@@ -97,9 +93,7 @@
         </template>
         <template v-else>
           <div class="uk-align-right uk-width-1-4 uk-alert-primary" uk-alert>
-            <button class="uk-alert-close" type="button" uk-close></button>
-            <h3><span class="uk-badge">NOTE</span></h3>
-            <p>Please use <span uk-icon="icon: menu"></span> menu button to select an <b>Apache</b> web farm</p>
+            <p style="text-align: right">Please use <span uk-icon="icon: menu"></span> menu button to select an <b>Apache</b> web farm</p>
           </div>
         </template>
       </li>
@@ -587,11 +581,7 @@ export default class Portal extends Vue {
 
   //  hooks
   beforeCreate() {}
-
-  created() {
-    this.menu = 'peek'
-  }
-
+  created() {}
   beforeMount() {}
   mounted() {}
   beforeUpdate() {}
