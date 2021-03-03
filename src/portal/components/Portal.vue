@@ -30,11 +30,6 @@
       <!-- monitor -->
       <li>
         <template v-if="apache">
-          <div style="text-align: right">
-            <a class="uk-button uk-button-primary" href="#modal-clientIP" uk-toggle>
-              <b>{{ apache }}</b> &nbsp;<span class="uk-margin-small-left" uk-icon="icon: info" />
-            </a>
-          </div>
           <table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto" id="dashboard">
             <!-- header line -->
             <thead>
@@ -71,7 +66,11 @@
               </template>
               <!-- total line -->
               <tr style="vertical-align: middle">
-                <td></td>
+                <td style="text-align: center">
+                  <a class="uk-button uk-button-primary" href="#modal-clientIP" uk-toggle>
+                    <b>{{ apache }}</b> &nbsp;<span class="uk-margin-small-left" uk-icon="icon: info" />
+                  </a>
+                </td>
                 <td style="text-align: right"><b>- total:</b></td>
                 <td style="text-align: center" v-for="(value, index) in alive" :key="index">
                   <b>{{ value || '-' }}</b>
