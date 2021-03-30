@@ -36,8 +36,12 @@
               <tr>
                 <th style="text-align: center">location</th>
                 <th style="text-align: center">access</th>
-                <th style="text-align: center" v-for="server in hosts.apache" :key="server">
-                  {{ server.split('.')[0] }}
+                <th style="text-align: center" v-for="(server, index) in hosts.apache" :key="server">
+                  <span v-if="wss[index].readyState < 3">{{ server.split('.')[0] }}</span>
+                  <span v-else>
+                  <button class="uk-button uk-button-link" @click="wss[index] = webSocketOpen(server)" type="button">
+                    <em>{{ server.split('.')[0] }}</em>
+                  </button></span>
                 </th>
               </tr>
             </thead>
@@ -110,7 +114,7 @@
     </div>
 
     <div id="modal-webTrail" uk-modal>
-      <div class="uk-modal-dialog uk-modal-body" style="text-align: center">
+      <div class="uk-modal-dialog uk-modal-body uk-width-1-2" style="text-align: center">
         <button class="uk-modal-close-default" type="button" uk-close></button>
         <div class="uk-modal-header">
           <h4>{{ webtrail.location }} - {{ webtrail.access }} on {{ webtrail.server }}</h4>
@@ -376,6 +380,108 @@ export default class Portal extends Vue {
     return { location: '', access: '' }
   }
 
+  webSocketOpen(server: string): WebSocket {
+    const reqUrl = `wss://${server}/peek/apache/`
+    let wss = new WebSocket(reqUrl)
+
+    wss.onopen = () => {
+      UIkit.notification({ message: `WebSocket opened: ${server}`, pos: 'bottom-left', status: 'success' })
+      this.messages[server] = 0
+    }
+
+    wss.onclose = (ev) => {
+      UIkit.notification({ message: `WebSocket closed: ${server}`, pos: 'bottom-left', status: 'warning' })
+      this.messages[server] = `<em>${this.messages[server]}</em>`
+      this.$forceUpdate()
+    }
+
+    wss.onerror = (ev) => {
+      this.messages[server] = '<div uk-spinner></div>'
+      UIkit.notification({ message: `WebSocket error: ${server}`, pos: 'bottom-left', status: 'danger' })
+    }
+
+    wss.onmessage = (ev) => {
+      try {
+        const result: {
+          [remoteHost: string]: {
+            ts: string
+            pathname: string
+            webt?: string
+          }
+        } = JSON.parse(ev.data)
+
+        for (let remoteHost in result) {
+          const where = this.topology(remoteHost)
+          if (!where.location || !where.access) {
+            UIkit.notification({
+              message: `skipping ${remoteHost} from ${server}`,
+              pos: 'bottom-left',
+              status: 'warning',
+            })
+            continue
+          }
+          this.messages[server] = +this.messages[server] + 1
+
+          if (this.peek[remoteHost]) {
+            const from = this.peek[remoteHost].server
+            if (from !== server) {
+              if (this.dashboard[where.location][where.access][from]) {
+                this.dashboard[where.location][where.access][from]--
+                this.alive[from]--
+              }
+              UIkit.notification({
+                message: `${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`,
+                pos: 'bottom-left',
+                status: 'warning',
+              })
+              this.peek[remoteHost].server = server
+            }
+            this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
+            this.peek[remoteHost].pathname = result[remoteHost].pathname
+          } else {
+            //  new client
+            this.peek[remoteHost] = {
+              server: server,
+              ts: new Date(result[remoteHost].ts),
+              pathname: result[remoteHost].pathname,
+            }
+          }
+          //  keep any last webt received
+          if (result[remoteHost].webt) this.peek[remoteHost].webt = result[remoteHost].webt
+        }
+
+        for (const location in this.dashboard) for (const access in this.dashboard[location]) this.dashboard[location][access][server] = 0
+        this.alive[server] = 0
+        //  idle?
+        for (let remoteHost in this.peek) {
+          if (this.peek[remoteHost].server !== server) continue
+          const where = this.topology(remoteHost)
+          const then = this.peek[remoteHost].ts.valueOf() || 0
+          const elapsed = Date.now() - then
+          if (elapsed < 1200000) {
+            this.dashboard[where.location][where.access][server]++
+            this.alive[server]++
+          } else delete this.peek[remoteHost]
+        }
+        //  update any active modal
+        this.peekFormatter()
+        if (this.webtrail.enable && this.webtrail.location && this.webtrail.access && this.webtrail.server == server)
+          this.webtrailFormatter(this.webtrail.location, this.webtrail.access, this.webtrail.server)
+      } catch (err) {
+        UIkit.notification({
+          message: `WebSocket message error: ${err.message} from ${server}`,
+          pos: 'bottom-left',
+          status: 'danger'
+        })
+      }
+
+      this.ready = true
+      this.refresh = Date.now()
+    }
+
+    return wss
+  }
+
   webTrail(location: string, access: string, server: string) {
     return new Promise<number>((resolve, reject) => {
       let ccc: [{ ip?: string; webt?: string }?] = []
@@ -461,120 +567,18 @@ export default class Portal extends Vue {
     this.peek = {}
 
     return new Promise<number>((resolve, reject) => {
-      this.wss.forEach((s) => {
-        s.close()
-      })
+      this.wss.forEach((s) => { s.close() })
       this.wss = []
 
-      let count = 0
       this.ready = false
 
       this.hosts.apache.forEach((server) => {
         this.alive[server] = 0
         this.messages[server] = '<div uk-spinner></div>'
 
-        const reqUrl = `wss://${server}/peek/apache/`
-
-        let i = this.wss.push(new WebSocket(reqUrl)) - 1
-
-        this.wss[i].onopen = () => {
-          UIkit.notification({ message: `WebSocket opened: ${server}`, pos: 'bottom-left', status: 'success' })
-          this.messages[server] = 0
-          count++
-        }
-
-        this.wss[i].onclose = (ev) => {
-          UIkit.notification({ message: `WebSocket closed: ${server}`, pos: 'bottom-left', status: 'warning' })
-          this.messages[server] = `<em>${this.messages[server]}</em>`
-          count--
-          if (!count) resolve(1)
-        }
-
-        this.wss[i].onerror = (ev) => {
-          this.messages[server] = '<div uk-spinner></div>'
-          UIkit.notification({ message: `WebSocket error: ${server}`, pos: 'bottom-left', status: 'danger' })
-        }
-
-        this.wss[i].onmessage = (ev) => {
-          try {
-            const result: {
-              [remoteHost: string]: {
-                ts: string
-                pathname: string
-                webt?: string
-              }
-            } = JSON.parse(ev.data)
-
-            for (let remoteHost in result) {
-              const where = this.topology(remoteHost)
-              if (!where.location || !where.access) {
-                UIkit.notification({
-                  message: `skipping ${remoteHost} from ${server}`,
-                  pos: 'bottom-left',
-                  status: 'warning',
-                })
-                continue
-              }
-              this.messages[server] = +this.messages[server] + 1
-
-              if (this.peek[remoteHost]) {
-                const from = this.peek[remoteHost].server
-                if (from !== server) {
-                  if (this.dashboard[where.location][where.access][from]) {
-                    this.dashboard[where.location][where.access][from]--
-                    this.alive[from]--
-                  }
-                  UIkit.notification({
-                    message: `${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`,
-                    pos: 'bottom-left',
-                    status: 'warning',
-                  })
-                  this.peek[remoteHost].server = server
-                }
-                this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
-                this.peek[remoteHost].pathname = result[remoteHost].pathname
-              } else {
-                //  new client
-                this.peek[remoteHost] = {
-                  server: server,
-                  ts: new Date(result[remoteHost].ts),
-                  pathname: result[remoteHost].pathname,
-                }
-              }
-              //  keep any last webt received
-              if (result[remoteHost].webt) this.peek[remoteHost].webt = result[remoteHost].webt
-            }
-
-            for (const location in this.dashboard) for (const access in this.dashboard[location]) this.dashboard[location][access][server] = 0
-            this.alive[server] = 0
-            //  idle?
-            for (let remoteHost in this.peek) {
-              if (this.peek[remoteHost].server !== server) continue
-              const where = this.topology(remoteHost)
-              const then = this.peek[remoteHost].ts.valueOf() || 0
-              const elapsed = Date.now() - then
-              if (elapsed < 1200000) {
-                this.dashboard[where.location][where.access][server]++
-                this.alive[server]++
-              } else delete this.peek[remoteHost]
-            }
-            //  update any active modal
-            this.peekFormatter()
-            if (this.webtrail.enable && this.webtrail.location && this.webtrail.access && this.webtrail.server == server)
-              this.webtrailFormatter(this.webtrail.location, this.webtrail.access, this.webtrail.server)
-          } catch (err) {
-            UIkit.notification({
-              message: `WebSocket message error: ${err.message} from ${server}`,
-              pos: 'bottom-left',
-              status: 'danger',
-            })
-            console.error(reqUrl, 'websocket message', err.message)
-          }
-
-          this.ready = true
-          this.refresh = Date.now()
-        }
+        let i = this.wss.push(this.webSocketOpen(server)) - 1
       })
+      resolve(0)
     })
   }
 

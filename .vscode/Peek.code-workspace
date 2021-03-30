@@ -2,7 +2,7 @@
   "folders": [
     {
       "name": "BIDMC ITS Peek",
-      "path": "/home/rhurst/src/work/node/bidmc-its-peek"
+      "path": "/home/rhurst/bidmc-its-peek"
     },
     {
       "name": "watson:CCC",
@@ -21,7 +21,7 @@
     "editor.cursorBlinking": "blink",
     "editor.cursorStyle": "block",
     "editor.cursorSmoothCaretAnimation": true,
-    "editor.fontFamily": "'Noto Sans Mono','Noto Color Emoji','Lucida Console',Consolas,monospace",
+    "editor.fontFamily": "'Victor Mono','Noto Sans Mono','Noto Color Emoji',Consolas,monospace",
     "editor.fontSize": 16,
     "editor.formatOnSave": false,
     "editor.minimap.enabled": false,
@@ -79,6 +79,6 @@
     "terminal.integrated.fontWeight": "400",
     "terminal.integrated.fontWeightBold": "500",
     "window.zoomLevel": 0.5,
-    "workbench.colorTheme": "InterSystems Default Light"
+    "workbench.colorTheme": "Solarized Dark"
   }
 }

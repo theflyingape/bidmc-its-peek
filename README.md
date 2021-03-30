@@ -9,8 +9,8 @@ $ npm install
 $ sudo -s
 % rsync -av --delete . /mnt/autofs/media/peek/
 % cd /usr/local/sbin
-% ln -s /mnt/autofs/media/peek/bin/peek peek
-% ln -s /mnt/autofs/media/peek/bin/peek-gw peek-gw
+% ln -s /mnt/autofs/media/peek/bin/peek
+% ln -s /mnt/autofs/media/peek/bin/peek-gw
 
 % vi /etc/httpd/conf.d/ccc*.conf
 # ... append etc/apache-localhost-proxy.conf
