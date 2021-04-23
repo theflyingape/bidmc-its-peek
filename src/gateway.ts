@@ -23,7 +23,9 @@ interface config {
 process.title = `peek-gw`
 
 process.on('uncaughtException', (err, origin) => {
-    console.error(`${process.title}: ${origin} ${err}`)
+    const stack = err.stack.split('\n')
+    if (stack[0]) console.error(`${process.title}: ${origin} ${stack[0]}`)
+    if (stack[1]) console.error(`${process.title}: ${origin} ${stack[1]}`)
 })
 
 process.on('SIGINT', () => {

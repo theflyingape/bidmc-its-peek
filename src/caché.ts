@@ -15,7 +15,8 @@ module Caché {
     }).use(express.json({ strict: false }))
 
     //  REST services
-    //  bug?: using /caché as a POST endpoint fails to work
+    //  bug: using /caché as a POST endpoint fails to work?
+    //  override to use /data instead of this source filename
     router.post(`/data/webt`, (req, res) => {
         instances = (String(req.query.INSTANCES) || 'localhost').split(',')
         nodes = []
@@ -68,7 +69,7 @@ module Caché {
     let results
 
     try {
-        const api = JSON.parse(fs.readFileSync('keys/caché.json').toString())
+        const api = JSON.parse(fs.readFileSync('etc/caché.json').toString())
         db = require('./lib/cache1200.node')
     }
     catch (err) {

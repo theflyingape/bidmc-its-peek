@@ -18,15 +18,6 @@
     }
   ],
   "settings": {
-    "editor.cursorBlinking": "blink",
-    "editor.cursorStyle": "block",
-    "editor.cursorSmoothCaretAnimation": true,
-    "editor.fontFamily": "'Victor Mono','Noto Sans Mono','Noto Color Emoji',Consolas,monospace",
-    "editor.fontSize": 16,
-    "editor.formatOnSave": false,
-    "editor.minimap.enabled": false,
-    "editor.tabSize": 4,
-    "editor.wordWrap": "on",
     "intersystems.servers": {
       "watson": {
         "webServer": {
@@ -59,26 +50,14 @@
     },
     "objectscript.conn": {
       "active": false,
-      "https": true,
-      "host": "watson.bidmc.org",
-      "port": 443,
-      "server": "watson",
-      "username": "rhurst",
-      "ns": "CCC"
+      "links": {
+          "CCC Classic dev": "https://xterm-dev.bidmc.org",
+          "CCC Classic Test": "https://xterm-test.bidmc.org",
+          "CCC Classic": "https://xterm.bidmc.harvard.edu/xterm/its@mycroft/",
+          "Routine Utilities": "https://watson.bidmc.org/isc/studio/usertemplates/xpcstart.csp?User=rhurst&Namespace=BIH&Name=Compare"
+      }
     },
     "objectscript.serverSideEditing": true,
-    "objectscript.showExplorer": false,
-    "terminal.integrated.drawBoldTextInBrightColors": true,
-    "terminal.integrated.cursorBlinking": true,
-    "terminal.integrated.copyOnSelection": true,
-    "terminal.integrated.enableBell": true,
-    "terminal.integrated.experimentalUseTitleEvent": true,
-    "terminal.integrated.experimentalLinkProvider": true,
-    "terminal.integrated.fontFamily": "'Noto Sans Mono','Noto Color Emoji','Lucida Console',Consolas,monospace",
-    "terminal.integrated.fontSize": 14,
-    "terminal.integrated.fontWeight": "400",
-    "terminal.integrated.fontWeightBold": "500",
-    "window.zoomLevel": 0.5,
-    "workbench.colorTheme": "Solarized Dark"
+    "objectscript.showExplorer": false
   }
 }

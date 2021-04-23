@@ -175,6 +175,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import xterm from './consolelog'
 const UIkit = require('uikit')
 
 interface alive {
@@ -387,6 +388,7 @@ export default class Portal extends Vue {
     wss.onopen = () => {
       UIkit.notification({ message: `WebSocket opened: ${server}`, pos: 'bottom-left', status: 'success' })
       this.messages[server] = 0
+      this.$forceUpdate()
     }
 
     wss.onclose = (ev) => {
@@ -429,12 +431,14 @@ export default class Portal extends Vue {
                 this.dashboard[where.location][where.access][from]--
                 this.alive[from]--
               }
-              UIkit.notification({
-                message: `${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`,
-                pos: 'bottom-left',
-                status: 'warning',
-              })
               this.peek[remoteHost].server = server
+
+              //  log to console, but not API call-ins from our VPCs
+              const ts = new Date(Date.now()).toLocaleDateString() + ' ' + new Date(Date.now()).toLocaleTimeString()
+              const msg = `${ts}  ${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`
+              if (where.location !== 'AWS')
+                xterm.write(`\r\n${msg}`)
+                xterm.scrollToBottom()
             }
             this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
             this.peek[remoteHost].pathname = result[remoteHost].pathname

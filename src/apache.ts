@@ -33,7 +33,7 @@ module Apache {
         .get(`${API}restart`, (req, res) => {
             res.json({ host: os.hostname(), code: 1 })
             res.end()
-            process.exit(1)
+            process.exit(1) //  signal systemd to restart
         })
 
     const apache = config.apache || { dir: "/var/log/httpd", files: "*_log" }
@@ -142,6 +142,16 @@ module Apache {
         })
     }
 
+    //  Apache server-status
+    function modStatus(server: string, interval = 1) {
+        return new Promise<number>((resolve, reject) => {
+            const reqUrl = `https://${server}/server-status`
+            const params = `auto,refresh=${interval}`
+            fetch(`${reqUrl}?${params}`, {
+            })
+        })
+    }
+
     export function webMonitor(client: ws, params: URLSearchParams) {
         let hosts = 0
         let idle = 2500
@@ -152,9 +162,14 @@ module Apache {
             if (result.remoteHost && result.time) {
                 payload[result.remoteHost] = {}
                 payload[result.remoteHost].ts = result.time
-                let url = new URL(result.request.split(' ')[1], `${listener}`)
-                payload[result.remoteHost].pathname = url.pathname
-                if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
+                try {
+                    let url = new URL(result.request.split(' ')[1], `${listener}`)
+                    payload[result.remoteHost].pathname = url.pathname
+                    if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
+                }
+                catch (err) {
+                    payload[result.remoteHost].pathname = payload[result.remoteHost].pathname || err.code
+                }
                 hosts++
             }
         })
