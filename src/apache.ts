@@ -198,13 +198,11 @@ module Apache {
         logs.forEach((file) => {
             const today = new Date().toLocaleDateString()
             let stat = fs.statSync(file)
-            const minutes = Math.trunc((stat.mtime.getTime() - new Date(`${today} 00:00:00`).getTime())
+            const minutes = Math.trunc((stat.mtime.getTime() - new Date(`${today} 04:00:00`).getTime())
                 / 1000 / 60) + 1
             //  make a good guess ...
             const lpm = Math.trunc(stat.size / 384 / minutes)
-            const lookback = recent
-                ? (lpm < 10 ? 20 : lpm < 25 ? 6 : lpm < 50 ? 1 : 0)
-                : (lpm < 10 ? 600 : 480)
+            const lookback = recent ? (lpm < 60 ? 19 : 9) : (lpm < 10 ? 600 : 480)
             const lines = lpm * lookback + 1
 
             audit(`${path.basename(file)} size:${stat.size.toLocaleString()} => lpm:${lpm}; want ${lines} lines`)

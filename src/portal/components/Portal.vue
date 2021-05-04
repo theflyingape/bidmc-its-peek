@@ -12,6 +12,9 @@
       <li class="uk-active">
         <a href="#">Monitor<span class="uk-margin-small-left" uk-icon="icon: list" /></a>
       </li>
+      <li>
+        <a href="#">Archive <span uk-icon="icon: history" />&nbsp; DR <span uk-icon="icon: lifesaver" /></a>
+      </li>
     </ul>
 
     <ul class="uk-switcher">
@@ -98,6 +101,11 @@
           <div class="uk-align-right uk-width-1-4 uk-alert-primary" uk-alert>
             <p style="text-align: right">Please use <span uk-icon="icon: menu"></span> menu button to select an <b>Apache</b> web farm</p>
           </div>
+        </template>
+      </li>
+      <!-- valhalla & asgard -->
+      <li>
+        <template>
         </template>
       </li>
     </ul>
@@ -261,6 +269,10 @@ export default class Portal extends Vue {
   peekTable = ''
   ready = false
   refresh = 0
+  webAdds = 0
+  webDrops = 0
+  webLog = Date.now()
+  webT = 0
   webtrail: webtrail = { enable: false, peek: {} }
   webtrailTable = ''
   wss: WebSocket[] = []
@@ -328,8 +340,7 @@ export default class Portal extends Vue {
 
     let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
     html += `<thead><tr>`
-    html += `<th style="text-align: center">location</th>`
-    html += `<th style="text-align: center">access</th>`
+    html += `<th style="text-align: center">location - access</th>`
     this.hosts.apache.forEach((server) => {
       html += `<th style="text-align: center">${server.split('.')[0]}</th>`
     })
@@ -356,8 +367,7 @@ export default class Portal extends Vue {
         let row = 0
         for (let access in detail[location]) {
           html += `<tr style="text-align: center">`
-          if (!row) html += `<td style="vertical-align: middle" rowspan="${Object.keys(detail[location]).length}">${location}</td>`
-          html += `<td>${access}</td>`
+          html += `<td style="text-align: center">${location} - ${access}</td>`
           for (let server in detail[location][access]) html += `<td>${detail[location][access][server].ip.join('<br>') || '-'}</td>`
           html += `</tr>`
           row++
@@ -434,11 +444,10 @@ export default class Portal extends Vue {
               this.peek[remoteHost].server = server
 
               //  log to console, but not API call-ins from our VPCs
-              const ts = new Date(Date.now()).toLocaleDateString() + ' ' + new Date(Date.now()).toLocaleTimeString()
-              const msg = `${ts}  ${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`
-              if (where.location !== 'AWS')
-                xterm.write(`\r\n${msg}`)
-                xterm.scrollToBottom()
+              const ts = new Date(Date.now()).toLocaleTimeString()
+              const msg = `${ts} \x1b[31;1m ${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`
+              xterm.writeln('\x1b[m')
+              xterm.write(msg)
             }
             this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
             this.peek[remoteHost].pathname = result[remoteHost].pathname
@@ -449,9 +458,13 @@ export default class Portal extends Vue {
               ts: new Date(result[remoteHost].ts),
               pathname: result[remoteHost].pathname,
             }
+            this.webAdds++
           }
           //  keep any last webt received
-          if (result[remoteHost].webt) this.peek[remoteHost].webt = result[remoteHost].webt
+          if (result[remoteHost].webt) {
+            if (!this.peek[remoteHost].webt) this.webT++
+            this.peek[remoteHost].webt = result[remoteHost].webt
+          }
         }
 
         for (const location in this.dashboard) for (const access in this.dashboard[location]) this.dashboard[location][access][server] = 0
@@ -465,7 +478,11 @@ export default class Portal extends Vue {
           if (elapsed < 1200000) {
             this.dashboard[where.location][where.access][server]++
             this.alive[server]++
-          } else delete this.peek[remoteHost]
+          } else {
+            if (this.peek[remoteHost].webt) this.webT--
+            delete this.peek[remoteHost]
+            this.webDrops++
+          }
         }
         //  update any active modal
         this.peekFormatter()
@@ -481,6 +498,20 @@ export default class Portal extends Vue {
 
       this.ready = true
       this.refresh = Date.now()
+      if (this.refresh - this.webLog > 59950) {
+        const ts = new Date(this.refresh).toLocaleTimeString()
+        let msg = `${ts}  ${this.webAdds} new endpoints detected`
+        if (this.webDrops) msg += ` with ${this.webDrops} idle dropped`
+        msg += '.  Active '
+        if (this.webDrops) msg += `endpoints:\x1B[36;1m ${Object.keys(this.peek).length} \x1B[m`
+        msg += `webt:\x1B[36;1m ${this.webT}`
+        this.webAdds = 0
+        this.webDrops = 0
+        this.webLog = this.refresh
+        xterm.writeln('\x1b[m')
+        xterm.write(msg)
+        xterm.scrollToBottom()
+      }
     }
 
     return wss

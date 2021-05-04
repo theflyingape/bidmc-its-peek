@@ -38,7 +38,7 @@ console.log('xterm loaded')
 
 xterm.unicode.activeVersion = '11'
 xterm.open(terminal)
-xterm.writeln(`\x1B[0;1;4mW\x1B[melcome to the \x1B[35mBIDMC\x1B[m ITS 👁️ \x1B[1;36mPeek Portal\x1B[m`)
+xterm.writeln(`\x1B[0;1;4mW\x1B[melcome to the \x1B[35mBIDMC\x1B[m ITS 👁️ \x1B[1;36m Peek Portal\x1B[m into the Caché Apache farms -- application console`)
 
 window.onresize = () => {
     if (!xterm) return
@@ -53,7 +53,7 @@ window.onresize = () => {
     let h = Math.trunc(20 * xy.rows / rows)
     xterm.setOption('fontSize', h < w ? h : w)
     xy = fit.proposeDimensions()
-    //xterm.scrollToBottom()
+    xterm.scrollToBottom()
 }
 
 export default xterm
