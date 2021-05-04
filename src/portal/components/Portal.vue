@@ -458,7 +458,7 @@ export default class Portal extends Vue {
             if (!first) {
               first = result[remoteHost].ts
               xterm.writeln('\x1b[m')
-              xterm.write(`\x1b[33m${server}\x1b[1m first log entry timestamp returned: ${first}`)
+              xterm.write(`\x1b[33m${server}\x1b[m first log timestamp consumed: ${first}`)
             }
             this.peek[remoteHost] = {
               server: server,

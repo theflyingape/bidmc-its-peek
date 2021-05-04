@@ -202,7 +202,7 @@ module Apache {
                 / 1000 / 60) + 1
             //  make a good guess ...
             const lpm = Math.trunc(stat.size / 384 / minutes)
-            const lookback = recent ? (lpm < 100 ? 50 : 25) : (lpm < 10 ? 600 : 480)
+            const lookback = recent ? (lpm < 100 ? 60 : 30) : (lpm < 10 ? 600 : 480)
             const lines = lpm * lookback + 1
 
             audit(`${path.basename(file)} size:${stat.size.toLocaleString()} => lpm:${lpm}; want ${lines} lines`)
