@@ -394,7 +394,6 @@ export default class Portal extends Vue {
   webSocketOpen(server: string): WebSocket {
     const reqUrl = `wss://${server}/peek/apache/`
     let wss = new WebSocket(reqUrl)
-    let first = ''
 
     wss.onopen = () => {
       UIkit.notification({ message: `WebSocket opened: ${server}`, pos: 'bottom-left', status: 'success' })
@@ -455,11 +454,6 @@ export default class Portal extends Vue {
           } else {
             //  new client
             const ts = new Date(result[remoteHost].ts)
-            if (!first) {
-              first = result[remoteHost].ts
-              xterm.writeln('\x1b[m')
-              xterm.write(`\x1b[33m${server}\x1b[m first log timestamp consumed: ${first}`)
-            }
             this.peek[remoteHost] = {
               server: server,
               ts: ts,
