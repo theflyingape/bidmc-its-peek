@@ -160,17 +160,11 @@ module Apache {
 
         tail(true, (result: apacheLog) => {
             if (result.remoteHost && result.time) {
-                payload[result.remoteHost] = {}
-                try {
-                    let url = new URL(result.request.split(' ')[1], `${listener}`)
-                    payload[result.remoteHost].pathname = url.pathname
-                    if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
-                }
-                catch (err) {
-                    payload[result.remoteHost].pathname = payload[result.remoteHost].pathname || err.code
-                }
+                payload[result.remoteHost] = { ts: result.time }
+                payload[result.remoteHost].pathname = result.request.split(' ')[1] || ''
+                let url = new URL(payload[result.remoteHost].pathname, `${listener}`)
+                if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
                 payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
-                payload[result.remoteHost].ts = result.time
                 hosts++
             }
         })

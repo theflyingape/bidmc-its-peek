@@ -443,13 +443,13 @@ export default class Portal extends Vue {
                 this.alive[from]--
               }
               this.peek[remoteHost].server = server
-
               //  log to console, but not API call-ins from our VPCs
               const ts = new Date(Date.now()).toLocaleTimeString()
               const msg = `${ts} \x1b[31;1m ${where.location} ${remoteHost} switched from ${from.split('.')[0]} to ${server.split('.')[0]}`
               xterm.writeln('\x1b[m')
               xterm.write(msg)
             }
+
             this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
             if (!this.peek[remoteHost].pathname) this.peek[remoteHost].pathname = result[remoteHost].pathname.substring(0, 15)
             //  any request/referer consolidatation, in order of preference
@@ -462,13 +462,14 @@ export default class Portal extends Vue {
                 i = url.search(s)
               }
               if (i > 0) {
-                let j = url.indexOf('&', i + 5) - 1
+                let j = url.indexOf('&', ++i) - 1
                 if (j < i) j = i + 15
                 const app = url.substring(i, j)
                 this.peek[remoteHost].pathname = app
               }
             })
-          } else {
+          }
+          else {
             //  new client
             const ts = new Date(result[remoteHost].ts)
             this.peek[remoteHost] = {
@@ -478,6 +479,7 @@ export default class Portal extends Vue {
             }
             this.webAdds++
           }
+
           //  keep any last webt received
           if (result[remoteHost].webt) {
             if (!this.peek[remoteHost].webt) this.webT++
@@ -549,7 +551,7 @@ export default class Portal extends Vue {
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
           if (!this.webtrail.peek[remoteHost].username)
-            ccc.push({ ip: remoteHost, webt: this.peek[remoteHost].webt })
+            ccc.push({ ip: remoteHost, webt: this.webtrail.peek[remoteHost].webt })
         }
       }
 
@@ -599,7 +601,7 @@ export default class Portal extends Vue {
         html += `<tr>`
         html += `<td>${remoteHost}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].ts}</td>`
-        html += `<td>${this.webtrail.peek[remoteHost].pathname} / ${this.webtrail.peek[remoteHost].webt}</td>`
+        html += `<td>${this.webtrail.peek[remoteHost].pathname || ''} / ${this.webtrail.peek[remoteHost].webt || ''}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].username || 'n/a'}</td>`
         html += `</tr>`
       }
