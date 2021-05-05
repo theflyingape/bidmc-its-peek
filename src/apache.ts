@@ -161,7 +161,6 @@ module Apache {
         tail(true, (result: apacheLog) => {
             if (result.remoteHost && result.time) {
                 payload[result.remoteHost] = {}
-                payload[result.remoteHost].ts = result.time
                 try {
                     let url = new URL(result.request.split(' ')[1], `${listener}`)
                     payload[result.remoteHost].pathname = url.pathname
@@ -170,6 +169,8 @@ module Apache {
                 catch (err) {
                     payload[result.remoteHost].pathname = payload[result.remoteHost].pathname || err.code
                 }
+                payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
+                payload[result.remoteHost].ts = result.time
                 hosts++
             }
         })
@@ -210,7 +211,6 @@ module Apache {
             let tail = new Tail(file, { nLines: lines })
             let alpine = new Alpine(Alpine.LOGFORMATS.COMBINED)
 
-            tail.on("line", (data) => {
                 //  strip any X-Forwarded-For ip addresses first (was a NetScaler config issue)
                 while (/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[,].*$/.test(data)) {
                     const space = data.indexOf(', ')
@@ -219,6 +219,8 @@ module Apache {
                 //  now parse it
                 const result = alpine.parseLine(data)
                 result.time = time(result.time)
+                const result = alpine.parsereferer = result['RequestHeader Referer'] || ''
+            tail.on("line", (data) => {
                 cb(result)
             })
 
