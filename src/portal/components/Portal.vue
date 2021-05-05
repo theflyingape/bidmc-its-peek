@@ -451,23 +451,9 @@ export default class Portal extends Vue {
             }
 
             this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
-            if (!this.peek[remoteHost].pathname) this.peek[remoteHost].pathname = result[remoteHost].pathname.substring(0, 15)
-            //  any request/referer consolidatation, in order of preference
-            const r = [ /&APP=/i, /&RUN=/i, /\/csp\// ]
-            r.forEach(s => {
-              let url = result[remoteHost].pathname
-              let i = url.search(s)
-              if (i < 0) {
-                url = result[remoteHost].referer
-                i = url.search(s)
-              }
-              if (i > 0) {
-                let j = url.indexOf('&', ++i) - 1
-                if (j < i) j = i + 15
-                const app = url.substring(i, j)
-                this.peek[remoteHost].pathname = app
-              }
-            })
+            this.peek[remoteHost].pathname = running(result[remoteHost])
+              || this.peek[remoteHost].pathname
+              || result[remoteHost].pathname.substring(0, 15)
           }
           else {
             //  new client
@@ -475,7 +461,7 @@ export default class Portal extends Vue {
             this.peek[remoteHost] = {
               server: server,
               ts: ts,
-              pathname: result[remoteHost].pathname
+              pathname: running(result[remoteHost]) || result[remoteHost].pathname.substring(0, 15)
             }
             this.webAdds++
           }
@@ -531,6 +517,35 @@ export default class Portal extends Vue {
         xterm.writeln('\x1b[m')
         xterm.write(msg)
         xterm.scrollToBottom()
+      }
+
+      //  any request/referer consolidatation, in order of preference
+      function running(result: {
+        ts: string
+        pathname: string
+        referer: string
+        webt?: string
+      }): string {
+        let pathname = ''
+        const r = [ /&APP=/i, /&RUN=/i, /\/csp\// ]
+        r.forEach(s => {
+          let url = result.pathname
+          let i = url.search(s)
+          if (i < 0) {
+            url = result.referer
+            i = url.search(s)
+          }
+          if (i > 0) {
+            let j = url.indexOf('&', ++i) - 1
+            if (j < i) j = i + 15
+            const app = url.substring(i, j)
+            if (/^LOGIN/i.test(app))
+              pathname += `-${app}`
+            else
+              pathname = app
+          }
+        })
+        return pathname
       }
     }
 
@@ -601,7 +616,7 @@ export default class Portal extends Vue {
         html += `<tr>`
         html += `<td>${remoteHost}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].ts}</td>`
-        html += `<td>${this.webtrail.peek[remoteHost].pathname || ''} / ${this.webtrail.peek[remoteHost].webt || ''}</td>`
+        html += `<td>${this.webtrail.peek[remoteHost].pathname || ''}${this.webtrail.peek[remoteHost].webt ? ' / ' + this.webtrail.peek[remoteHost].webt : ''}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].username || 'n/a'}</td>`
         html += `</tr>`
       }
