@@ -453,7 +453,7 @@ export default class Portal extends Vue {
             this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
             this.peek[remoteHost].pathname = running(result[remoteHost])
               || this.peek[remoteHost].pathname
-              || result[remoteHost].pathname.substring(0, 15)
+              || result[remoteHost].pathname.substring(0, 16)
           }
           else {
             //  new client
@@ -461,7 +461,7 @@ export default class Portal extends Vue {
             this.peek[remoteHost] = {
               server: server,
               ts: ts,
-              pathname: running(result[remoteHost]) || result[remoteHost].pathname.substring(0, 15)
+              pathname: running(result[remoteHost]) || result[remoteHost].pathname.substring(0, 16)
             }
             this.webAdds++
           }
@@ -537,7 +537,10 @@ export default class Portal extends Vue {
           }
           if (i > 0) {
             let j = url.indexOf('&', ++i) - 1
-            if (j < i) j = i + 15
+            if (j > i)
+              i += 4
+            else
+              j = i + 15
             const app = url.substring(i, j)
             if (/^LOGIN/i.test(app))
               pathname += `-${app}`
