@@ -211,6 +211,7 @@ module Apache {
             let tail = new Tail(file, { nLines: lines })
             let alpine = new Alpine(Alpine.LOGFORMATS.COMBINED)
 
+            tail.on("line", (data) => {
                 //  strip any X-Forwarded-For ip addresses first (was a NetScaler config issue)
                 while (/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[,].*$/.test(data)) {
                     const space = data.indexOf(', ')
@@ -219,8 +220,6 @@ module Apache {
                 //  now parse it
                 const result = alpine.parseLine(data)
                 result.time = time(result.time)
-                const result = alpine.parsereferer = result['RequestHeader Referer'] || ''
-            tail.on("line", (data) => {
                 cb(result)
             })
 
