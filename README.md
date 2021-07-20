@@ -26,6 +26,6 @@ $ sudo -s
 
 [![NPM](https://nodei.co/npm/bidmc-its-peek.png?compact=true)](https://nodei.co/npm/bidmc-its-peek/)
 
-![Node.js Package](https://github.com/theflyingape/bidmc-its-peek/workflows/Node.js%20Package/badge.svg) ![David](https://img.shields.io/david/dev/theflyingape/bidmc-its-peek) [![Issues](http://img.shields.io/github/issues/theflyingape/bidmc-its-peek.svg)](https://github.com/theflyingape/bidmc-its-peek/issues)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)[![npm version](https://badge.fury.io/js/bidmc-its-peek.svg)](https://www.npmjs.com/package/bidmc-its-peek) ![npm version](https://img.shields.io/node/v/bidmc-its-peek) ![David](https://img.shields.io/david/dev/theflyingape/bidmc-its-peek) [![Issues](http://img.shields.io/github/issues/theflyingape/bidmc-its-peek.svg)](https://github.com/theflyingape/bidmc-its-peek/issues)
 
 :us: :copyright: 2021 [Robert Hurst](https://www.linkedin.com/in/roberthurstrius/)

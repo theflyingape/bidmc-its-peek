@@ -3,18 +3,6 @@
     {
       "name": "BIDMC ITS Peek",
       "path": "/home/rhurst/bidmc-its-peek"
-    },
-    {
-      "name": "watson:CCC",
-      "uri": "isfs://watson:CCC/"
-    },
-    {
-      "name": "toby:CCC",
-      "uri": "isfs://toby:CCC/"
-    },
-    {
-      "name": "mycroft:CCC",
-      "uri": "isfs://mycroft:CCC/"
     }
   ],
   "settings": {
@@ -46,16 +34,18 @@
         "description": "LIVE Caché 2018",
         "username": "rhurst"
       },
-      "/default": "watson"
+      "/hideEmbeddedEntries": true
     },
     "objectscript.conn": {
-      "active": false,
+      "active": true,
       "links": {
           "CCC Classic dev": "https://xterm-dev.bidmc.org",
           "CCC Classic Test": "https://xterm-test.bidmc.org",
-          "CCC Classic": "https://xterm.bidmc.harvard.edu/xterm/its@mycroft/",
-          "Routine Utilities": "https://watson.bidmc.org/isc/studio/usertemplates/xpcstart.csp?User=rhurst&Namespace=BIH&Name=Compare"
-      }
+          "CCC Classic": "https://xterm.bidmc.org",
+          "Routine Utilities": "${serverUrl}/isc/studio/usertemplates/xpcstart.csp?User=rhurst&Namespace=${namespace}&Name=Compare",
+          "SOAP Wizard": "${serverUrl}/isc/studio/templates/%25ZEN.Template.AddInWizard.SOAPWizard.cls?Namespace=${namespace}",
+          "XML Schema Wizard": "${serverUrl}/isc/studio/templates/%25ZEN.Template.AddInWizard.XMLSchemaWizard.cls?Namespace=${namespace}"
+        }
     },
     "objectscript.serverSideEditing": true,
     "objectscript.showExplorer": false
