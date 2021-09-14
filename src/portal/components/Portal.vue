@@ -587,7 +587,7 @@ export default class Portal extends Vue {
       html += `<thead><tr>`
       html += `<th style="text-align: center">client</th>`
       html += `<th style="text-align: center">timestamp</th>`
-      html += `<th style="text-align: center">path / webt</th>`
+      html += `<th style="text-align: center">app / webt</th>`
       html += `<th style="text-align: center">username</th>`
       html += `</tr></thead>`
 
@@ -595,8 +595,8 @@ export default class Portal extends Vue {
       for (let remoteHost in this.webtrail.peek) {
         html += `<tr>`
         html += `<td>${remoteHost}</td>`
-        html += `<td>${this.webtrail.peek[remoteHost].ts}</td>`
-        html += `<td>${this.webtrail.peek[remoteHost].pathname || ''}${this.webtrail.peek[remoteHost].webt ? ' / ' + this.webtrail.peek[remoteHost].webt : ''}</td>`
+        html += `<td>${this.webtrail.peek[remoteHost].ts} (${(this.webtrail.peek[remoteHost].ttl || 0) / 1000})</td>`
+        html += `<td>${this.webtrail.peek[remoteHost].app || ''}${this.webtrail.peek[remoteHost].webt ? ' / ' + this.webtrail.peek[remoteHost].webt : ''}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].username || 'n/a'}</td>`
         html += `</tr>`
       }

@@ -203,7 +203,7 @@ module Apache {
                     if (re.test(request)) {
                         app = name
                         ttl = apps[name].ttl
-                        audit(`${app} ${ttl} ${request}`)
+                        audit(`${app} ${ttl} ${request}`, 'warn')
                         break
                     }
                 }
