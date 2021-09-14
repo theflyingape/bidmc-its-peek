@@ -19,13 +19,6 @@ module Apache {
         caseSensitive: true, strict: false, mergeParams: false
     })
 
-    try {
-        const apps = JSON.parse(fs.readFileSync('etc/apps.json').toString())
-    }
-    catch (err) {
-        audit(`Caché apps are not available: ${err.message}`, 'warn')
-    }
-
     //  REST services
     router.get(`${API}*`, (req, res, next) => {
         next()
@@ -160,6 +153,14 @@ module Apache {
     }
 
     export function webMonitor(client: ws, params: URLSearchParams) {
+        let apps = {}
+        try {
+            apps = JSON.parse(fs.readFileSync('etc/apps.json').toString())
+        }
+        catch (err) {
+            audit(`Caché apps are not available: ${err.message}`, 'warn')
+        }
+    
         let hosts = 0
         let idle = 2500
         let last = new Date()
@@ -169,9 +170,8 @@ module Apache {
             if (result.remoteHost && result.time) {
                 const pathname = result.request.split(' ')[1] || ''
                 const url = new URL(pathname, `${listener}`)
-                let suite = apps(result.request)
-                payload[result.remoteHost] = { ts: result.time, app: suite.app, ttl: suite.ttl }
-                payload[result.remoteHost].pathname = pathname
+                let which = suite(result.request)
+                payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, app: which.app }
                 if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
                 payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
                 hosts++
@@ -195,7 +195,7 @@ module Apache {
             }
         }, 995)
 
-        function apps(request:string): { app:string, ttl:number } {
+        function suite(request:string): { app:string, ttl:number } {
             let app = '', ttl = 0
             for (let name in apps) {
                 for (let i in apps[name].filter) {
