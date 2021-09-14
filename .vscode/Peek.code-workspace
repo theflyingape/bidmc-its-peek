@@ -2,7 +2,7 @@
   "folders": [
     {
       "name": "BIDMC ITS Peek",
-      "path": "/home/rhurst/bidmc-its-peek"
+      "path": ".."
     }
   ],
   "settings": {

@@ -19,6 +19,13 @@ module Apache {
         caseSensitive: true, strict: false, mergeParams: false
     })
 
+    try {
+        const apps = JSON.parse(fs.readFileSync('etc/apps.json').toString())
+    }
+    catch (err) {
+        audit(`Caché apps are not available: ${err.message}`, 'warn')
+    }
+
     //  REST services
     router.get(`${API}*`, (req, res, next) => {
         next()
@@ -160,12 +167,16 @@ module Apache {
 
         tail(true, (result: apacheLog) => {
             if (result.remoteHost && result.time) {
-                payload[result.remoteHost] = { ts: result.time }
-                payload[result.remoteHost].pathname = result.request.split(' ')[1] || ''
-                let url = new URL(payload[result.remoteHost].pathname, `${listener}`)
-                if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
-                payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
-                hosts++
+                const pathname = result.request.split(' ')[1] || ''
+                const url = new URL(pathname, `${listener}`)
+                let suite
+                if ((suite = apps(result.request)).ttl) {
+                    payload[result.remoteHost] = { ts: result.time, app: suite.app, ttl: suite.ttl }
+                    payload[result.remoteHost].pathname = pathname
+                    if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
+                    payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
+                    hosts++
+                }
             }
         })
 
@@ -185,6 +196,19 @@ module Apache {
                 })
             }
         }, 1000)
+
+        function apps(request:string): { app:string, ttl:number } {
+            let app = '', ttl = 0
+            for (let name in apps) {
+                const re = RegExp(apps[name].filter)
+                if (re.test(request)) {
+                    app = name
+                    ttl = apps[name].ttl
+                    break
+                }
+            }
+            return { app:app, ttl:ttl }
+        }
     }
 
     function tail(recent: boolean, cb: Function) {

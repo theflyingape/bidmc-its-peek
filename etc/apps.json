@@ -1,0 +1,81 @@
+{
+    "api": {
+        "filter": [
+            "\/csp\/"
+        ],
+        "ttl": 60
+    },
+    "discard": {
+        "filter": [
+            "^((?!\/scripts\/).)*$",
+            "^GET .*RUN=.*LOGIN.*"
+        ],
+        "ttl": 0
+    },
+    "Magic Buttons": {
+        "filter": [
+            "RUN=n2init",
+            "RUN=ECW",
+            "RUN=ENOTIFY",
+            "RUN=EPIC",
+            "RUN=MBAJH",
+            "RUN=MBATHENA",
+            "RUN=MBCAMBRIDGEHA",
+            "RUN=MBCOMM1",
+            "RUN=MBFCHC",
+            "RUN=MBLH",
+            "RUN=MBMAH",
+            "RUN=MBMILTON",
+            "RUN=MBMTAH",
+            "RUN=MBNEBH",
+            "RUN=MBPLYMOUTH",
+            "RUN=MBSH",
+            "RUN=MBSIGNATURE",
+            "RUN=MBSSH",
+            "RUN=MBVIGILANZ",
+            "RUN=MBMGH",
+            "RUN=MBMGHPOC",
+            "RUN=MBMGHTST"
+        ],
+        "ttl": 240
+    },
+    "Team Census": {
+        "filter": [
+            "APP=CNO"
+        ],
+        "ttl": 420
+    },
+    "webOMR": {
+        "filter": [
+            "APP=EMR"
+        ],
+        "ttl": 420
+    },
+    "Interventional Radiology": {
+        "filter": [
+            "APP=IR"
+        ],
+        "ttl": 420
+    },
+    "Physician Order Entry": {
+        "filter": [
+            "APP=POE"
+        ],
+        "ttl": 420
+    },
+    "Inpatient Pharmacy": {
+        "filter": [
+            "APP=PHA"
+        ],
+        "ttl": 420
+    },
+    "eMAR": {
+        "filter": [
+            "APP=rmdsh"
+        ],
+        "ttl": 420
+    },
+    "default": {
+        "ttl": 360
+    }
+}

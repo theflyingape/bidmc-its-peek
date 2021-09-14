@@ -260,9 +260,11 @@ export default class Portal extends Vue {
   peek: {
     [host: string]: {
       server: string
-      pathname: string
       ts: Date
+      app: string
+      ttl: number
       username?: string
+      pathname: string
       webt?: string
     }
   } = {}
@@ -417,6 +419,8 @@ export default class Portal extends Vue {
         const result: {
           [remoteHost: string]: {
             ts: string
+            app: string
+            ttl: number
             pathname: string
             referer: string
             webt?: string
@@ -451,7 +455,7 @@ export default class Portal extends Vue {
             }
 
             this.peek[remoteHost].ts = new Date(result[remoteHost].ts)
-            this.peek[remoteHost].pathname = running(result[remoteHost]) || this.peek[remoteHost].pathname
+            this.peek[remoteHost].pathname = result[remoteHost].app || this.peek[remoteHost].pathname
           }
           else {
             //  new client
@@ -459,7 +463,8 @@ export default class Portal extends Vue {
             this.peek[remoteHost] = {
               server: server,
               ts: ts,
-              pathname: running(result[remoteHost])
+              app: result[remoteHost].app, ttl: result[remoteHost].ttl,
+              pathname: result[remoteHost].pathname
             }
             this.webAdds++
           }
@@ -479,7 +484,8 @@ export default class Portal extends Vue {
           const where = this.topology(remoteHost)
           const then = this.peek[remoteHost].ts.valueOf() || 0
           const elapsed = Date.now() - then
-          if (elapsed < 1200000) {
+          //  app identifed "TTL", else Netscaler is configured for 20-minutes
+          if (elapsed < this.peek[remoteHost].ttl.valueOf() || 1200000) {
             this.dashboard[where.location][where.access][server]++
             this.alive[server]++
           } else {
@@ -492,7 +498,7 @@ export default class Portal extends Vue {
         this.peekFormatter()
         if (this.webtrail.enable && this.webtrail.location && this.webtrail.access && this.webtrail.server == server)
           this.webtrailFormatter(this.webtrail.location, this.webtrail.access, this.webtrail.server)
-      } catch (err) {
+      } catch (err:any) {
         UIkit.notification({
           message: `WebSocket message error: ${err.message} from ${server}`,
           pos: 'bottom-left',
@@ -515,36 +521,6 @@ export default class Portal extends Vue {
         xterm.writeln('\x1b[m')
         xterm.write(msg)
         xterm.scrollToBottom()
-      }
-
-      //  any request/referer consolidatation, in order of preference
-      function running(result: {
-        ts: string
-        pathname: string
-        referer: string
-        webt?: string
-      }): string {
-        let pathname = /^\/scripts\//.test(result.pathname) ? '' : result.pathname.substring(0, 16)
-        const r = [ /&APP=/i, /&RUN=/i, /\/csp\// ]
-        r.forEach(s => {
-          let url = result.pathname
-          let i = url.search(s)
-          if (i < 0) {
-            url = result.referer
-            i = url.search(s)
-          }
-          if (i > 0) {
-            let j = url.indexOf('&', ++i) - 1
-            if (j < i) j = i + 15
-            i += 4
-            const app = url.substring(i, j)
-            if (pathname && /^LOGIN/i.test(app))
-              pathname += ` ${app}`
-            else
-              pathname = app
-          }
-        })
-        return pathname
       }
     }
 
