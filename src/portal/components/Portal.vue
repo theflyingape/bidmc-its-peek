@@ -479,7 +479,10 @@ export default class Portal extends Vue {
 
           if (result[remoteHost].ttl > this.peek[remoteHost].ttl / 1000) this.peek[remoteHost].ttl = result[remoteHost].ttl * 1000
           if (result[remoteHost].pathname) this.peek[remoteHost].pathname = result[remoteHost].pathname
-          if (!this.peek[remoteHost].app) this.peek[remoteHost].app = result[remoteHost].app
+          if (!this.peek[remoteHost].app)
+            this.peek[remoteHost].app = result[remoteHost].app
+          else if ((this.peek[remoteHost].app || '')[0] == '*')
+            this.peek[remoteHost].app = result[remoteHost].app
           //  keep any last webt received
           if (result[remoteHost].webt) {
             if (!this.peek[remoteHost].webt) this.webT++

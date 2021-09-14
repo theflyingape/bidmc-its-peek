@@ -174,7 +174,7 @@ module Apache {
                 payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, referer: result['RequestHeader Referer'] || '' }
                 if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
                 if (which.app == '*')
-                    payload[result.remoteHost].app = url.searchParams.get('APP') || url.searchParams.get('RUN') || url.searchParams.get('TITLE') || ''
+                    payload[result.remoteHost].app = which.app + (url.searchParams.get('APP') || url.searchParams.get('RUN') || url.searchParams.get('app') || url.searchParams.get('cmd') || url.searchParams.get('TITLE') || '')
                 else
                     payload[result.remoteHost].app = which.app
                 hosts++
