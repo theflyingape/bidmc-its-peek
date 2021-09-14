@@ -173,6 +173,8 @@ module Apache {
                 let which = suite(result.request)
                 payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, referer: result['RequestHeader Referer'] || '', app: which.app }
                 if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
+                if (which.app == '*')
+                    payload[result.remoteHost].app = url.searchParams.get('APP') || url.searchParams.get('RUN')
                 hosts++
             }
         })
@@ -202,7 +204,7 @@ module Apache {
                     if (re.test(request)) {
                         app = name
                         ttl = apps[name].ttl
-                        audit(`${app} ${ttl} ${request}`, 'warn')
+                        //audit(`${app} ${ttl} ${request}`)
                         break
                     }
                 }

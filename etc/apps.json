@@ -5,7 +5,7 @@
         ],
         "ttl": 60
     },
-    "discard": {
+    "-": {
         "filter": [
             "^((?!\/scripts\/).)*$",
             "^GET .*RUN=.*LOGIN.*"
@@ -38,6 +38,20 @@
             "RUN=MBMGHTST"
         ],
         "ttl": 240
+    },
+    "ED Call-in": {
+        "filter": [
+            "RUN=EWci"
+        ],
+        "ttl": 0
+    },
+    "ED Dashboard": {
+        "filter": [
+            "RUN=EWDASH",
+            "app=triggerCheck",
+            "_WEBTAG=chkForerun"
+        ],
+        "ttl": 60
     },
     "Team Census": {
         "filter": [
@@ -75,7 +89,16 @@
         ],
         "ttl": 420
     },
-    "default": {
-        "ttl": 360
+    "Urgent Care": {
+        "filter": [
+            "APP=UCCC"
+        ],
+        "ttl": 420
+    },
+    "*": {
+        "filter": [
+            ".*"
+        ],
+        "ttl": 60
     }
 }

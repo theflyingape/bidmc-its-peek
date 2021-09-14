@@ -585,21 +585,18 @@ export default class Portal extends Vue {
       let html = `<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">`
       html += `<thead><tr>`
       html += `<th style="text-align: center">client</th>`
-      html += `<th style="text-align: center">timestamp</th>`
-      html += `<th style="text-align: center">app / webt</th>`
+      html += `<th style="text-align: center">timestamp (ttl)</th>`
+      html += `<th style="text-align: center">app :: webt</th>`
       html += `<th style="text-align: center">username</th>`
       html += `</tr></thead>`
 
       html += `<tbody>`
       for (let remoteHost in this.webtrail.peek) {
         html += `<tr>`
-        html += `<td rowspan=2>${remoteHost}</td>`
+        html += `<td>${remoteHost}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].ts} (${(this.webtrail.peek[remoteHost].ttl || 0) / 1000})</td>`
-        html += `<td>${this.webtrail.peek[remoteHost].app}${this.webtrail.peek[remoteHost].webt ? ' / ' + this.webtrail.peek[remoteHost].webt : ''}</td>`
+        html += `<td>${this.webtrail.peek[remoteHost].app}${this.webtrail.peek[remoteHost].webt ? ' :: ' + this.webtrail.peek[remoteHost].webt : ''}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].username || 'n/a'}</td>`
-        html += `</tr>`
-        html += `<tr>`
-        html += `<td colspan=3>${this.webtrail.peek[remoteHost].pathname}</td>`
         html += `</tr>`
       }
       html += `</tbody>`
