@@ -469,7 +469,7 @@ export default class Portal extends Vue {
           }
 
           if (result[remoteHost].ttl > this.peek[remoteHost].ttl / 1000) this.peek[remoteHost].ttl = result[remoteHost].ttl * 1000
-          this.peek[remoteHost].pathname = this.peek[remoteHost].pathname
+          if (result[remoteHost].pathname) this.peek[remoteHost].pathname = result[remoteHost].pathname
           if (!this.peek[remoteHost].app) this.peek[remoteHost].app = result[remoteHost].app
           //  keep any last webt received
           if (result[remoteHost].webt) {
@@ -541,7 +541,7 @@ export default class Portal extends Vue {
         this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleTimeString()
         this.webtrail.peek[remoteHost].ttl = this.peek[remoteHost].ttl
         this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
-        this.webtrail.peek[remoteHost].app = this.peek[remoteHost].app || ''
+        this.webtrail.peek[remoteHost].app = this.peek[remoteHost].app
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
           if (!this.webtrail.peek[remoteHost].username)
@@ -597,6 +597,8 @@ export default class Portal extends Vue {
         html += `<td>${this.webtrail.peek[remoteHost].ts} (${(this.webtrail.peek[remoteHost].ttl || 0) / 1000})</td>`
         html += `<td>${this.webtrail.peek[remoteHost].app}${this.webtrail.peek[remoteHost].webt ? ' / ' + this.webtrail.peek[remoteHost].webt : ''}</td>`
         html += `<td>${this.webtrail.peek[remoteHost].username || 'n/a'}</td>`
+        html += `</tr>`
+        html += `<tr>`
         html += `<td colspan=3>${this.webtrail.peek[remoteHost].pathname}</td>`
         html += `</tr>`
       }
