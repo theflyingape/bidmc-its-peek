@@ -160,7 +160,7 @@ module Apache {
         catch (err) {
             audit(`Caché apps are not available: ${err.message}`, 'warn')
         }
-    
+
         let hosts = 0
         let idle = 2500
         let last = new Date()
@@ -171,9 +171,8 @@ module Apache {
                 const pathname = result.request.split(' ')[1] || ''
                 const url = new URL(pathname, `${listener}`)
                 let which = suite(result.request)
-                payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, app: which.app }
+                payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, referer: result['RequestHeader Referer'] || '', app: which.app }
                 if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
-                payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
                 hosts++
             }
         })

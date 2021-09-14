@@ -490,7 +490,7 @@ export default class Portal extends Vue {
           const then = this.peek[remoteHost].ts.valueOf() || 0
           const elapsed = Date.now() - then
           //  app identifed "TTL", else Netscaler is configured for 20-minutes
-          if (elapsed < this.peek[remoteHost].ttl.valueOf() || 1200000) {
+          if (elapsed < (this.peek[remoteHost].ttl.valueOf() || 1200000)) {
             this.dashboard[where.location][where.access][server]++
             this.alive[server]++
           } else {
