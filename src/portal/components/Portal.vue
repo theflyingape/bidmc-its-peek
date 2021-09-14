@@ -572,8 +572,10 @@ export default class Portal extends Vue {
           .then((response) => {
             response.json().then((globals) => {
               globals.forEach((global: { remoteHost: string; username: string; instance: string }) => {
-                this.webtrail.peek[global.remoteHost].username = global.username || ''
-                this.webtrail.peek[global.remoteHost].instance = global.instance || ''
+                if (global.remoteHost) {
+                  this.webtrail.peek[global.remoteHost].username = global.username || ''
+                  this.webtrail.peek[global.remoteHost].instance = global.instance || ''
+                }
               })
               resolve(1)
             })
