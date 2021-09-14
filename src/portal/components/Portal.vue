@@ -306,6 +306,11 @@ export default class Portal extends Vue {
       }
     }
 
+    const ts = new Date(Date.now()).toLocaleTimeString()
+    const msg = `${ts} selected \x1b[32;1m ${value}\x1b[22m farm\x1b[m -- be patient while dashboard warms up`
+    xterm.writeln('\x1b[m')
+    xterm.write(msg)
+
     //  configure UIkit events
     UIkit.offcanvas('#offcanvas').toggle()
     UIkit.util.on('#modal-clientIP', 'show', () => {
@@ -400,6 +405,10 @@ export default class Portal extends Vue {
     let wss = new WebSocket(reqUrl)
 
     wss.onopen = () => {
+      const ts = new Date(Date.now()).toLocaleTimeString()
+      const msg = `${ts} streaming \x1b[32;1m ${server} \x1b[22m web logs`
+      xterm.writeln('\x1b[m')
+      xterm.write(msg)
       UIkit.notification({ message: `WebSocket opened: ${server}`, pos: 'bottom-left', status: 'success' })
       this.messages[server] = 0
       this.$forceUpdate()
