@@ -232,10 +232,12 @@ interface webtrail {
   peek: {
     [host: string]: {
       ts?: string
-      instance?: string
-      pathname?: string
-      webt?: string
+      ttl?: number
       username?: string
+      pathname?: string
+      app?: string
+      webt?: string
+      instance?: string
     }
   }
 }
@@ -261,10 +263,10 @@ export default class Portal extends Vue {
     [host: string]: {
       server: string
       ts: Date
-      app: string
       ttl: number
       username?: string
       pathname: string
+      app?: string
       webt?: string
     }
   } = {}
@@ -419,10 +421,10 @@ export default class Portal extends Vue {
         const result: {
           [remoteHost: string]: {
             ts: string
-            app: string
             ttl: number
             pathname: string
             referer: string
+            app?: string
             webt?: string
           }
         } = JSON.parse(ev.data)
@@ -463,7 +465,7 @@ export default class Portal extends Vue {
             this.peek[remoteHost] = {
               server: server,
               ts: ts,
-              app: result[remoteHost].app, ttl: result[remoteHost].ttl || 2000,
+              ttl: (result[remoteHost].ttl || 2) * 1000,
               pathname: result[remoteHost].pathname
             }
             this.webAdds++

@@ -193,20 +193,23 @@ module Apache {
                     }
                 })
             }
-        }, 1000)
+        }, 995)
 
         function apps(request:string): { app:string, ttl:number } {
             let app = '', ttl = 0
             for (let name in apps) {
-                const re = RegExp(apps[name].filter)
-                if (re.test(request)) {
-                    app = name
-                    ttl = apps[name].ttl
-                    console.info(app, ttl, request)
-                    break
+                for (let i in apps[name].filter) {
+                    const re = RegExp(apps[name].filter[i])
+                    if (re.test(request)) {
+                        app = name
+                        ttl = apps[name].ttl
+                        audit(`${app} ${ttl} ${request}`)
+                        break
+                    }
                 }
+                if (ttl) break
             }
-            return { app:app, ttl:ttl }
+            return { app: app, ttl: ttl }
         }
     }
 
