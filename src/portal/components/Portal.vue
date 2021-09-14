@@ -542,7 +542,9 @@ export default class Portal extends Vue {
         if (where.location !== location || where.access !== access) continue
         if (!this.webtrail.peek[remoteHost]) this.webtrail.peek[remoteHost] = {}
         this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleTimeString()
+        this.webtrail.peek[remoteHost].ttl = this.peek[remoteHost].ttl
         this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
+        this.webtrail.peek[remoteHost].app = this.peek[remoteHost].app
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
           if (!this.webtrail.peek[remoteHost].username)
