@@ -171,10 +171,12 @@ module Apache {
                 const pathname = result.request.split(' ')[1] || ''
                 const url = new URL(pathname, `${listener}`)
                 let which = suite(result.request)
-                payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, referer: result['RequestHeader Referer'] || '', app: which.app }
+                payload[result.remoteHost] = { ts: result.time, ttl: which.ttl, pathname: pathname, referer: result['RequestHeader Referer'] || '' }
                 if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
                 if (which.app == '*')
-                    payload[result.remoteHost].app = url.searchParams.get('APP') || url.searchParams.get('RUN')
+                    payload[result.remoteHost].app = url.searchParams.get('APP') || url.searchParams.get('RUN') || ''
+                else
+                    payload[result.remoteHost].app = which.app
                 hosts++
             }
         })

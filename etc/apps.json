@@ -53,6 +53,12 @@
         ],
         "ttl": 60
     },
+    "ED POE": {
+        "filter": [
+            "RUN=POEed"
+        ],
+        "ttl": 360
+    },
     "Team Census": {
         "filter": [
             "APP=CNO"
