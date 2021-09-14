@@ -1,7 +1,8 @@
 {
-    "api": {
+    "api-": {
         "filter": [
-            "\/csp\/"
+            "\/csp\/",
+            "RUN=ccc"
         ],
         "ttl": 60
     },
@@ -38,6 +39,18 @@
             "RUN=MBMGHTST"
         ],
         "ttl": 240
+    },
+    "CareWeb": {
+        "filter": [
+            "RUN=cw"
+        ],
+        "ttl": 420
+    },
+    "eTicket": {
+        "filter": [
+            "APP=ET"
+        ],
+        "ttl": 300
     },
     "ED Call-in": {
         "filter": [
@@ -86,6 +99,12 @@
     "Inpatient Pharmacy": {
         "filter": [
             "APP=PHA"
+        ],
+        "ttl": 420
+    },
+    "Radiology Orders": {
+        "filter": [
+            "APP=RADORD"
         ],
         "ttl": 420
     },
