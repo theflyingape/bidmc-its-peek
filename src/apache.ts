@@ -169,14 +169,12 @@ module Apache {
             if (result.remoteHost && result.time) {
                 const pathname = result.request.split(' ')[1] || ''
                 const url = new URL(pathname, `${listener}`)
-                let suite
-                if ((suite = apps(result.request)).ttl) {
-                    payload[result.remoteHost] = { ts: result.time, app: suite.app, ttl: suite.ttl }
-                    payload[result.remoteHost].pathname = pathname
-                    if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
-                    payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
-                    hosts++
-                }
+                let suite = apps(result.request)
+                payload[result.remoteHost] = { ts: result.time, app: suite.app, ttl: suite.ttl }
+                payload[result.remoteHost].pathname = pathname
+                if (url.searchParams.get('_WEBT')) payload[result.remoteHost].webt = url.searchParams.get('_WEBT')
+                payload[result.remoteHost].referer = result['RequestHeader Referer'] || ''
+                hosts++
             }
         })
 
@@ -204,6 +202,7 @@ module Apache {
                 if (re.test(request)) {
                     app = name
                     ttl = apps[name].ttl
+                    console.info(app, ttl, request)
                     break
                 }
             }
