@@ -115,7 +115,7 @@
       <div class="uk-modal-dialog uk-modal-body uk-width-1-1" uk-overflow-auto>
         <button class="uk-modal-close-default" type="button" uk-close></button>
         <div class="uk-modal-header">
-          <h2 class="uk-modal-title">Client IP - Topology</h2>
+          <h2 class="uk-modal-title">Application Utilizations</h2>
         </div>
         <span v-html="peekTable"></span>
       </div>
@@ -347,6 +347,7 @@ export default class Portal extends Vue {
     //  not showing clientIP - skip html rendering
     if (!this.detail) return
 
+/*
     let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
     html += `<thead><tr>`
     html += `<th style="text-align: center">location - access</th>`
@@ -384,7 +385,31 @@ export default class Portal extends Vue {
       }
       html += `</tbody>`
     }
+*/
+    let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
+    html += `<thead><tr>`
+    html += `<th style="text-align: center">Application Suite</th>`
+    html += `<th style="text-align: center">Endpoints</th>`
+    html += `<th style="text-align: center">WebLink Sessions</th>`
+    html += `</tr></thead>`
 
+    let detail: { [application: string]: { endpoints: number, webt: 0 } } = {}
+    for (let remoteHost in this.peek) {
+      const app = this.peek[remoteHost].app || '?'
+      if (!detail[app]) detail[app] = { endpoints: 0, webt: 0 }
+      detail[app].endpoints++
+      if (this.peek[remoteHost].webt) detail[app].webt++
+    }
+
+    html += `<tbody>`
+    for (let app in detail) {
+        html += `<tr style="text-align: center">`
+        html += `<td style="text-align: center">${app}</td>`
+        html += `<td style="text-align: center">${detail[app].endpoints}</td>`
+        html += `<td style="text-align: center">${detail[app].webt}</td>`
+        html += `</tr>`
+    }
+    html += `</tbody>`
     html += `</table>`
     this.peekTable = html
   }

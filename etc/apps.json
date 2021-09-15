@@ -120,6 +120,12 @@
         ],
         "ttl": 420
     },
+    "*keepalive": {
+        "filter": [
+            "^.*T /scripts/nph-mgwcgi$"
+        ],
+        "ttl": 200
+    },
     "*": {
         "filter": [
             ".*"
