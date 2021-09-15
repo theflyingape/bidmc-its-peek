@@ -393,22 +393,36 @@ export default class Portal extends Vue {
     html += `<th style="text-align: center">WebLink Sessions</th>`
     html += `</tr></thead>`
 
-    let detail: { [application: string]: { endpoints: number, webt: 0 } } = {}
+    let detail: { [application: string]: { endpoints: number, webt: number } } = {}
+
     for (let remoteHost in this.peek) {
       const app = this.peek[remoteHost].app || '?'
+
       if (!detail[app]) detail[app] = { endpoints: 0, webt: 0 }
       detail[app].endpoints++
       if (this.peek[remoteHost].webt) detail[app].webt++
     }
+    let report = Object.keys(detail).sort().reduce((o:any, k) => {
+        o[k] = detail[k]
+        return o
+      }, {})
+    report['Total'] = { endpoints: 0, webt: 0 }
 
     html += `<tbody>`
-    for (let app in detail) {
-        html += `<tr style="text-align: center">`
-        html += `<td style="text-align: center">${app}</td>`
-        html += `<td style="text-align: center">${detail[app].endpoints}</td>`
-        html += `<td style="text-align: center">${detail[app].webt}</td>`
-        html += `</tr>`
+    for (let app in report) {
+      html += `<tr style="text-align: center">`
+      html += `<td style="text-align: center">${app}</td>`
+      html += `<td style="text-align: center">${detail[app].endpoints}</td>`
+      html += `<td style="text-align: center">${detail[app].webt}</td>`
+      html += `</tr>`
+      detail['Total'].endpoints += detail[app].endpoints
+      detail['Total'].webt += detail[app].webt
     }
+    html += `<tr style="text-align: center">`
+    html += `<td style="text-align: right">- Totals:</td>`
+    html += `<td style="text-align: center">${detail['Total'].endpoints}</td>`
+    html += `<td style="text-align: center">${detail['Total'].webt}</td>`
+    html += `</tr>`
     html += `</tbody>`
     html += `</table>`
     this.peekTable = html

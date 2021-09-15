@@ -122,7 +122,7 @@
     },
     "*keepalive": {
         "filter": [
-            "^.*T /scripts/nph-mgwcgi$"
+            "^.*T /scripts/nph-mgwcgi HTTP.*$"
         ],
         "ttl": 200
     },
