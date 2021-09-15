@@ -407,7 +407,7 @@ export default class Portal extends Vue {
         obj[key] = detail[key]
         return obj
       }, {})
-    report['Total'] = { endpoints: 0, webt: 0 }
+    let total = { endpoints: 0, webt: 0 }
 
     html += `<tbody>`
     for (let app in report) {
@@ -416,13 +416,13 @@ export default class Portal extends Vue {
       html += `<td style="text-align: center">${report[app].endpoints}</td>`
       html += `<td style="text-align: center">${report[app].webt}</td>`
       html += `</tr>`
-      report['Total'].endpoints += report[app].endpoints || 0
-      report['Total'].webt += report[app].webt || 0
+      total.endpoints += report[app].endpoints || 0
+      total.webt += report[app].webt || 0
     }
     html += `<tr style="text-align: center">`
     html += `<td style="text-align: right">- Totals:</td>`
-    html += `<td style="text-align: center">${report['Total'].endpoints}</td>`
-    html += `<td style="text-align: center">${report['Total'].webt}</td>`
+    html += `<td style="text-align: center">${total.endpoints}</td>`
+    html += `<td style="text-align: center">${total.webt}</td>`
     html += `</tr>`
     html += `</tbody>`
     html += `</table>`
