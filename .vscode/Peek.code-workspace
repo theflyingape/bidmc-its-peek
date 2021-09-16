@@ -7,6 +7,14 @@
     {
       "name": "watson:CCC",
       "uri": "isfs://watson:ccc/"
+    },
+    {
+      "name": "toby:CCC",
+      "uri": "isfs://toby:ccc/"
+    },
+    {
+      "name": "mycroft:CCC",
+      "uri": "isfs://mycroft:ccc/"
     }
   ],
   "settings": {

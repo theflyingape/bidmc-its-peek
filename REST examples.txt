@@ -1,0 +1,16 @@
+### return webt meta
+
+POST https://valhalla.bidmc.org/peek/api/data/webt?INSTANCES=cccprodapp01.bidmc.org,cccprodapp02.bidmc.org
+Content-Type: application/json
+
+[{ "webt":1267885169 }]
+
+
+### retrieve today's webt for this user
+
+GET https://valhalla.bidmc.org/peek/api/caché/username/rhurst/?INSTANCES=watsonapp1.bidmc.org,watsonapp2.bidmc.org
+
+
+### retrieve a web server's Apache log filename(s) used for monitoring
+
+GET https://cccdevweb01.bidmc.org/peek/api/apache/
