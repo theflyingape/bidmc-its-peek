@@ -615,13 +615,10 @@ export default class Portal extends Vue {
                 if (global.remoteHost) {
                   this.webtrail.peek[global.remoteHost].username = global.username || ''
                   this.webtrail.peek[global.remoteHost].instance = global.instance || ''
-                  this.webtrail.peek[global.remoteHost].app = `*${global.APP || ''}`
                   //  backfill here from Caché result if not detected from Apache
-                  if (this.peek[global.remoteHost]) {
-                    if ((this.peek[global.remoteHost].app || '*').indexOf('*') == 0)
-                      this.peek[global.remoteHost].app = global.app || this.webtrail.peek[global.remoteHost].app
-                    this.webtrail.peek[global.remoteHost].app = this.peek[global.remoteHost].app
-                  }
+                  if (this.peek[global.remoteHost] && (this.peek[global.remoteHost].app || '*').indexOf('*') == 0)
+                    this.peek[global.remoteHost].app = global.app
+                  this.webtrail.peek[global.remoteHost].app = this.peek[global.remoteHost].app || `*${global.APP || ''}`
                 }
               })
               resolve(1)
