@@ -112,10 +112,10 @@
 
     <!-- modals :: detail listing off main dashboard -->
     <div id="modal-clientIP" class="uk-model-container" uk-modal>
-      <div class="uk-modal-dialog uk-modal-body uk-width-1-2" uk-overflow-auto>
+      <div class="uk-modal-dialog uk-modal-body uk-width-1-2" style="text-align: center">
         <button class="uk-modal-close-default" type="button" uk-close></button>
         <div class="uk-modal-header">
-          <h2 class="uk-modal-title">Application Utilizations</h2>
+          <h4>Application Utilizations</h4>
         </div>
         <span v-html="peekTable"></span>
       </div>
@@ -314,8 +314,11 @@ export default class Portal extends Vue {
     //  configure UIkit events
     UIkit.offcanvas('#offcanvas').toggle()
     UIkit.util.on('#modal-clientIP', 'show', () => {
-      this.peekTable = 'Loading ... <div uk-spinner></div>'
+      this.peekTable = 'Please wait ... <div uk-spinner></div>'
       this.detail = true
+      this.webTrail().finally(() => {
+        this.peekFormatter()
+      })
     })
     UIkit.util.on('#modal-clientIP', 'hide', () => {
       this.detail = false
@@ -388,13 +391,6 @@ export default class Portal extends Vue {
       html += `</tbody>`
     }
 */
-    let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
-    html += `<thead><tr>`
-    html += `<th style="text-align: center">Application Suite</th>`
-    html += `<th style="text-align: center">Endpoints</th>`
-    html += `<th style="text-align: center">WebLink Sessions</th>`
-    html += `</tr></thead>`
-
     let detail: { [application: string]: { endpoints: number, webt: number } } = {}
 
     for (let remoteHost in this.peek) {
@@ -411,6 +407,12 @@ export default class Portal extends Vue {
       }, {})
     let total = { endpoints: 0, webt: 0 }
 
+    let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
+    html += `<thead><tr>`
+    html += `<th style="text-align: center">Application Suite</th>`
+    html += `<th style="text-align: center">Endpoints</th>`
+    html += `<th style="text-align: center">WebLink Sessions</th>`
+    html += `</tr></thead>`
     html += `<tbody>`
     for (let app in report) {
       html += `<tr style="text-align: center">`
@@ -603,7 +605,7 @@ export default class Portal extends Vue {
         }
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
-          if (!app || /^[?|*|^]/.test(app))
+          if (/^[?|*|^]/.test(app))
             ccc.push({ ip: remoteHost, webt: this.webtrail.peek[remoteHost].webt })
         }
       }
