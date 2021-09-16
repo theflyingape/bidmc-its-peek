@@ -25,7 +25,7 @@ Property ke As %Integer;
 
 Property tm As CCC.DT.Timestamp;
 
-Property app As %String;
+Property app As %String [ Calculated, SqlComputeCode = { set {*} = $g(@##class(CCC.WEB.Session).Getapp({ID}))}, SqlComputed ];
 
 Property username As %String;
 
@@ -35,6 +35,11 @@ Property webt As %CacheString [ Calculated, SqlComputeCode = { set {*} = ##class
 
 ///  Primary key
 Index IDKey On ID [ IdKey, Unique ];
+
+Method appGet() As %String
+{
+	quit ..Getapp()
+}
 
 ///  yeah, let's keep this human-readadble
 Method tmGet() As %String
@@ -52,7 +57,14 @@ Method webtGet()
 	quit ..Getwebt(i%ID)
 }
 
-ClassMethod Getinstance(ID)
+ClassMethod Getapp(ID) As %String
+{
+	set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "login", "APP"))
+	if (app = "") set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "from"))
+	quit app
+}
+
+ClassMethod Getinstance(ID) As %String
 {
 	set instance = $g(@##class(CCC.WEB.Session).#iWebs@(ID, "instance"))
 	set webt = $p(..Getwebt(ID), ",", *)
@@ -63,7 +75,7 @@ ClassMethod Getinstance(ID)
 	quit instance
 }
 
-ClassMethod Getwebt(ID)
+ClassMethod Getwebt(ID) As %String
 {
 	set (webt, list)=""
 	for n = 1:1 {
@@ -178,9 +190,6 @@ ClassMethod ToJSON(id) As %DynamicObject
 Storage BIDMC
 {
 <SQLMap name="DataMap">
-<Data name="app">
-<Node>"login","APP"</Node>
-</Data>
 <Data name="ip">
 <Node>"login","ip"</Node>
 </Data>

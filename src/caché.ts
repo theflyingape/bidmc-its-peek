@@ -25,13 +25,13 @@ module Caché {
         const jsData = req.body
         jsData.forEach((client) => {
             let result = {}
-            let ccc: { webtmaster?: { APP?: string, ip?: string, username?: string } } = {}
+            let ccc: { webtmaster?: { ip?: string, username?: string, app?: string } } = {}
             for (let node in nodes) {
                 const webt = parseInt(client.webt)
                 ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
                     let meta = { remoteHost: client.ip, app: '' }
-                    if (ccc.webtmaster.APP) meta.app = suite(ccc.webtmaster.APP).app
+                    if (ccc.webtmaster.app) meta.app = suite(ccc.webtmaster.app).app
                     result = Object.assign(meta, ccc.webtmaster)
                     break
                 }
