@@ -600,7 +600,7 @@ export default class Portal extends Vue {
         this.webtrail.peek[remoteHost].app = app
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
-          if (!app || /^[?|*|^]/.test(app) || !this.webtrail.peek[remoteHost].username)
+          if (!app || /^[?|*|^]/.test(app))
             ccc.push({ ip: remoteHost, webt: this.webtrail.peek[remoteHost].webt })
         }
       }
@@ -620,9 +620,10 @@ export default class Portal extends Vue {
                   this.webtrail.peek[global.remoteHost].username = global.username || ''
                   this.webtrail.peek[global.remoteHost].instance = global.instance || ''
                   //  backfill here from Caché result if not detected from Apache
-                  if (this.peek[global.remoteHost] && (this.peek[global.remoteHost].app || '*').indexOf('*') == 0)
+                  if (this.peek[global.remoteHost] && global.app) {
                     this.peek[global.remoteHost].app = global.app
-                  this.webtrail.peek[global.remoteHost].app = this.peek[global.remoteHost].app || `*${global.app || ''}`
+                    this.webtrail.peek[global.remoteHost].app = global.app
+                  }
                 }
               })
               resolve(1)
