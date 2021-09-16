@@ -25,17 +25,14 @@ module Caché {
         const jsData = req.body
         jsData.forEach((client) => {
             let result = {}
-            let ccc: { webtmaster?: { ip?: string, username?: string, app?: string } } = {}
+            let ccc: { webtmaster?: { ip?: string, username?: string, app?: string, APP?: string } } = {}
             for (let node in nodes) {
                 const webt = parseInt(client.webt)
                 ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
-                    let meta = { remoteHost: client.ip, app: '' }
-                    if (ccc.webtmaster.app) {
-                        meta.app = ccc.webtmaster.app
-                        if (meta.app[0] !== '^')
-                            meta.app = suite(`APP=${ccc.webtmaster.app}`).app
-                    }
+                    let meta = { remoteHost: client.ip, app: ccc.webtmaster.APP || '' }
+                    if (meta.app && meta.app[0] !== '^')
+                        meta.app = suite(`APP=${ccc.webtmaster.app}`).app
                     result = Object.assign(ccc.webtmaster, meta)
                     break
                 }
@@ -136,9 +133,9 @@ module Caché {
 
     export function webtmaster(node: cachedb, webt: number): {} {
         let cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
-        let result: { webtmaster?: { app: string } } = global(cos)
-        if (!result.webtmaster.app) {
-            result.webtmaster.app = node.cmd.invoke_classmethod({
+        let result: { webtmaster?: { APP: string } } = global(cos)
+        if (!result.webtmaster.APP) {
+            result.webtmaster.APP = node.cmd.invoke_classmethod({
                 class: "CCC.WEB.Session", method: "Getapp", arguments: [ webt ]
             }).result
         }
