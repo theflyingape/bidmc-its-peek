@@ -31,9 +31,11 @@ module Caché {
                 ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
                     let meta = { remoteHost: client.ip, app: '' }
-                    if (ccc.webtmaster.app) meta.app = ccc.webtmaster.app[0] == '^'
-                        ? ccc.webtmaster.app
-                        : suite(`APP=${ccc.webtmaster.app}`).app
+                    if (ccc.webtmaster.app) {
+                        meta.app = ccc.webtmaster.app
+                        if (ccc.webtmaster.app[0] !== '^')
+                            meta.app = suite(`APP=${ccc.webtmaster.app}`).app
+                    }
                     result = Object.assign(meta, ccc.webtmaster)
                     break
                 }
@@ -133,8 +135,14 @@ module Caché {
     }
 
     export function webtmaster(node: cachedb, webt: number): {} {
-        const cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
-        return global(cos)
+        let cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
+        let result: { webtmaster?: { app: string } } = global(cos)
+        if (!result.webtmaster.app) {
+            result.webtmaster.app = node.cmd.invoke_classmethod({
+                class: "CCC.WEB.Session", method: "Getapp", arguments: [ webt ]
+            }).result
+        }
+        return result
     }
 
     //  TODO: account for UTC

@@ -38,7 +38,7 @@ Index IDKey On ID [ IdKey, Unique ];
 
 Method appGet() As %String
 {
-	quit ..Getapp()
+	quit ..Getapp(i%ID)
 }
 
 ///  yeah, let's keep this human-readadble
