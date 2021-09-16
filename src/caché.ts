@@ -31,7 +31,9 @@ module Caché {
                 ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
                     let meta = { remoteHost: client.ip, app: '' }
-                    if (ccc.webtmaster.app) meta.app = suite(`APP=${ccc.webtmaster.app}`).app
+                    if (ccc.webtmaster.app) meta.app = ccc.webtmaster.app[0] == '^'
+                        ? ccc.webtmaster.app
+                        : suite(`APP=${ccc.webtmaster.app}`).app
                     result = Object.assign(meta, ccc.webtmaster)
                     break
                 }
