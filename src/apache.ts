@@ -2,7 +2,7 @@
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
-import { audit, config, listener } from './gateway'
+import { audit, config, listener, suite } from './gateway'
 import express = require('express')
 import fs = require('fs')
 import glob = require('glob')
@@ -153,14 +153,6 @@ module Apache {
     }
 
     export function webMonitor(client: ws, params: URLSearchParams) {
-        let apps = {}
-        try {
-            apps = JSON.parse(fs.readFileSync('etc/apps.json').toString())
-        }
-        catch (err) {
-            audit(`Caché apps are not available: ${err.message}`, 'warn')
-        }
-
         let hosts = 0
         let idle = 2500
         let last = new Date()
@@ -197,23 +189,6 @@ module Apache {
                 })
             }
         }, 995)
-
-        function suite(request:string): { app:string, ttl:number } {
-            let app = '', ttl = 0
-            for (let name in apps) {
-                for (let i in apps[name].filter) {
-                    const re = RegExp(apps[name].filter[i])
-                    if (re.test(request)) {
-                        app = name
-                        ttl = apps[name].ttl
-                        //audit(`${app} ${ttl} ${request}`)
-                        break
-                    }
-                }
-                if (ttl) break
-            }
-            return { app: app, ttl: ttl }
-        }
     }
 
     function tail(recent: boolean, cb: Function) {

@@ -79,6 +79,31 @@ module Gateway {
         }
     }
 
+    export function suite(request:string): { app:string, ttl:number } {
+        let app = '', ttl = 0
+        for (let name in apps) {
+            for (let i in apps[name].filter) {
+                const re = RegExp(apps[name].filter[i])
+                if (re.test(request)) {
+                    app = name
+                    ttl = apps[name].ttl
+                    //audit(`${app} ${ttl} ${request}`)
+                    break
+                }
+            }
+            if (ttl) break
+        }
+        return { app: app, ttl: ttl }
+    }
+
+    let apps = {}
+    try {
+        apps = JSON.parse(fs.readFileSync('etc/apps.json').toString())
+    }
+    catch (err) {
+        audit(`Caché apps are not available: ${err.message}`, 'warn')
+    }
+
     //  app server startup
     dns.lookup(config.host || 'localhost', (err, addr, family) => {
         const app = express()

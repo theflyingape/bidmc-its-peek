@@ -2,7 +2,7 @@
  *  Authored by Robert Hurst <rhurst@bidmc.harvard.edu>
  */
 
-import { audit } from './gateway'
+import { audit, suite } from './gateway'
 import express = require('express')
 import fs = require('fs')
 import path = require('path')
@@ -25,12 +25,14 @@ module Caché {
         const jsData = req.body
         jsData.forEach((client) => {
             let result = {}
-            let ccc: { webtmaster?: {} } = {}
+            let ccc: { webtmaster?: { APP?: string, ip?: string, username?: string } } = {}
             for (let node in nodes) {
                 const webt = parseInt(client.webt)
                 ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
-                    result = Object.assign({ remoteHost: client.ip }, ccc.webtmaster)
+                    let meta = { remoteHost: client.ip, app: '' }
+                    if (ccc.webtmaster.APP) meta.app = suite(ccc.webtmaster.APP).app
+                    result = Object.assign(meta, ccc.webtmaster)
                     break
                 }
             }
