@@ -316,6 +316,7 @@ export default class Portal extends Vue {
     UIkit.util.on('#modal-clientIP', 'show', () => {
       this.peekTable = 'Please wait ... <div uk-spinner></div>'
       this.detail = true
+
       this.webTrail().finally(() => {
         this.peekFormatter()
       })
@@ -590,9 +591,11 @@ export default class Portal extends Vue {
   webTrail(location = '', access = '', server = '') {
     return new Promise<number>((resolve, reject) => {
       let ccc: [{ ip?: string; webt?: string }?] = []
+      let cccHost = server
 
       for (let remoteHost in this.peek) {
         if (server && this.peek[remoteHost].server !== server) continue
+        cccHost = this.peek[remoteHost].server
         const where = this.topology(remoteHost)
         if (location && where.location !== location) continue
         if (access && where.access !== access) continue
@@ -611,7 +614,7 @@ export default class Portal extends Vue {
       }
 
       if (Object.keys(ccc).length) {
-        const reqUrl = `https://${server}/peek/api/data/webt/`
+        const reqUrl = `https://${cccHost}/peek/api/data/webt/`
         const params = new URLSearchParams({ INSTANCES: String(this.hosts.caché) })
         fetch(`${reqUrl}?${params}`, {
           method: 'POST',
@@ -620,6 +623,7 @@ export default class Portal extends Vue {
         })
           .then((response) => {
             response.json().then((globals) => {
+              console.log(globals)
               globals.forEach((global: { remoteHost: string; username: string; instance: string; app: string }) => {
                 if (global.remoteHost) {
                   this.webtrail.peek[global.remoteHost].username = global.username || ''

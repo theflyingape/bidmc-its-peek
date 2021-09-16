@@ -91,6 +91,12 @@
         ],
         "ttl": 420
     },
+    "Perioperative": {
+        "filter": [
+            "APP=ORS"
+        ],
+        "ttl": 420
+    },
     "Physician Order Entry": {
         "filter": [
             "APP=POE"
@@ -106,6 +112,12 @@
     "Radiology Orders": {
         "filter": [
             "APP=RADORD"
+        ],
+        "ttl": 420
+    },
+    "Med Room MAR": {
+        "filter": [
+            "APP=medrmdsh"
         ],
         "ttl": 420
     },
