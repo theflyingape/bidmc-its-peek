@@ -344,9 +344,10 @@ export default class Portal extends Vue {
   }
 
   peekFormatter() {
+/*
     //  not showing application utilizations - skip html rendering
     if (!this.detail) return
-/*
+
     let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
     html += `<thead><tr>`
     html += `<th style="text-align: center">location - access</th>`
@@ -572,8 +573,8 @@ export default class Portal extends Vue {
         this.webLog = this.refresh
         xterm.writeln('\x1b[m')
         xterm.write(msg)
-        this.webTrail().finally(() => {
-          xterm.scrollToBottom()
+        xterm.scrollToBottom()
+        if (this.detail) this.webTrail().finally(() => {
           this.peekFormatter()
         })
       }
