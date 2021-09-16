@@ -344,9 +344,8 @@ export default class Portal extends Vue {
   }
 
   peekFormatter() {
-    //  not showing clientIP - skip html rendering
+    //  not showing application utilizations - skip html rendering
     if (!this.detail) return
-
 /*
     let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
     html += `<thead><tr>`
@@ -549,7 +548,6 @@ export default class Portal extends Vue {
           }
         }
         //  update any active modal
-        this.peekFormatter()
         if (this.webtrail.enable && this.webtrail.location && this.webtrail.access && this.webtrail.server == server)
           this.webtrailFormatter(this.webtrail.location, this.webtrail.access, this.webtrail.server)
       } catch (err:any) {
@@ -576,6 +574,7 @@ export default class Portal extends Vue {
         xterm.write(msg)
         this.webTrail().finally(() => {
           xterm.scrollToBottom()
+          this.peekFormatter()
         })
       }
     }
