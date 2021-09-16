@@ -3,6 +3,10 @@
     {
       "name": "BIDMC ITS Peek",
       "path": ".."
+    },
+    {
+      "name": "watson:CCC",
+      "uri": "isfs://watson:ccc/"
     }
   ],
   "settings": {

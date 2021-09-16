@@ -25,6 +25,8 @@ Property ke As %Integer;
 
 Property tm As CCC.DT.Timestamp;
 
+Property app As %String;
+
 Property username As %String;
 
 Property usersim As %String;
@@ -164,6 +166,7 @@ ClassMethod ToJSON(id) As %DynamicObject
 		set obj.ip = webs.ip
 		set obj.ke = webs.ke
 		set obj.tm = webs.tm
+		set obj.app = webs.app
 		set obj.username = webs.username
 		set obj.usersim = webs.usersim
 		set obj.webt = webs.webt
@@ -175,6 +178,9 @@ ClassMethod ToJSON(id) As %DynamicObject
 Storage BIDMC
 {
 <SQLMap name="DataMap">
+<Data name="app">
+<Node>"login","APP"</Node>
+</Data>
 <Data name="ip">
 <Node>"login","ip"</Node>
 </Data>

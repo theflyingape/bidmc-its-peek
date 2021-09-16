@@ -611,10 +611,13 @@ export default class Portal extends Vue {
         })
           .then((response) => {
             response.json().then((globals) => {
-              globals.forEach((global: { remoteHost: string; username: string; instance: string }) => {
+              globals.forEach((global: { remoteHost: string; username: string; instance: string; app: string }) => {
                 if (global.remoteHost) {
                   this.webtrail.peek[global.remoteHost].username = global.username || ''
                   this.webtrail.peek[global.remoteHost].instance = global.instance || ''
+                  this.webtrail.peek[global.remoteHost].app = global.app || ''
+                  if (global.app && this.peek[global.remoteHost] && (this.peek[global.remoteHost].app || '*') == '*')
+                    this.peek[global.remoteHost].app = global.app
                 }
               })
               resolve(1)
