@@ -574,7 +574,9 @@ export default class Portal extends Vue {
         this.webLog = this.refresh
         xterm.writeln('\x1b[m')
         xterm.write(msg)
-        this.webTrail().finally(() => { xterm.scrollToBottom() })
+        this.webTrail().finally(() => {
+          xterm.scrollToBottom()
+        })
       }
     }
 
@@ -594,10 +596,11 @@ export default class Portal extends Vue {
         this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleTimeString()
         this.webtrail.peek[remoteHost].ttl = this.peek[remoteHost].ttl
         this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
-        this.webtrail.peek[remoteHost].app = this.peek[remoteHost].app
+        const app = this.peek[remoteHost].app || '?'
+        this.webtrail.peek[remoteHost].app = app
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
-          if (!this.webtrail.peek[remoteHost].username)
+          if (!app || /^[?|*|^]/.test(app) || !this.webtrail.peek[remoteHost].username)
             ccc.push({ ip: remoteHost, webt: this.webtrail.peek[remoteHost].webt })
         }
       }
