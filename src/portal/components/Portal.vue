@@ -574,21 +574,22 @@ export default class Portal extends Vue {
         this.webLog = this.refresh
         xterm.writeln('\x1b[m')
         xterm.write(msg)
-        xterm.scrollToBottom()
+        this.webTrail().finally(() => { xterm.scrollToBottom() })
       }
     }
 
     return wss
   }
 
-  webTrail(location: string, access: string, server: string) {
+  webTrail(location = '', access = '', server = '') {
     return new Promise<number>((resolve, reject) => {
       let ccc: [{ ip?: string; webt?: string }?] = []
 
       for (let remoteHost in this.peek) {
-        if (this.peek[remoteHost].server !== server) continue
+        if (server && this.peek[remoteHost].server !== server) continue
         const where = this.topology(remoteHost)
-        if (where.location !== location || where.access !== access) continue
+        if (location && where.location !== location) continue
+        if (access && where.access !== access) continue
         if (!this.webtrail.peek[remoteHost]) this.webtrail.peek[remoteHost] = {}
         this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleTimeString()
         this.webtrail.peek[remoteHost].ttl = this.peek[remoteHost].ttl
