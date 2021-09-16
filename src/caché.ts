@@ -134,7 +134,7 @@ module Caché {
     export function webtmaster(node: cachedb, webt: number): {} {
         let cos = node.cmd.retrieve({ global: 'webtmaster', subscripts: [webt, 'login'] })
         let result: { webtmaster?: { APP: string } } = global(cos)
-        if (!result.webtmaster.APP) {
+        if (!result.webtmaster.APP || result.webtmaster.APP[0] == '^') {
             result.webtmaster.APP = node.cmd.invoke_classmethod({
                 class: "CCC.WEB.Session", method: "Getapp", arguments: [ webt ]
             }).result
