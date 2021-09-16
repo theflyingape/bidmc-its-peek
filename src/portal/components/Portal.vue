@@ -112,7 +112,7 @@
 
     <!-- modals :: detail listing off main dashboard -->
     <div id="modal-clientIP" class="uk-model-container" uk-modal>
-      <div class="uk-modal-dialog uk-modal-body uk-width-1-1" uk-overflow-auto>
+      <div class="uk-modal-dialog uk-modal-body uk-width-1-2" uk-overflow-auto>
         <button class="uk-modal-close-default" type="button" uk-close></button>
         <div class="uk-modal-header">
           <h2 class="uk-modal-title">Application Utilizations</h2>
@@ -319,12 +319,14 @@ export default class Portal extends Vue {
     })
     UIkit.util.on('#modal-clientIP', 'hide', () => {
       this.detail = false
+      this.webtrail.peek = {}
     })
     UIkit.util.on('#modal-webTrail', 'show', () => {
       this.webtrail.enable = true
     })
     UIkit.util.on('#modal-webTrail', 'hide', () => {
       this.webtrail.enable = false
+      this.webtrail.peek = {}
     })
 
     if (this.hosts.apache.length)
@@ -592,12 +594,13 @@ export default class Portal extends Vue {
         const where = this.topology(remoteHost)
         if (location && where.location !== location) continue
         if (access && where.access !== access) continue
-        if (!this.webtrail.peek[remoteHost]) this.webtrail.peek[remoteHost] = {}
-        this.webtrail.peek[remoteHost].ts = this.peek[remoteHost].ts.toLocaleTimeString()
-        this.webtrail.peek[remoteHost].ttl = this.peek[remoteHost].ttl
-        this.webtrail.peek[remoteHost].pathname = this.peek[remoteHost].pathname
         const app = this.peek[remoteHost].app || '?'
-        this.webtrail.peek[remoteHost].app = app
+        this.webtrail.peek[remoteHost] = {
+          ts: this.peek[remoteHost].ts.toLocaleTimeString(),
+          ttl: this.peek[remoteHost].ttl,
+          pathname: this.peek[remoteHost].pathname,
+          app: app
+        }
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
           if (!app || /^[?|*|^]/.test(app))
