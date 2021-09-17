@@ -15,6 +15,28 @@
     },
     "Magic Buttons": {
         "filter": [
+            "APP=n2init",
+            "APP=ecw",
+            "APP=enotify",
+            "APP=epic",
+            "APP=mbajh",
+            "APP=mbathena",
+            "APP=mbcomm1",
+            "APP=mbfchc",
+            "APP=mblh",
+            "APP=mbmah",
+            "APP=mbmgh",
+            "APP=mbmghpoc",
+            "APP=mbmghtst",
+            "APP=mbmilton",
+            "APP=mbmtah",
+            "APP=mbnebh",
+            "APP=mbplymouth",
+            "APP=mbrmg",
+            "APP=mbsh",
+            "APP=mbsignature",
+            "APP=mbssh",
+            "APP=mbvigilanz",
             "RUN=n2init",
             "RUN=ECW",
             "RUN=ENOTIFY",
@@ -22,7 +44,7 @@
             "RUN=MBAJH",
             "RUN=MBATHENA",
             "RUN=MBCAMBRIDGEHA",
-            "APP=MBCOMM1",
+            "RUN=MBCOMM1",
             "RUN=MBFCHC",
             "RUN=MBLH",
             "RUN=MBMAH",
@@ -47,9 +69,21 @@
         ],
         "ttl": 420
     },
+    "Patient Access": {
+        "filter": [
+            "APP=AF"
+        ],
+        "ttl": 300
+    },
     "Discharge Plan": {
         "filter": [
             "APP=DP"
+        ],
+        "ttl": 300
+    },
+    "eProtocol": {
+        "filter": [
+            "APP=ePROT"
         ],
         "ttl": 300
     },
@@ -61,13 +95,14 @@
     },
     "ED Call-in": {
         "filter": [
+            "APP=EWci",
             "RUN=EWci"
         ],
         "ttl": 0
     },
     "ED Dashboard": {
         "filter": [
-            "RUN=EWDASH",
+            "EWDASH",
             "app=triggerCheck",
             "_WEBTAG=chkForerun"
         ],
@@ -82,13 +117,20 @@
     "Team Census": {
         "filter": [
             "APP=CNO",
-            "APP=[^]cno"
+            "RUN=cno"
         ],
         "ttl": 420
     },
     "webOMR": {
         "filter": [
-            "APP=EMR"
+            "APP=EMR",
+            "RUN=emr"
+        ],
+        "ttl": 420
+    },
+    "Image Archive": {
+        "filter": [
+            "APP=IAU"
         ],
         "ttl": 420
     },
@@ -98,15 +140,28 @@
         ],
         "ttl": 420
     },
-    "Perioperative": {
+    "Med Room MAR": {
         "filter": [
-            "APP=ORS"
+            "APP=medrmdsh"
         ],
         "ttl": 420
     },
-    "Physician Order Entry": {
+    "Oncology": {
         "filter": [
-            "APP=POE"
+            "APP=OMS"
+        ],
+        "ttl": 420
+    },
+    "Perioperative": {
+        "filter": [
+            "APP=ORS",
+            "APP=POA"
+        ],
+        "ttl": 420
+    },
+    "Pathology": {
+        "filter": [
+            "APP=PATH"
         ],
         "ttl": 420
     },
@@ -116,9 +171,41 @@
         ],
         "ttl": 420
     },
+    "Phlebotomy": {
+        "filter": [
+            "APP=PHLEB"
+        ],
+        "ttl": 420
+    },
+    "Physician Order Entry": {
+        "filter": [
+            "APP=POE",
+            "APP=DISSUM",
+            "APP=NUT"
+        ],
+        "ttl": 420
+    },
     "Radiology Orders": {
         "filter": [
             "APP=RADORD"
+        ],
+        "ttl": 420
+    },
+    "RAD Dashboard": {
+        "filter": [
+            "APP=RAD.*"
+        ],
+        "ttl": 420
+    },
+    "GI Referral": {
+        "filter": [
+            "APP=refManager"
+        ],
+        "ttl": 420
+    },
+    "eMAR": {
+        "filter": [
+            "APP=rmdsh"
         ],
         "ttl": 420
     },
@@ -131,18 +218,6 @@
     "Urgent Care": {
         "filter": [
             "APP=UCCC"
-        ],
-        "ttl": 420
-    },
-    "Med Room MAR": {
-        "filter": [
-            "APP=medrmdsh"
-        ],
-        "ttl": 420
-    },
-    "eMAR": {
-        "filter": [
-            "APP=rmdsh"
         ],
         "ttl": 420
     },

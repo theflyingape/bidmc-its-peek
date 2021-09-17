@@ -1,6 +1,6 @@
 {
   "name": "@theflyingape/bidmc-its-peek",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "BIDMC ITS Peek Gateway & Console",
   "main": "gateway",
   "publisher": "theflyingape",

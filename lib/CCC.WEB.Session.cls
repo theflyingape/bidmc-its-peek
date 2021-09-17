@@ -69,10 +69,7 @@ ClassMethod Getapp(ID) As %String
 	set app = $p($g(@##class(CCC.WEB.Session).#webs@(ID, "login", "APP")), "^")
 	if (app = "") set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "from"))
 	if (app = "") set app = $p($g(@##class(CCC.WEB.Session).#webs@(ID, "login", "magicb")), ";")
-	if ($l(app) < 2) {
-		set s = $g(@##class(CCC.WEB.Session).#webs@(ID, "s"))
-		set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "s", s, "%prg"))
-	}
+	if ($l(app) < 2) set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "s", 1, "%prg"))
 
 	; sigh -- return startup namespace
 	if (app = "") && (webt) {

@@ -32,8 +32,15 @@ module Caché {
                 if (ccc.webtmaster) {
                     let meta = { remoteHost: client.ip, app: ccc.webtmaster.APP || '' }
                     if (meta.app) {
-                        let app = suite(`APP=${meta.app}`).app
-                        if (app !== '*') meta.app = app
+                        let app = '*'
+                        let b4 = meta.app
+                        if (meta.app[0] == '^') {
+                            meta.app = meta.app.substr(1)
+                            app = suite(`RUN=${meta.app}`).app
+                        }
+                        if (app == '*') app = suite(`APP=${meta.app}`).app
+                        meta.app = (app == '*') ? app + meta.app : app
+                        if (app[0] == '*') console.log(client.webt, b4, '->', meta.app)
                     }
                     result = Object.assign(ccc.webtmaster, meta)
                     break

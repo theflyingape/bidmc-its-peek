@@ -601,6 +601,7 @@ export default class Portal extends Vue {
       for (let remoteHost in this.peek) {
         if (server && this.peek[remoteHost].server !== server) continue
         cccHost = this.peek[remoteHost].server
+        cccHost = 'localhost:2018'
         const where = this.topology(remoteHost)
         if (location && where.location !== location) continue
         if (access && where.access !== access) continue
@@ -614,7 +615,7 @@ export default class Portal extends Vue {
         }
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
-          if (/^[?|*|^]/.test(app))
+          if (/^[?|*]/.test(app))
             ccc.push({ ip: remoteHost, webt: this.webtrail.peek[remoteHost].webt })
         }
       }
@@ -638,12 +639,10 @@ export default class Portal extends Vue {
                       this.webtrail.peek[global.remoteHost].username = global.username
                     }
                     if (global.app) {
-                      this.peek[global.remoteHost].app = global.app
+                      if (global.app[0] !== '*') this.peek[global.remoteHost].app = global.app
                       this.webtrail.peek[global.remoteHost].app = global.app
                     }
                   }
-                  else
-                    console.warn('missing client IP', global)
                 }
               })
               resolve(1)
