@@ -22,7 +22,7 @@
             "RUN=MBAJH",
             "RUN=MBATHENA",
             "RUN=MBCAMBRIDGEHA",
-            "RUN=MBCOMM1",
+            "APP=MBCOMM1",
             "RUN=MBFCHC",
             "RUN=MBLH",
             "RUN=MBMAH",
