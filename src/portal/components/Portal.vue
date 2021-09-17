@@ -601,7 +601,7 @@ export default class Portal extends Vue {
       for (let remoteHost in this.peek) {
         if (server && this.peek[remoteHost].server !== server) continue
         cccHost = this.peek[remoteHost].server
-        cccHost = 'localhost:2018'
+        //cccHost = 'localhost:2018'
         const where = this.topology(remoteHost)
         if (location && where.location !== location) continue
         if (access && where.access !== access) continue
