@@ -631,8 +631,8 @@ export default class Portal extends Vue {
               console.log(globals)
               globals.forEach((global: { remoteHost: string; username: string; instance: string; app: string }) => {
                 if (global.remoteHost) {
-                  this.webtrail.peek[global.remoteHost].username = global.username || ''
-                  this.webtrail.peek[global.remoteHost].instance = global.instance || ''
+                  if (global.username) this.webtrail.peek[global.remoteHost].username = global.username
+                  if (global.instance) this.webtrail.peek[global.remoteHost].instance = global.instance
                   //  backfill here from Caché result if not detected from Apache
                   if (this.peek[global.remoteHost] && global.app) {
                     this.peek[global.remoteHost].app = global.app
