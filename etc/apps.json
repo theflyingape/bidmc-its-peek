@@ -81,7 +81,8 @@
     },
     "Team Census": {
         "filter": [
-            "APP=CNO"
+            "APP=CNO",
+            "APP=^cno"
         ],
         "ttl": 420
     },

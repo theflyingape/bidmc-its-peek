@@ -75,7 +75,10 @@ ClassMethod Getapp(ID) As %String
 	}
 
 	; sigh -- return startup namespace
-	if (app = "") && (webt) set app = $g(@##class(CCC.WEB.Session).#webt@(webt, 1, "%ns"))
+	if (app = "") && (webt) {
+		set app = $g(@##class(CCC.WEB.Session).#webt@(webt, 1, "%ns"))
+		if (app = "BIH") set app = $g(@##class(CCC.WEB.Session).#webt@(webt, 1, "%prg"))
+	}
 
 	quit app
 }
