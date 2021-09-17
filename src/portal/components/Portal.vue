@@ -609,7 +609,8 @@ export default class Portal extends Vue {
           ts: this.peek[remoteHost].ts.toLocaleTimeString(),
           ttl: this.peek[remoteHost].ttl,
           pathname: this.peek[remoteHost].pathname,
-          app: app
+          app: app,
+          username: this.peek[remoteHost].username || ''
         }
         if (this.peek[remoteHost].webt) {
           this.webtrail.peek[remoteHost].webt = this.peek[remoteHost].webt
@@ -629,10 +630,12 @@ export default class Portal extends Vue {
           .then((response) => {
             response.json().then((globals) => {
               console.log(globals)
-              globals.forEach((global: { remoteHost: string; username: string; instance: string; app: string }) => {
+              globals.forEach((global: { remoteHost: string; username: string; app: string }) => {
                 if (global.remoteHost) {
-                  if (global.username) this.webtrail.peek[global.remoteHost].username = global.username
-                  if (global.instance) this.webtrail.peek[global.remoteHost].instance = global.instance
+                  if (global.username) {
+                    this.peek[global.remoteHost].username = global.username
+                    this.webtrail.peek[global.remoteHost].username = global.username
+                  }
                   //  backfill here from Caché result if not detected from Apache
                   if (this.peek[global.remoteHost] && global.app) {
                     this.peek[global.remoteHost].app = global.app
