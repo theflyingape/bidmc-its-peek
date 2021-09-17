@@ -47,6 +47,12 @@
         ],
         "ttl": 420
     },
+    "Discharge Plan": {
+        "filter": [
+            "APP=DP"
+        ],
+        "ttl": 300
+    },
     "eTicket": {
         "filter": [
             "APP=ET"
