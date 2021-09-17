@@ -629,18 +629,21 @@ export default class Portal extends Vue {
         })
           .then((response) => {
             response.json().then((globals) => {
-              console.log(globals)
+              //  backfill here from Caché result if not detected from Apache
               globals.forEach((global: { remoteHost: string; username: string; app: string }) => {
                 if (global.remoteHost) {
-                  if (global.username) {
-                    this.peek[global.remoteHost].username = global.username
-                    this.webtrail.peek[global.remoteHost].username = global.username
+                  if (this.peek[global.remoteHost]) {
+                    if (global.username) {
+                      this.peek[global.remoteHost].username = global.username
+                      this.webtrail.peek[global.remoteHost].username = global.username
+                    }
+                    if (global.app) {
+                      this.peek[global.remoteHost].app = global.app
+                      this.webtrail.peek[global.remoteHost].app = global.app
+                    }
                   }
-                  //  backfill here from Caché result if not detected from Apache
-                  if (this.peek[global.remoteHost] && global.app) {
-                    this.peek[global.remoteHost].app = global.app
-                    this.webtrail.peek[global.remoteHost].app = global.app
-                  }
+                  else
+                    console.warn('missing client IP', global)
                 }
               })
               resolve(1)

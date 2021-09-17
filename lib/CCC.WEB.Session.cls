@@ -60,7 +60,11 @@ Method webtGet()
 ClassMethod Getapp(ID) As %String
 {
 	; invoked directly with a webt instead?
-	if ('$d(@##class(CCC.WEB.Session).#webs@(ID))) set ID = $g(@##class(CCC.WEB.Session).#webt@(ID, 1, "%webs"))
+	set webt = ""
+	if ('$d(@##class(CCC.WEB.Session).#webs@(ID))) {
+		set webt = ID
+		set ID = $g(@##class(CCC.WEB.Session).#webt@(ID, 1, "%webs"))
+	}
 
 	set app = $p($g(@##class(CCC.WEB.Session).#webs@(ID, "login", "APP")), "^")
 	if (app = "") set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "from"))
@@ -69,6 +73,9 @@ ClassMethod Getapp(ID) As %String
 		set s = $g(@##class(CCC.WEB.Session).#webs@(ID, "s"))
 		set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "s", s, "%prg"))
 	}
+
+	; sigh -- return startup namespace
+	if (app = "") && (webt) set app = $g(@##class(CCC.WEB.Session).#webt@(webt, 1, "%ns"))
 
 	quit app
 }
