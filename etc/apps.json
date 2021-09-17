@@ -115,6 +115,18 @@
         ],
         "ttl": 420
     },
+    "Scheduling Display": {
+        "filter": [
+            "APP=S"
+        ],
+        "ttl": 420
+    },
+    "Urgent Care": {
+        "filter": [
+            "APP=UCCC"
+        ],
+        "ttl": 420
+    },
     "Med Room MAR": {
         "filter": [
             "APP=medrmdsh"
@@ -124,12 +136,6 @@
     "eMAR": {
         "filter": [
             "APP=rmdsh"
-        ],
-        "ttl": 420
-    },
-    "Urgent Care": {
-        "filter": [
-            "APP=UCCC"
         ],
         "ttl": 420
     },

@@ -410,21 +410,26 @@ export default class Portal extends Vue {
 
     let html = '<table class="uk-table uk-table-divider uk-table-hover uk-overflow-auto">'
     html += `<thead><tr>`
-    html += `<th style="text-align: center">Application Suite</th>`
+    html += `<th style="text-align: center">Suite</th>`
     html += `<th style="text-align: center">Endpoints</th>`
-    html += `<th style="text-align: center">WebLink Sessions</th>`
+    html += `<th style="text-align: center">WebLink</th>`
+    html += `<th style="text-align: center">Suite</th>`
+    html += `<th style="text-align: center">Endpoints</th>`
+    html += `<th style="text-align: center">WebLink</th>`
     html += `</tr></thead>`
     html += `<tbody>`
+    let i = 0
     for (let app in report) {
-      html += `<tr style="text-align: center">`
+      if (!(i % 2)) html += `<tr style="text-align: center">`
       html += `<td style="text-align: center">${app}</td>`
       html += `<td style="text-align: center">${report[app].endpoints}</td>`
       html += `<td style="text-align: center">${report[app].webt}</td>`
-      html += `</tr>`
+      if (i % 2) html += `</tr>`
       total.endpoints += report[app].endpoints || 0
       total.webt += report[app].webt || 0
+      i++
     }
-    html += `<tr style="text-align: center">`
+    if (!(i % 2)) html += `<tr style="text-align: center"><td></td><td></td><td></td>`
     html += `<td style="text-align: right">- Totals:</td>`
     html += `<td style="text-align: center">${total.endpoints}</td>`
     html += `<td style="text-align: center">${total.webt}</td>`
