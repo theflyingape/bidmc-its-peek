@@ -64,10 +64,12 @@ ClassMethod Getapp(ID) As %String
 
 	set app = $p($g(@##class(CCC.WEB.Session).#webs@(ID, "login", "APP")), "^")
 	if (app = "") set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "from"))
-	if (app = "") {
+	if (app = "") set app = $p($g(@##class(CCC.WEB.Session).#webs@(ID, "login", "magicb")), ";")
+	if ($l(app) < 2) {
 		set s = $g(@##class(CCC.WEB.Session).#webs@(ID, "s"))
 		set app = $g(@##class(CCC.WEB.Session).#webs@(ID, "s", s, "%prg"))
 	}
+
 	quit app
 }
 
