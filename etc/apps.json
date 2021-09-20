@@ -4,7 +4,7 @@
             "\/csp\/",
             "RUN=ccc"
         ],
-        "ttl": 12
+        "ttl": 6
     },
     "-": {
         "filter": [
@@ -61,13 +61,13 @@
             "RUN=MBSSH",
             "RUN=MBVIGILANZ"
         ],
-        "ttl": 240
+        "ttl": 300
     },
     "CareWeb": {
         "filter": [
             "RUN=cw"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Patient Access": {
         "filter": [
@@ -112,70 +112,70 @@
         "filter": [
             "RUN=POEed"
         ],
-        "ttl": 360
+        "ttl": 300
     },
     "Team Census": {
         "filter": [
             "APP=CNO",
             "RUN=cno"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "webOMR": {
         "filter": [
             "APP=EMR",
             "RUN=emr"
         ],
-        "ttl": 420
+        "ttl": 360
     },
     "Image Archive": {
         "filter": [
             "APP=IAU"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Interventional Radiology": {
         "filter": [
             "APP=IR"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Med Room MAR": {
         "filter": [
             "APP=medrmdsh"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Oncology": {
         "filter": [
             "APP=OMS"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Perioperative": {
         "filter": [
             "APP=ORS",
             "APP=POA"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Pathology": {
         "filter": [
             "APP=PATH"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Inpatient Pharmacy": {
         "filter": [
             "APP=PHA"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Phlebotomy": {
         "filter": [
             "APP=PHLEB"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Physician Order Entry": {
         "filter": [
@@ -183,54 +183,54 @@
             "APP=DISSUM",
             "APP=NUT"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Radiology Orders": {
         "filter": [
             "APP=RADORD"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "RAD Dashboard": {
         "filter": [
             "APP=RAD.*"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "GI Referral": {
         "filter": [
             "APP=refManager"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "eMAR": {
         "filter": [
             "APP=rmdsh"
         ],
-        "ttl": 420
+        "ttl": 600
     },
     "Scheduling Display": {
         "filter": [
             "APP=S"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "Urgent Care": {
         "filter": [
             "APP=UCCC"
         ],
-        "ttl": 420
+        "ttl": 300
     },
     "*keepalive": {
         "filter": [
             "^.*T /scripts/nph-mgwcgi HTTP.*$"
         ],
-        "ttl": 144
+        "ttl": 60
     },
     "*": {
         "filter": [
             ".*"
         ],
-        "ttl": 72
+        "ttl": 60
     }
 }
