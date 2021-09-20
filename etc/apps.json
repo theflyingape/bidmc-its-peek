@@ -126,7 +126,7 @@
             "APP=EMR",
             "RUN=emr"
         ],
-        "ttl": 360
+        "ttl": 300
     },
     "Image Archive": {
         "filter": [
@@ -231,6 +231,6 @@
         "filter": [
             ".*"
         ],
-        "ttl": 60
+        "ttl": 150
     }
 }
