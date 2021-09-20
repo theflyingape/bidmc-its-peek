@@ -522,7 +522,7 @@ export default class Portal extends Vue {
             this.peek[remoteHost] = {
               server: server,
               ts: ts,
-              ttl: (result[remoteHost].ttl || 2) * 1000
+              ttl: (result[remoteHost].ttl || 6) * 1000
             }
             this.webAdds++
           }
@@ -632,7 +632,7 @@ export default class Portal extends Vue {
           .then((response) => {
             response.json().then((globals) => {
               //  backfill here from Caché result if not detected from Apache
-              globals.forEach((global: { remoteHost: string; username: string; app: string }) => {
+              globals.forEach((global: { remoteHost: string; username: string; app: string, ttl: number }) => {
                 if (global.remoteHost) {
                   if (this.peek[global.remoteHost]) {
                     if (global.username) {
@@ -642,6 +642,10 @@ export default class Portal extends Vue {
                     if (global.app) {
                       if (global.app[0] !== '*') this.peek[global.remoteHost].app = global.app
                       this.webtrail.peek[global.remoteHost].app = global.app
+                    }
+                    if (global.ttl && global.ttl > this.peek[global.remoteHost].ttl / 1000) {
+                      this.peek[global.remoteHost].ttl = global.ttl * 1000
+                      this.webtrail.peek[global.remoteHost].ttl = global.ttl
                     }
                   }
                 }
