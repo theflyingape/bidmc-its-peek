@@ -4,7 +4,7 @@
             "\/csp\/",
             "RUN=ccc"
         ],
-        "ttl": 60
+        "ttl": 12
     },
     "-": {
         "filter": [
@@ -98,7 +98,7 @@
             "APP=EWci",
             "RUN=EWci"
         ],
-        "ttl": 0
+        "ttl": 300
     },
     "ED Dashboard": {
         "filter": [
@@ -106,7 +106,7 @@
             "app=triggerCheck",
             "_WEBTAG=chkForerun"
         ],
-        "ttl": 60
+        "ttl": 12
     },
     "ED POE": {
         "filter": [
@@ -225,12 +225,12 @@
         "filter": [
             "^.*T /scripts/nph-mgwcgi HTTP.*$"
         ],
-        "ttl": 200
+        "ttl": 144
     },
     "*": {
         "filter": [
             ".*"
         ],
-        "ttl": 300
+        "ttl": 72
     }
 }
