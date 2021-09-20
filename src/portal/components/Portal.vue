@@ -555,6 +555,7 @@ export default class Portal extends Vue {
           } else {
             if (this.peek[remoteHost].webt) this.webT--
             delete this.peek[remoteHost]
+            if (this.webtrail.peek[remoteHost]) delete this.webtrail.peek[remoteHost]
             this.webDrops++
           }
         }
