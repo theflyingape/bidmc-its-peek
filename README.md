@@ -25,7 +25,7 @@ $ sudo -s
 ```
 
 <figure>
-<img src="{{site.url}}Peek Portal - webOMR apps.png" alt="webOMR application utilizations" />
+<img src="{{site.url}}Peek%20Portal%20-%20webOMR%20apps.png" alt="webOMR application utilizations" />
 <figcaption>example screenshot from web server https://valhalla.bidmc.org/peek/</figcaption>
 </figure>
 
