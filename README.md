@@ -24,7 +24,10 @@ $ sudo -s
 % systemctl restart httpd
 ```
 
-![screenshot](https://raw.githubusercontent.com/theflyingape/bidmc-its-peek/master/Peek%20Portal%20-%20webOMR%20apps.png "webOMR application utilizations")
+<figure>
+<img src="{{site.url}}Peek Portal - webOMR apps.png" alt="webOMR application utilizations" />
+<figcaption>example screenshot from web server https://valhalla.bidmc.org/peek/</figcaption>
+</figure>
 
 [![NPM](https://nodei.co/npm/bidmc-its-peek.png?compact=true)](https://nodei.co/npm/bidmc-its-peek/)
 
