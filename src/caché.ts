@@ -6,7 +6,6 @@ import { audit, suite } from './gateway'
 import express = require('express')
 import fs = require('fs')
 import path = require('path')
-import { ENGINE_METHOD_ALL } from 'constants'
 
 module Caché {
 
@@ -31,15 +30,18 @@ module Caché {
                 const webt = parseInt(client.webt)
                 ccc = webtmaster(nodes[node], webt)
                 if (ccc.webtmaster) {
-                    let meta = { remoteHost: client.ip, app: ccc.webtmaster.APP || '', ttl: 0 }
+                    let meta = { remoteHost: client.ip, app: ccc.webtmaster.APP || '', ttl: 6 }
                     if (meta.app) {
-                        const b4 = meta.app
-                        if (meta.app[0] == '^') meta.app = meta.app.substr(1)
-                        let find = suite(`RUN=${meta.app}`)
-                        if (find.app == '*') find = suite(`APP=${find.app}`)
-                        if (find.app[0] == '*') console.log(client.webt, b4, '->', meta.app)
+                        let find = { app: '*', ttl: 9 }
+                        let b4 = meta.app
+                        if (meta.app[0] == '^') {
+                            meta.app = meta.app.substr(1)
+                            find = suite(`RUN=${meta.app}`)
+                        }
+                        if (find.app == '*') find = suite(`APP=${meta.app}`)
                         meta.app = (find.app == '*') ? find.app + meta.app : find.app
                         meta.ttl = find.ttl
+                        if (find.app[0] == '*') console.log(client.webt, b4, '->', meta.app)
                     }
                     result = Object.assign(ccc.webtmaster, meta)
                     break
