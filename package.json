@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
-    "@types/node": "^16.9.4",
+    "@types/node": "^16.9.6",
     "@types/uikit": "^3.3.2",
     "@types/ws": "^7.4.7",
     "@vue/cli-plugin-pwa": "^4.5.13",
