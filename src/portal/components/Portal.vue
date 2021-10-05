@@ -115,7 +115,7 @@
       <div class="uk-modal-dialog uk-modal-body uk-width-1-2" style="text-align: center">
         <button class="uk-modal-close-default" type="button" uk-close></button>
         <div class="uk-modal-header">
-          <h4>Application Utilizations</h4>
+          <h4>Application Utilizations: {{ refresh ? new Date(refresh).toLocaleTimeString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12: false }) : 'never' }})</h4>
         </div>
         <span v-html="peekTable"></span>
       </div>
