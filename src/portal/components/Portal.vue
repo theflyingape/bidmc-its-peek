@@ -115,7 +115,7 @@
       <div class="uk-modal-dialog uk-modal-body uk-width-1-2" style="text-align: center">
         <button class="uk-modal-close-default" type="button" uk-close></button>
         <div class="uk-modal-header">
-          <h4>Application Utilizations: {{ refresh ? new Date(refresh).toLocaleTimeString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12: false }) : 'never' }})</h4>
+          <h4>Application Utilizations for {{ refresh ? new Date(refresh).toLocaleTimeString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12: false }) : 'never' }}</h4>
         </div>
         <span v-html="peekTable"></span>
       </div>
@@ -314,7 +314,7 @@ export default class Portal extends Vue {
     //  configure UIkit events
     UIkit.offcanvas('#offcanvas').toggle()
     UIkit.util.on('#modal-clientIP', 'show', () => {
-      this.peekTable = 'Please wait ... <div uk-spinner></div>'
+      this.peekTable = 'Aggregating per interval ... <div uk-spinner></div>'
       this.detail = true
 
       this.webTrail().finally(() => {
@@ -430,9 +430,9 @@ export default class Portal extends Vue {
       i++
     }
     if (!(i % 2)) html += `<tr style="text-align: center"><td></td><td></td><td></td>`
-    html += `<td style="text-align: right">- Totals:</td>`
-    html += `<td style="text-align: center">${total.endpoints}</td>`
-    html += `<td style="text-align: center">${total.webt}</td>`
+    html += `<td style="text-align: right"><em>- Totals:</em></td>`
+    html += `<td style="text-align: center"><b>${total.endpoints}</b></td>`
+    html += `<td style="text-align: center"><b>${total.webt}</b></td>`
     html += `</tr>`
     html += `</tbody>`
     html += `</table>`
@@ -456,7 +456,7 @@ export default class Portal extends Vue {
 
     wss.onopen = () => {
       const ts = new Date(Date.now()).toLocaleTimeString()
-      const msg = `${ts} streaming \x1b[32;1m ${server} \x1b[22m web logs`
+      const msg = `${ts} streaming \x1b[32;1m${server}\x1b[22m web logs`
       xterm.writeln('\x1b[m')
       xterm.write(msg)
       UIkit.notification({ message: `WebSocket opened: ${server}`, pos: 'bottom-left', status: 'success' })
