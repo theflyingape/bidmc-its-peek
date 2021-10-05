@@ -526,7 +526,7 @@ module Console {
             let wss = []
 
             hosts.apache.forEach(server => {
-                const reqUrl = `https://${server}:${port}/peek/apache/`
+                const reqUrl = `wss://${server}:${port}/peek/apache/`
                 const params = new URLSearchParams({
                     VIP: session.name, USER: USER,
                     host: session.host, request: session.request, status: session.status,
