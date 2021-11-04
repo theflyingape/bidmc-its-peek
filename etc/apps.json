@@ -13,7 +13,7 @@
         ],
         "ttl": 0
     },
-    "Magic Buttons": {
+    "Magic Button": {
         "filter": [
             "APP=n2init",
             "APP=ecw",
